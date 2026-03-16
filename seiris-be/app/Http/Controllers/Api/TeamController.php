@@ -274,6 +274,29 @@ class TeamController extends Controller
                 'exited_at' => now(),
             ]);
 
+            // Bug 3 fix — auto-reject semua kontribusi PENDING milik member yang exit
+            $pendingCount = $member->contributions()
+                ->where('status', 'PENDING')
+                ->count();
+
+            if ($pendingCount > 0) {
+                $member->contributions()
+                    ->where('status', 'PENDING')
+                    ->update(['status' => 'REJECTED']);
+
+                AuditLogService::logFromRequest(
+                    request:     $request,
+                    teamId:      $team->id,
+                    action:      'contribution.auto_rejected',
+                    subjectType: TeamMember::class,
+                    subjectId:   $member->id,
+                    payload:     [
+                        'reason'         => 'member_exited',
+                        'rejected_count' => $pendingCount,
+                    ],
+                );
+            }
+
             AuditLogService::logFromRequest(
                 request:     $request,
                 teamId:      $team->id,

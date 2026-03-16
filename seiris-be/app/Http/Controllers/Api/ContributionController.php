@@ -62,6 +62,13 @@ class ContributionController extends Controller
             ->where('status', 'active')
             ->first();
 
+        // Bug 1 fix — FMR = 0 tidak boleh log TIME/IDEA/NETWORK
+        if (in_array($request->type, ['TIME', 'IDEA', 'NETWORK']) && $member->fmr === 0) {
+            return response()->json([
+                'message' => 'FMR kamu belum diset oleh owner. Minta owner set FMR kamu terlebih dahulu sebelum log kontribusi jenis ' . $request->type . '.',
+            ], 422);
+        }
+
         // Hitung value berdasarkan tipe kontribusi
         $value = $this->calculateValue($request, $member);
 
