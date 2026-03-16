@@ -1,15 +1,15 @@
 <?php
-// ============================================================
-// app/Http/Controllers/Api/EquityController.php
-// ============================================================
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\EquitySnapshot;
+use App\Models\Revenue;
 use App\Models\Team;
-use App\Models\TeamMember;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class EquityController extends Controller
 {
@@ -37,7 +37,6 @@ class EquityController extends Controller
             ]);
         }
 
-        // Enrich equity_map dengan data user
         $members = $team->activeMembers()->with('user')->get()->keyBy('id');
         $enriched = [];
 
@@ -52,16 +51,15 @@ class EquityController extends Controller
             ];
         }
 
-        // Sort by equity_pct descending
         usort($enriched, fn($a, $b) => $b['equity_pct'] <=> $a['equity_pct']);
 
         return response()->json([
             'data' => [
-                'snapshot_id'  => $snapshot->id,
-                'total_slices' => $snapshot->total_slices,
-                'equity_map'   => $enriched,
-                'is_frozen'    => $snapshot->is_frozen,
-                'calculated_at'=> $snapshot->created_at?->toISOString(),
+                'snapshot_id'   => $snapshot->id,
+                'total_slices'  => $snapshot->total_slices,
+                'equity_map'    => $enriched,
+                'is_frozen'     => $snapshot->is_frozen,
+                'calculated_at' => $snapshot->created_at?->toISOString(),
             ],
         ]);
     }
@@ -80,11 +78,11 @@ class EquityController extends Controller
 
         return response()->json([
             'data' => $snapshots->map(fn($s) => [
-                'snapshot_id'  => $s->id,
-                'total_slices' => $s->total_slices,
-                'equity_map'   => $s->equity_map,
-                'is_frozen'    => $s->is_frozen,
-                'calculated_at'=> $s->created_at?->toISOString(),
+                'snapshot_id'   => $s->id,
+                'total_slices'  => $s->total_slices,
+                'equity_map'    => $s->equity_map,
+                'is_frozen'     => $s->is_frozen,
+                'calculated_at' => $s->created_at?->toISOString(),
             ]),
             'meta' => [
                 'current_page' => $snapshots->currentPage(),
@@ -96,67 +94,104 @@ class EquityController extends Controller
 
     /**
      * GET /api/teams/{team}/equity/export
-     * Export ringkasan equity sebagai JSON
-     * (PDF export akan dihandle di Sprint 4)
+     * Export laporan equity + slicing pie sebagai PDF
      */
-    public function export(Request $request, Team $team): JsonResponse
+    public function export(Request $request, Team $team): Response
     {
         $this->authorizeMember($request, $team);
 
+        // Ambil snapshot terbaru
         $snapshot = EquitySnapshot::where('team_id', $team->id)
             ->latest()
             ->first();
 
         if (!$snapshot) {
-            return response()->json(['message' => 'Belum ada data equity.'], 404);
+            abort(404, 'Belum ada data equity untuk diekspor.');
         }
 
+        // Enrich equity_map dengan data user + FMR
         $members = $team->members()->with('user')->get()->keyBy('id');
+        $enrichedMap = [];
 
-        $contributions = $team->contributions()
-            ->where('status', 'APPROVED')
-            ->with('member.user')
-            ->get()
-            ->groupBy('member_id');
-
-        $report = [];
         foreach ($snapshot->equity_map as $memberId => $data) {
             $member = $members->get($memberId);
-            $memberContribs = $contributions->get($memberId, collect());
-
-            $report[] = [
-                'member'       => [
-                    'id'   => $memberId,
-                    'name' => $member?->user?->name ?? 'Unknown',
-                    'role' => $member?->role ?? 'member',
-                    'fmr'  => $member?->fmr ?? 0,
-                ],
-                'slices'       => $data['slices'],
-                'equity_pct'   => $data['equity_pct'],
-                'contributions'=> $memberContribs->map(fn($c) => [
-                    'type'         => $c->type,
-                    'description'  => $c->description,
-                    'total_slices' => $c->total_slices,
-                    'date'         => $c->contribution_date?->toDateString(),
-                ])->values(),
+            $enrichedMap[] = [
+                'member_id'  => $memberId,
+                'name'       => $member?->user?->name ?? 'Unknown',
+                'role'       => $member?->role ?? 'member',
+                'fmr'        => $member?->fmr ?? 0,
+                'slices'     => $data['slices'],
+                'equity_pct' => $data['equity_pct'],
             ];
         }
 
-        usort($report, fn($a, $b) => $b['equity_pct'] <=> $a['equity_pct']);
+        usort($enrichedMap, fn($a, $b) => $b['equity_pct'] <=> $a['equity_pct']);
 
-        return response()->json([
-            'data' => [
-                'team'         => [
-                    'id'   => $team->id,
-                    'name' => $team->name,
-                ],
+        // Ambil semua kontribusi APPROVED dengan data member
+        $contributions = $team->contributions()
+            ->where('status', 'APPROVED')
+            ->with('member.user')
+            ->orderBy('contribution_date')
+            ->get()
+            ->map(fn($c) => [
+                'member_id'    => $c->member_id,
+                'type'         => $c->type,
+                'description'  => $c->description,
+                'value'        => $c->value,
+                'multiplier'   => $c->multiplier,
+                'total_slices' => $c->total_slices,
+                'date'         => $c->contribution_date?->toDateString(),
+            ])
+            ->toArray();
+
+        // Ambil revenues yang sudah didistribusikan
+        $revenues = Revenue::where('team_id', $team->id)
+            ->where('is_distributed', true)
+            ->with(['distributions.member.user'])
+            ->orderBy('revenue_date')
+            ->get()
+            ->map(fn($r) => [
+                'description'          => $r->description,
+                'amount'               => $r->amount,
+                'distributable_amount' => $r->distributable_amount,
+                'revenue_date'         => $r->revenue_date?->toDateString(),
+                'distributions'        => $r->distributions->map(fn($d) => [
+                    'member_name' => $d->member?->user?->name ?? 'Unknown',
+                    'equity_pct'  => $d->equity_pct_snapshot,
+                    'amount'      => $d->amount,
+                ])->toArray(),
+            ])
+            ->toArray();
+
+        // Build view data
+        $data = [
+            'team'         => [
+                'id'   => $team->id,
+                'name' => $team->name,
+            ],
+            'snapshot'     => [
                 'snapshot_id'  => $snapshot->id,
                 'total_slices' => $snapshot->total_slices,
+                'equity_map'   => $enrichedMap,
                 'is_frozen'    => $snapshot->is_frozen,
-                'generated_at' => now()->toISOString(),
-                'members'      => $report,
             ],
-        ]);
+            'contributions' => $contributions,
+            'revenues'      => $revenues,
+            'generated_at'  => now()->setTimezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB',
+        ];
+
+        $pdf = Pdf::loadView('pdf.equity-report', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'defaultFont'     => 'DejaVu Sans',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => false,
+                'dpi'             => 150,
+            ]);
+
+        $filename = 'SEIRIS_' . str_replace(' ', '_', $team->name) . '_' . now()->format('Ymd') . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     private function authorizeMember(Request $request, Team $team): void
