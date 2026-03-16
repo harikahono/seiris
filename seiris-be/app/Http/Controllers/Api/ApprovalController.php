@@ -81,7 +81,7 @@ class ApprovalController extends Controller
             );
 
             // Cek apakah threshold terpenuhi
-            $this->checkAndUpdateStatus($contribution, $team);
+            $this->checkAndUpdateStatus($contribution, $team, $request);
 
             return $contribution->fresh()->load(['member.user', 'approvals.member.user']);
         });
@@ -97,7 +97,7 @@ class ApprovalController extends Controller
      * Jika approve >= threshold → APPROVED → recalculate equity
      * Jika reject >= (100 - threshold) → REJECTED
      */
-    private function checkAndUpdateStatus(Contribution $contribution, $team): void
+    private function checkAndUpdateStatus(Contribution $contribution, $team, Request $request): void
     {
         $contribution->refresh();
 
@@ -124,7 +124,8 @@ class ApprovalController extends Controller
         if ($approvePct >= $threshold) {
             $contribution->update(['status' => 'APPROVED']);
 
-            AuditLogService::log(
+            AuditLogService::logFromRequest(
+                request:     $request,
                 teamId:      $team->id,
                 action:      'contribution.approved',
                 subjectType: Contribution::class,
@@ -138,7 +139,8 @@ class ApprovalController extends Controller
         } elseif ($rejectPct > (100 - $threshold)) {
             $contribution->update(['status' => 'REJECTED']);
 
-            AuditLogService::log(
+            AuditLogService::logFromRequest(
+                request:     $request,
                 teamId:      $team->id,
                 action:      'contribution.rejected',
                 subjectType: Contribution::class,
