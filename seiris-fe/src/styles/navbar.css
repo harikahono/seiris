@@ -1,0 +1,232 @@
+/* ===================================
+   SEIRIS NAVBAR STYLES (Restored & Dark Mode)
+   =================================== */
+
+.site-header-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: transparent;
+  pointer-events: none;
+}
+
+.header {
+  padding: 1.5rem 0;
+}
+
+.container-full {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.nav-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.nav-row__right {
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  padding-right: 2rem;
+  padding-top: 0.5rem; 
+}
+
+/* LOGO TRIGGER */
+.nav-logo-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1001;
+  transform-origin: center;
+}
+
+.nav-logo-img {
+  height: 48px;
+  width: auto;
+  transition: transform 0.2s ease;
+  filter: drop-shadow(0 0 8px rgba(224, 120, 32, 0.3));
+}
+
+.nav-logo-btn:hover .nav-logo-img {
+  transform: scale(1.1);
+}
+
+/* OVERLAYS */
+.fullscreen-menu-container {
+  position: relative;
+  z-index: 999;
+}
+
+.nav-overlay-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: none;
+  z-index: 998;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.menu-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 600px;
+  max-width: 90vw;
+  height: 100vh;
+  background: #0a0a0a;
+  z-index: 2;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.menu-content::-webkit-scrollbar {
+  display: none;
+}
+
+.menu-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ANIMASI LEMBARAN (DARK MODE) */
+.backdrop-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #111111;
+}
+
+.backdrop-layer.first {
+  background: #1a1a1a;
+}
+
+.backdrop-layer.second {
+  background: #262626;
+}
+
+/* ABSTRACT SHAPES (Biar kelihatan di bg gelap) */
+.ambient-background-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.bg-shape {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.bg-shape.active {
+  opacity: 1;
+}
+
+.shape-element {
+  transform-origin: center;
+}
+
+/* MENU CONTENT & LINKS */
+.menu-content-wrapper {
+  position: relative;
+  z-index: 3;
+  padding: 8rem 3rem 3rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-list-item {
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.nav-link {
+  position: relative;
+  display: block;
+  padding: 1.5rem 0;
+  text-decoration: none;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.nav-link-text {
+  position: relative;
+  font-size: 3rem;
+  font-weight: 700;
+  font-family: var(--font-sans);
+  margin: 0;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover .nav-link-text {
+  color: var(--color-accent);
+}
+
+.nav-link-hover-bg {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(224, 120, 32, 0.1);
+  transition: left 0.4s ease;
+}
+
+.nav-link:hover .nav-link-hover-bg {
+  left: 0;
+}
+
+.cta-link .nav-link-text {
+  color: var(--color-accent);
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .menu-content { width: 100%; }
+  .menu-content-wrapper { padding: 6rem 2rem 2rem; }
+  .nav-link-text { font-size: 2rem; }
+  .nav-row__right {
+    padding-right: 1.5rem;
+    }
+}
