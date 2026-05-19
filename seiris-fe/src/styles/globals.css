@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* Design Tokens - Tailwind v4 way */
+@theme {
+  /* Colors */
+  --color-accent: #e07820;           /* ITI Orange */
+  --color-accent-hover: #c96a1b;     
+  --color-accent-light: #f5a561;
+  
+  /* Spacing (4px scale) */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  
+  /* Border radius */
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 9999px;
+  
+  /* Font family */
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+  
+  /* Font sizes (fixed base to 16px) */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 28px;
+  --text-3xl: 32px;
+  --text-4xl: 36px;
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  
+  body {
+    @apply bg-white text-gray-900;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+  }
+  
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    body {
+      @apply bg-gray-950 text-gray-50;
+    }
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-accent {
+    color: var(--color-accent);
+  }
+  
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+  
+  .border-accent {
+    border-color: var(--color-accent);
+  }
+}
