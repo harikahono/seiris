@@ -1,0 +1,263 @@
+/* src/styles/cta.css */
+
+/* ─── Marquee Keyframe ───────────────────────────────────────────────────────
+   Harus didefinisiin di sini karena Tailwind v4 gak punya
+   animate-marquee-vertical out of the box
+*/
+@keyframes marquee-vertical {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+/* ─── Section ────────────────────────────────────────────────────────────────── */
+
+.cta-section {
+  position: relative;
+  padding: 6rem 1.5rem;
+  background-color: #0a0a0a;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+/* ─── Ambient Glow ───────────────────────────────────────────────────────────── */
+
+.cta-glow {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(80px);
+}
+
+.cta-glow--left {
+  width: 28rem;
+  height: 28rem;
+  background: radial-gradient(circle, rgba(224, 120, 32, 0.12) 0%, transparent 70%);
+  top: 50%;
+  left: -8rem;
+  transform: translateY(-50%);
+}
+
+.cta-glow--right {
+  width: 20rem;
+  height: 20rem;
+  background: radial-gradient(circle, rgba(224, 120, 32, 0.06) 0%, transparent 70%);
+  bottom: 0;
+  right: 0;
+}
+
+/* ─── Container + Grid ───────────────────────────────────────────────────────── */
+
+.cta-container {
+  position: relative;
+  z-index: 1;
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.cta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+@media (max-width: 1024px) {
+  .cta-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+/* ─── Marquee (Kiri) ─────────────────────────────────────────────────────────── */
+
+.cta-marquee-wrapper {
+  position: relative;
+  height: 580px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cta-marquee-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Track = overflow container */
+.cta-marquee-track {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Reel = satu set items, animasi turun */
+.cta-marquee-reel {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  animation: marquee-vertical var(--marquee-duration, 20s) linear infinite;
+}
+
+/* ─── Marquee Items ──────────────────────────────────────────────────────────── */
+
+.cta-marquee-item {
+  font-size: clamp(1.75rem, 3.5vw, 3.25rem);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  padding: 1.25rem 0;
+  line-height: 1.2;
+  transition: opacity 0.1s ease;
+  white-space: nowrap;
+}
+
+/* ─── Vignette ───────────────────────────────────────────────────────────────── */
+
+.cta-vignette {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12rem;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cta-vignette--top {
+  top: 0;
+  background: linear-gradient(to bottom, #0a0a0a 0%, rgba(10,10,10,0.5) 60%, transparent 100%);
+}
+
+.cta-vignette--bottom {
+  bottom: 0;
+  background: linear-gradient(to top, #0a0a0a 0%, rgba(10,10,10,0.5) 60%, transparent 100%);
+}
+
+/* ─── CTA Content (Kanan) ────────────────────────────────────────────────────── */
+
+.cta-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 36rem;
+}
+
+.cta-title {
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  margin: 0;
+}
+
+.cta-title--accent {
+  color: #E07820;
+}
+
+.cta-subtitle {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+}
+
+.cta-subtitle--highlight {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+/* ─── Button ─────────────────────────────────────────────────────────────────── */
+
+.cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.cta-btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.75rem;
+  background-color: #E07820;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.cta-btn-primary:hover {
+  transform: scale(1.03);
+  background-color: #d06e1a;
+  box-shadow: 0 8px 32px rgba(224, 120, 32, 0.35);
+}
+
+/* Shimmer sweep on hover */
+.cta-btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.cta-btn-primary:hover::after {
+  transform: translateX(100%);
+}
+
+.cta-btn-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.cta-btn-primary:hover .cta-btn-arrow {
+  transform: translateX(3px);
+}
+
+/* ─── Trust Signals ──────────────────────────────────────────────────────────── */
+
+.cta-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .cta-marquee-wrapper {
+    height: 300px;
+    order: 2;
+  }
+
+  .cta-content {
+    order: 1;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .cta-section {
+    padding: 4rem 1rem;
+  }
+
+  .cta-marquee-item {
+    white-space: normal;
+  }
+}
