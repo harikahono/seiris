@@ -12,13 +12,16 @@ class SlicingPieService
     /**
      * Recalculate equity for all active members of a team.
      * Called every time a contribution status changes to APPROVED.
+     * 
+     * PENTING: Fungsi ini harus dipanggil dalam transaksi database yang sudah memiliki lock
+     * untuk mencegah race condition saat multiple approvals terjadi bersamaan.
      *
      * @param Team $team
      * @param string|null $triggeredByContributionId UUID of the contribution that triggered this
      */
     public function recalculate(Team $team, ?string $triggeredByContributionId = null): EquitySnapshot
     {
-        // Load all APPROVED contributions with their member
+        // Load all APPROVED contributions with their member (dengan lock implisit dari transaction caller)
         $approvedContributions = $team->contributions()
             ->with('member')
             ->where('status', 'APPROVED')
@@ -47,8 +50,13 @@ class SlicingPieService
             }
         }
 
-        // Persist snapshot inside a transaction
+        // Persist snapshot inside a transaction dengan explicit lock
         $snapshot = DB::transaction(function () use ($team, $triggeredByContributionId, $totalSlicesTeam, $equityMap) {
+            // Lock table equity_snapshots untuk mencegah concurrent writes
+            DB::table('equity_snapshots')
+                ->where('team_id', $team->id)
+                ->lockForUpdate();
+                
             return EquitySnapshot::create([
                 'team_id'                    => $team->id,
                 'triggered_by_contribution'  => $triggeredByContributionId,

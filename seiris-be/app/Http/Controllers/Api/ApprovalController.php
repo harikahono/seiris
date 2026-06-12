@@ -63,6 +63,17 @@ class ApprovalController extends Controller
         }
 
         $result = DB::transaction(function () use ($request, $contribution, $voter, $team) {
+            // LOCK: Ambil data tim dengan row-level lock untuk mencegah race condition
+            // saat multiple vote masuk bersamaan untuk tim yang sama
+            $lockedTeam = DB::table('teams')
+                ->where('id', $team->id)
+                ->lockForUpdate()
+                ->first();
+            
+            if (!$lockedTeam) {
+                throw new \RuntimeException('Tim tidak ditemukan saat proses voting.');
+            }
+
             // Simpan vote
             ContributionApproval::create([
                 'contribution_id' => $contribution->id,
@@ -80,7 +91,7 @@ class ApprovalController extends Controller
                 payload:     ['vote' => $request->vote, 'voter_id' => $voter->id],
             );
 
-            // Cek apakah threshold terpenuhi
+            // Cek apakah threshold terpenuhi (dengan lock internal)
             $this->checkAndUpdateStatus($contribution, $team, $request);
 
             return $contribution->fresh()->load(['member.user', 'approvals.member.user']);
@@ -97,10 +108,19 @@ class ApprovalController extends Controller
      * Jika approve >= threshold → APPROVED → recalculate equity
      * Jika reject >= (100 - threshold) → REJECTED
      * Jika seri (tie) → gunakan Tie-Breaker mechanism
+     * 
+     * PENTING: Fungsi ini harus dipanggil dalam transaksi database yang sudah memiliki lock
      */
     private function checkAndUpdateStatus(Contribution $contribution, $team, Request $request): void
     {
-        $contribution->refresh();
+        // Refresh data dengan lock untuk memastikan kita membaca data terbaru
+        $contribution = Contribution::where('id', $contribution->id)
+            ->lockForUpdate()
+            ->first();
+            
+        if (!$contribution) {
+            throw new \RuntimeException('Kontribusi tidak ditemukan saat proses update status.');
+        }
 
         // Total member aktif selain pembuat kontribusi
         $totalVoters = $team->activeMembers()
@@ -160,6 +180,8 @@ class ApprovalController extends Controller
     /**
      * Handle Tie-Breaker ketika hasil voting seri.
      * Mekanisme: Team Owner memiliki casting vote (suara penentu).
+     * 
+     * PENTING: Fungsi ini dipanggil dalam transaksi yang sudah memiliki lock
      * 
      * @param Contribution $contribution
      * @param mixed $team
@@ -222,7 +244,7 @@ class ApprovalController extends Controller
                 ],
             );
 
-            // Jika approved, trigger recalculation
+            // Jika approved, trigger recalculation dengan lock
             if ($finalStatus === 'APPROVED') {
                 $this->slicingPie->recalculate($team, $contribution->id);
             }
