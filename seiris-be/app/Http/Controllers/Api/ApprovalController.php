@@ -96,6 +96,7 @@ class ApprovalController extends Controller
      * Cek apakah vote sudah memenuhi threshold.
      * Jika approve >= threshold → APPROVED → recalculate equity
      * Jika reject >= (100 - threshold) → REJECTED
+     * Jika seri (tie) → gunakan Tie-Breaker mechanism
      */
     private function checkAndUpdateStatus(Contribution $contribution, $team, Request $request): void
     {
@@ -121,6 +122,7 @@ class ApprovalController extends Controller
         $approvePct = ($approveCount / $totalVoters) * 100;
         $rejectPct  = ($rejectCount / $totalVoters) * 100;
 
+        // Cek kondisi APPROVED
         if ($approvePct >= $threshold) {
             $contribution->update(['status' => 'APPROVED']);
 
@@ -136,6 +138,7 @@ class ApprovalController extends Controller
             // Trigger SlicingPie recalculation
             $this->slicingPie->recalculate($team, $contribution->id);
 
+        // Cek kondisi REJECTED
         } elseif ($rejectPct > (100 - $threshold)) {
             $contribution->update(['status' => 'REJECTED']);
 
@@ -146,6 +149,99 @@ class ApprovalController extends Controller
                 subjectType: Contribution::class,
                 subjectId:   $contribution->id,
                 payload:     ['reject_count' => $rejectCount, 'total_voters' => $totalVoters],
+            );
+
+        // Cek kondisi TIE (Seri) - Tie-Breaker Mechanism
+        } elseif ($approveCount === $rejectCount && $approveCount > 0) {
+            $this->handleTieBreaker($contribution, $team, $request, $approveCount, $rejectCount);
+        }
+    }
+
+    /**
+     * Handle Tie-Breaker ketika hasil voting seri.
+     * Mekanisme: Team Owner memiliki casting vote (suara penentu).
+     * 
+     * @param Contribution $contribution
+     * @param mixed $team
+     * @param Request $request
+     * @param int $approveCount
+     * @param int $rejectCount
+     * @return void
+     */
+    private function handleTieBreaker(Contribution $contribution, $team, Request $request, int $approveCount, int $rejectCount): void
+    {
+        // Cari team owner
+        $ownerMember = TeamMember::where('team_id', $team->id)
+            ->where('user_id', $team->owner_id)
+            ->first();
+
+        // Jika owner adalah pembuat kontribusi, cari member dengan tenure terlama
+        if (!$ownerMember || $ownerMember->id === $contribution->member_id) {
+            // Fallback: member dengan created_at paling awal (tenure terlama)
+            $tieBreaker = TeamMember::where('team_id', $team->id)
+                ->where('id', '!=', $contribution->member_id)
+                ->where('status', 'active')
+                ->orderBy('created_at', 'asc')
+                ->first();
+            
+            $tieBreakerType = 'senior_member';
+        } else {
+            $tieBreaker = $ownerMember;
+            $tieBreakerType = 'team_owner';
+        }
+
+        if (!$tieBreaker) {
+            // Tidak ada tie-breaker yang valid, biarkan dalam status PENDING
+            return;
+        }
+
+        // Cek apakah tie-breaker sudah memberikan vote
+        $tieBreakerVote = ContributionApproval::where('contribution_id', $contribution->id)
+            ->where('member_id', $tieBreaker->id)
+            ->first();
+
+        if ($tieBreakerVote) {
+            // Tie-breaker sudah vote, gunakan suaranya sebagai keputusan final
+            $finalStatus = $tieBreakerVote->vote === 'APPROVE' ? 'APPROVED' : 'REJECTED';
+            $contribution->update(['status' => $finalStatus]);
+
+            AuditLogService::logFromRequest(
+                request:     $request,
+                teamId:      $team->id,
+                action:      'contribution.tie_breaker_resolved',
+                subjectType: Contribution::class,
+                subjectId:   $contribution->id,
+                payload:     [
+                    'tie_breaker_type' => $tieBreakerType,
+                    'tie_breaker_id'   => $tieBreaker->id,
+                    'tie_breaker_user_id' => $tieBreaker->user_id,
+                    'approve_count'    => $approveCount,
+                    'reject_count'     => $rejectCount,
+                    'final_decision'   => $finalStatus,
+                    'reason'           => 'Tie-breaker vote digunakan sebagai keputusan final',
+                ],
+            );
+
+            // Jika approved, trigger recalculation
+            if ($finalStatus === 'APPROVED') {
+                $this->slicingPie->recalculate($team, $contribution->id);
+            }
+        } else {
+            // Tie-breaker belum vote, catat dalam audit bahwa perlu tie-breaker
+            AuditLogService::logFromRequest(
+                request:     $request,
+                teamId:      $team->id,
+                action:      'contribution.tie_detected',
+                subjectType: Contribution::class,
+                subjectId:   $contribution->id,
+                payload:     [
+                    'tie_breaker_type' => $tieBreakerType,
+                    'tie_breaker_id'   => $tieBreaker->id,
+                    'tie_breaker_user_id' => $tieBreaker->user_id,
+                    'approve_count'    => $approveCount,
+                    'reject_count'     => $rejectCount,
+                    'reason'           => 'Hasil voting seri, menunggu casting vote dari tie-breaker',
+                ],
             );
         }
     }
