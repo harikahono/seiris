@@ -15,17 +15,18 @@ class UpdateFmrRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fmr' => ['required', 'integer', 'min:0', 'max:99999999'],
+            'fmr' => ['required', 'integer', 'min:0', 'max:' . config('seiris.max_student_fmr')],
         ];
     }
 
     public function messages(): array
     {
+        $maxFmr = config('seiris.max_student_fmr');
         return [
             'fmr.required' => 'FMR wajib diisi.',
             'fmr.integer'  => 'FMR harus berupa angka.',
             'fmr.min'      => 'FMR tidak boleh negatif.',
-            'fmr.max'      => 'FMR terlalu besar.',
+            'fmr.max'      => "FMR melebihi batas maksimum mahasiswa (Rp {$maxFmr}/jam).",
         ];
     }
 
