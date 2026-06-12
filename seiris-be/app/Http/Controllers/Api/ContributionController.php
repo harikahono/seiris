@@ -82,6 +82,17 @@ class ContributionController extends Controller
         }
 
         $contribution = DB::transaction(function () use ($request, $team, $member, $value, $slicesData, $invoicePath) {
+            // LOCK: Ambil data tim dengan row-level lock untuk mencegah race condition
+            // saat multiple kontribusi dibuat/diproses bersamaan untuk tim yang sama
+            $lockedTeam = DB::table('teams')
+                ->where('id', $team->id)
+                ->lockForUpdate()
+                ->first();
+            
+            if (!$lockedTeam) {
+                throw new \RuntimeException('Tim tidak ditemukan saat proses kontribusi.');
+            }
+
             $contribution = Contribution::create([
                 'team_id'           => $team->id,
                 'member_id'         => $member->id,
