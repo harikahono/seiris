@@ -1,0 +1,111 @@
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Dependencies
+node_modules/
+vendor/
+composer.lock
+*.lock
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PHP specific
+*.php~
+.php_cs.cache
+
+# Laravel/Homestead (common in PHP projects)
+Homestead.json
+Homestead.yaml
+Vagrantfile
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+.directory
+*.nib
+*~.nib
+.nfs*
+.smbdelete*
+.VolumeIcon.icns
+.Trashes
+.fseventsd
+.Spotlight-V100
+TemporaryItems
+.dirstamp
+
+# Build results
+dist/
+build/
+target/
+*.min.js
+*.min.css
+*.bundle.js
+*.bundle.css
+
+# Testing
+.phpunit.result.cache
+.phpunit-watcher.yml
+test-results/
+
+# Cache
+.cache/
+.cached/
+.mypy_cache/
+.pytest_cache/
+.hadolint.yaml
+.styleci.yml
+
+# Compression
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
