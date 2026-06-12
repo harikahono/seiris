@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ApprovalController;
 use App\Http\Controllers\Api\RevenueController;
 use App\Http\Controllers\Api\EquityController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\DashboardController;
 
 // ── Health Check (public, untuk UptimeRobot) ──────────────────
 Route::get('/ping', fn () => response()->json([
@@ -28,6 +29,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('auth/logout', [AuthController::class, 'logout']);
     Route::get('auth/me',      [AuthController::class, 'me']);
+
+    // Dashboard
+    Route::get('my-dashboard', [DashboardController::class, 'index']);
 
     // Teams
     Route::post('teams',                        [TeamController::class, 'store']);

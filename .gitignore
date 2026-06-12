@@ -1,67 +1,40 @@
 ```
-# Environment
-.env
-.env.local
-.env.*
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+dist/
+build/
+
+# Dependencies
+vendor/
+node_modules/
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
 
+# Environment
+.env
+.env.local
+*.env.*
+
 # Editors
 .vscode/
 .idea/
 
-# Dependencies
-vendor/
-node_modules/
-
-# Build artifacts
-dist/
-build/
-target/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/
-.mypy_cache/
-.pytest_cache/
-.hypothesis/
-
-# PHP
-*.phar
-vendor/
-composer.lock
-composer.phar
-.box/
-.build/
-.sass-cache/
-*.cache.php
-*.cache
-.settings/
-nbproject/
-*.swp
-*.swo
-*~
-.project
+# OS generated files
 .DS_Store
 Thumbs.db
+
+# PHP specific
+*.php~
+.php_cs.cache
+
+# Laravel/Hydrated specific (if applicable)
+storage/
+bootstrap/cache/
+
 ```
