@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { CustomEase } from "gsap/CustomEase";
@@ -88,10 +89,16 @@ export function Navbar() {
                   </a>
                 </li>
                 <li className="menu-list-item">
-                  <a href="#register" className="nav-link cta-link" onClick={() => setIsMenuOpen(false)}>
+                  <Link to="/login" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+                    <p className="nav-link-text">Login</p>
+                    <div className="nav-link-hover-bg"></div>
+                  </Link>
+                </li>
+                <li className="menu-list-item">
+                  <Link to="/register" className="nav-link cta-link" onClick={() => setIsMenuOpen(false)}>
                     <p className="nav-link-text">Register Now</p>
                     <div className="nav-link-hover-bg"></div>
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

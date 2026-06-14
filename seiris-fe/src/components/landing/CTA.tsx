@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { ReactNode, CSSProperties } from 'react';
+import { Link } from 'react-router-dom';
 import '@/styles/cta.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -116,10 +117,10 @@ export function CTA() {
             </p>
 
             <div className="cta-actions">
-              <button className="cta-btn-primary">
+              <Link to="/register" className="cta-btn-primary">
                 Register Now — It's Free
                 <span className="cta-btn-arrow">→</span>
-              </button>
+              </Link>
             </div>
 
             <p className="cta-trust">
