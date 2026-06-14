@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import type { DashboardData } from "@/types";
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +26,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-400">{user?.name}</span>
             <button
-              onClick={logout}
+              onClick={() => { logout(); navigate("/"); }}
               className="rounded-lg border border-gray-700 px-3 py-1 text-sm transition hover:border-red-500 hover:text-red-500"
             >
               Logout
