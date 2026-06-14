@@ -4,9 +4,21 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
 import bgImage from "@/assets/bg1.webp";
+import { isAxiosError } from "axios";
+
+interface FieldErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+}
 
 interface AuthUIProps {
   defaultMode?: "signin" | "signup";
+}
+
+function validateEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
@@ -19,29 +31,77 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+
+  const validate = (): boolean => {
+    const errs: FieldErrors = {};
+
+    if (!validateEmail(email)) {
+      errs.email = "Format email tidak valid";
+    }
+    if (password.length < 8) {
+      errs.password = "Password minimal 8 karakter";
+    }
+    if (mode === "signup") {
+      if (!name.trim()) {
+        errs.name = "Nama harus diisi";
+      }
+      if (password !== passwordConfirmation) {
+        errs.password_confirmation = "Konfirmasi password tidak cocok";
+      }
+    }
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const parseBackendErrors = (error: unknown) => {
+    if (isAxiosError(error) && error.response?.status === 422) {
+      const data = error.response.data as { errors?: Record<string, string[]> };
+      if (data.errors) {
+        const errs: FieldErrors = {};
+        for (const [field, messages] of Object.entries(data.errors)) {
+          (errs as Record<string, string>)[field] = messages[0];
+        }
+        setErrors(errs);
+        return;
+      }
+    }
+    setErrors({});
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    if (!validate()) return;
+
     setLoading(true);
     try {
       if (mode === "signin") {
         await login({ email, password });
         toast.success("Login berhasil");
       } else {
-        if (password !== passwordConfirmation) {
-          toast.error("Konfirmasi password tidak cocok");
-          setLoading(false);
-          return;
-        }
         await register({ name, email, password, password_confirmation: passwordConfirmation });
         toast.success("Registrasi berhasil");
       }
-    } catch {
-      toast.error(mode === "signin" ? "Email atau password salah" : "Registrasi gagal, coba lagi");
+    } catch (err) {
+      parseBackendErrors(err);
+      if (!isAxiosError(err) || err.response?.status !== 422) {
+        toast.error(mode === "signin" ? "Email atau password salah" : "Registrasi gagal, coba lagi");
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  const inputClass = (field: keyof FieldErrors) =>
+    cn(
+      "w-full rounded-lg border bg-gray-900 py-2.5 pl-10 pr-10 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
+      errors[field]
+        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+        : "border-gray-700 focus:border-accent focus:ring-accent"
+    );
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -61,7 +121,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
           <div className="mb-6 flex rounded-lg border border-gray-800 bg-gray-900/50 p-1">
             <button
               type="button"
-              onClick={() => setMode("signin")}
+              onClick={() => { setMode("signin"); setErrors({}); }}
               className={cn(
                 "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all",
                 mode === "signin"
@@ -73,7 +133,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
             </button>
             <button
               type="button"
-              onClick={() => setMode("signup")}
+              onClick={() => { setMode("signup"); setErrors({}); }}
               className={cn(
                 "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all",
                 mode === "signup"
@@ -85,7 +145,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
             {mode === "signup" && (
               <div>
                 <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-gray-300">
@@ -100,9 +160,12 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-gray-700 bg-gray-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-500 transition focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                    className={inputClass("name")}
                   />
                 </div>
+                {errors.name && (
+                  <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+                )}
               </div>
             )}
 
@@ -119,9 +182,13 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-700 bg-gray-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-500 transition focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  autoComplete="username"
+                  className={inputClass("email")}
                 />
               </div>
+              {errors.email && (
+                <p className="mt-1 text-xs text-red-500">{errors.email}</p>
+              )}
             </div>
 
             <div>
@@ -133,12 +200,13 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder={mode === "signup" ? "Minimal 8 karakter" : "Password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  className="w-full rounded-lg border border-gray-700 bg-gray-900 py-2.5 pl-10 pr-10 text-sm text-white placeholder-gray-500 transition focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                    placeholder={mode === "signup" ? "Minimal 8 karakter" : "Password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                  className={inputClass("password")}
                 />
                 <button
                   type="button"
@@ -149,6 +217,9 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="mt-1 text-xs text-red-500">{errors.password}</p>
+              )}
             </div>
 
             {mode === "signup" && (
@@ -166,7 +237,8 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
                     onChange={(e) => setPasswordConfirmation(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-900 py-2.5 pl-10 pr-10 text-sm text-white placeholder-gray-500 transition focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                    autoComplete="new-password"
+                    className={inputClass("password_confirmation")}
                   />
                   <button
                     type="button"
@@ -177,6 +249,9 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
                     {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                 </div>
+                {errors.password_confirmation && (
+                  <p className="mt-1 text-xs text-red-500">{errors.password_confirmation}</p>
+                )}
               </div>
             )}
 
@@ -200,7 +275,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
                 Belum punya akun?{" "}
                 <button
                   type="button"
-                  onClick={() => setMode("signup")}
+                  onClick={() => { setMode("signup"); setErrors({}); }}
                   className="font-medium text-accent hover:underline"
                 >
                   Daftar
@@ -211,7 +286,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
                 Sudah punya akun?{" "}
                 <button
                   type="button"
-                  onClick={() => setMode("signin")}
+                  onClick={() => { setMode("signin"); setErrors({}); }}
                   className="font-medium text-accent hover:underline"
                 >
                   Masuk

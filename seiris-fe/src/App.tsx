@@ -1,9 +1,19 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AuthPage from "@/pages/AuthPage";
+import DashboardLayout from "@/components/DashboardLayout";
 import DashboardPage from "@/pages/DashboardPage";
+import TeamDetailPage from "@/pages/teams/TeamDetailPage";
+import TeamOverviewTab from "@/components/teams/TeamOverviewTab";
+import TeamMembersTab from "@/components/teams/TeamMembersTab";
+import EquityTab from "@/components/teams/EquityTab";
+import RevenueTab from "@/components/teams/RevenueTab";
+import AuditLogTab from "@/components/teams/AuditLogTab";
+import ContributionsTab from "@/components/teams/ContributionsTab";
+import TeamSettingsTab from "@/components/teams/TeamSettingsTab";
+import ContributionDetailPage from "@/pages/teams/ContributionDetailPage";
 import LandingPage from "@/pages/LandingPage";
 
 export default function App() {
@@ -15,7 +25,20 @@ export default function App() {
           <Route path="/login" element={<AuthPage />} />
           <Route path="/register" element={<AuthPage />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/teams/:teamId" element={<TeamDetailPage />}>
+                <Route index element={<Navigate to="overview" replace />} />
+                <Route path="overview" element={<TeamOverviewTab />} />
+                <Route path="equity" element={<EquityTab />} />
+                <Route path="members" element={<TeamMembersTab />} />
+                <Route path="contributions" element={<ContributionsTab />} />
+                <Route path="revenue" element={<RevenueTab />} />
+                <Route path="audit" element={<AuditLogTab />} />
+                <Route path="settings" element={<TeamSettingsTab />} />
+              </Route>
+              <Route path="/teams/:teamId/contributions/:contributionId" element={<ContributionDetailPage />} />
+            </Route>
           </Route>
         </Routes>
         <Toaster

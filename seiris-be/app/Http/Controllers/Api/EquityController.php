@@ -26,13 +26,20 @@ class EquityController extends Controller
             ->first();
 
         if (!$snapshot) {
+            $members = $team->activeMembers()->with('user')->get();
+
             return response()->json([
-                'message' => 'Belum ada kontribusi yang diapprove.',
-                'data'    => [
-                    'total_slices' => 0,
-                    'equity_map'   => [],
-                    'is_frozen'    => false,
-                    'members'      => [],
+                'data' => [
+                    'total_slices'  => 0,
+                    'equity_map'    => $members->map(fn($m) => [
+                        'member_id'  => $m->id,
+                        'name'       => $m->user->name,
+                        'role'       => $m->role,
+                        'slices'     => 0,
+                        'equity_pct' => 0,
+                    ])->values()->toArray(),
+                    'is_frozen'     => $team->is_frozen,
+                    'calculated_at' => null,
                 ],
             ]);
         }

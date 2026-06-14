@@ -21,8 +21,13 @@ class AuditLogController extends Controller
     {
         $this->authorizeMember($request, $team);
 
-        $logs = AuditLog::where('team_id', $team->id)
-            ->with('actor')
+        $query = AuditLog::where('team_id', $team->id);
+
+        if ($request->filled('filter')) {
+            $query->where('action', 'like', $request->filter . '.%');
+        }
+
+        $logs = $query->with('actor')
             ->orderByDesc('created_at')
             ->paginate(20);
 
