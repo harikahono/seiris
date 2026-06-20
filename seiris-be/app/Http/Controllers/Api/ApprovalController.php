@@ -85,7 +85,7 @@ class ApprovalController extends Controller
             AuditLogService::logFromRequest(
                 request:     $request,
                 teamId:      $team->id,
-                action:      'contribution.voted',
+                action:      'vote.cast',
                 subjectType: Contribution::class,
                 subjectId:   $contribution->id,
                 payload:     ['vote' => $request->vote, 'voter_id' => $voter->id],

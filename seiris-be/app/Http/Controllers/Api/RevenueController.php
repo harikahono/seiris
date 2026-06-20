@@ -10,11 +10,11 @@ use App\Http\Resources\RevenueResource;
 use App\Models\ProfitDistribution;
 use App\Models\Revenue;
 use App\Models\Team;
-use App\Models\TeamMember;
 use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class RevenueController extends Controller
 {
@@ -24,7 +24,7 @@ class RevenueController extends Controller
      */
     public function index(Request $request, Team $team): JsonResponse
     {
-        $this->authorizeMember($request, $team);
+        // authorizeMember di-handle middleware EnsureTeamMember
 
         $revenues = Revenue::where('team_id', $team->id)
             ->with(['recordedBy.user', 'distributions.member.user'])
@@ -47,12 +47,10 @@ class RevenueController extends Controller
      */
     public function store(StoreRevenueRequest $request, Team $team): JsonResponse
     {
-        $this->authorizeOwner($request, $team);
+        Gate::authorize('manageRevenues', $team);
 
-        $member = TeamMember::where('team_id', $team->id)
-            ->where('user_id', $request->user()->id)
-            ->where('status', 'active')
-            ->first();
+        // TeamMember sudah di-attach oleh middleware EnsureTeamMember
+        $member = $request->teamMember;
 
         // Handle upload bukti pembayaran
         $proofPath = null;
@@ -100,7 +98,7 @@ class RevenueController extends Controller
     public function distribute(Request $request, Revenue $revenue): JsonResponse
     {
         $team = $revenue->team;
-        $this->authorizeOwner($request, $team);
+        Gate::authorize('manageRevenues', $team);
 
         if ($revenue->is_distributed) {
             return response()->json([
@@ -166,28 +164,4 @@ class RevenueController extends Controller
         ]);
     }
 
-    private function authorizeMember(Request $request, Team $team): void
-    {
-        $isMember = $team->members()
-            ->where('user_id', $request->user()->id)
-            ->where('status', 'active')
-            ->exists();
-
-        if (!$isMember) {
-            abort(403, 'Kamu bukan anggota tim ini.');
-        }
-    }
-
-    private function authorizeOwner(Request $request, Team $team): void
-    {
-        $isOwner = $team->members()
-            ->where('user_id', $request->user()->id)
-            ->where('role', 'owner')
-            ->where('status', 'active')
-            ->exists();
-
-        if (!$isOwner) {
-            abort(403, 'Hanya owner yang bisa melakukan aksi ini.');
-        }
-    }
 }

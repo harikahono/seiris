@@ -15,6 +15,7 @@ use App\Services\SlicingPieService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class TeamController extends Controller
@@ -88,7 +89,7 @@ class TeamController extends Controller
      */
     public function show(Request $request, Team $team): JsonResponse
     {
-        $this->authorizeMember($request, $team);
+        // authorizeMember sudah di-handle oleh middleware EnsureTeamMember
 
         return response()->json([
             'data' => new TeamResource($team->load(['members.user', 'owner'])),
@@ -101,7 +102,7 @@ class TeamController extends Controller
      */
     public function update(StoreTeamRequest $request, Team $team): JsonResponse
     {
-        $this->authorizeOwner($request, $team);
+        Gate::authorize('update', $team);
 
         $team->update([
             'name'               => $request->name,
@@ -186,7 +187,7 @@ class TeamController extends Controller
      */
     public function updateFmr(UpdateFmrRequest $request, Team $team, TeamMember $member): JsonResponse
     {
-        $this->authorizeOwner($request, $team);
+        Gate::authorize('manageMembers', $team);
 
         // Pastikan member ini memang ada di tim ini
         if ($member->team_id !== $team->id) {
@@ -221,7 +222,7 @@ class TeamController extends Controller
      */
     public function freeze(Request $request, Team $team): JsonResponse
     {
-        $this->authorizeOwner($request, $team);
+        Gate::authorize('freeze', $team);
 
         if ($team->is_frozen) {
             return response()->json(['message' => 'Tim sudah di-freeze sebelumnya.'], 409);
@@ -254,7 +255,7 @@ class TeamController extends Controller
      */
     public function exitMember(Request $request, Team $team, TeamMember $member): JsonResponse
     {
-        $this->authorizeOwner($request, $team);
+        Gate::authorize('manageMembers', $team);
 
         if ($member->team_id !== $team->id) {
             return response()->json(['message' => 'Anggota tidak ditemukan di tim ini.'], 404);
@@ -312,30 +313,4 @@ class TeamController extends Controller
         ]);
     }
 
-    // ── Private Helpers ───────────────────────────────────────
-
-    private function authorizeMember(Request $request, Team $team): void
-    {
-        $isMember = $team->members()
-            ->where('user_id', $request->user()->id)
-            ->where('status', 'active')
-            ->exists();
-
-        if (!$isMember) {
-            abort(403, 'Kamu bukan anggota tim ini.');
-        }
-    }
-
-    private function authorizeOwner(Request $request, Team $team): void
-    {
-        $isOwner = $team->members()
-            ->where('user_id', $request->user()->id)
-            ->where('role', 'owner')
-            ->where('status', 'active')
-            ->exists();
-
-        if (!$isOwner) {
-            abort(403, 'Hanya owner yang bisa melakukan aksi ini.');
-        }
-    }
 }

@@ -46,8 +46,10 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Revoke semua token lama sebelum buat yang baru
-        $user->tokens()->delete();
+        // Opsional: revoke token lain kalau user minta
+        if ($request->boolean('revoke_others')) {
+            $user->tokens()->delete();
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

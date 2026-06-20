@@ -19,7 +19,7 @@ class EquityController extends Controller
      */
     public function current(Request $request, Team $team): JsonResponse
     {
-        $this->authorizeMember($request, $team);
+        // authorizeMember di-handle middleware EnsureTeamMember
 
         $snapshot = EquitySnapshot::where('team_id', $team->id)
             ->latest()
@@ -77,7 +77,7 @@ class EquityController extends Controller
      */
     public function history(Request $request, Team $team): JsonResponse
     {
-        $this->authorizeMember($request, $team);
+        // authorizeMember di-handle middleware EnsureTeamMember
 
         $snapshots = EquitySnapshot::where('team_id', $team->id)
             ->orderByDesc('created_at')
@@ -105,7 +105,7 @@ class EquityController extends Controller
      */
     public function export(Request $request, Team $team): Response
     {
-        $this->authorizeMember($request, $team);
+        // authorizeMember di-handle middleware EnsureTeamMember
 
         // Ambil snapshot terbaru
         $snapshot = EquitySnapshot::where('team_id', $team->id)
@@ -201,15 +201,4 @@ class EquityController extends Controller
         return $pdf->download($filename);
     }
 
-    private function authorizeMember(Request $request, Team $team): void
-    {
-        $isMember = $team->members()
-            ->where('user_id', $request->user()->id)
-            ->where('status', 'active')
-            ->exists();
-
-        if (!$isMember) {
-            abort(403, 'Kamu bukan anggota tim ini.');
-        }
-    }
 }

@@ -1,35 +1,35 @@
 import { useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTeamContext } from "@/contexts/TeamContext";
 import { cn } from "@/lib/utils";
-import api from "@/api/axios";
-import type { Team } from "@/types";
+import CreateTeamModal from "@/components/ui/CreateTeamModal";
+import Skeleton from "@/components/ui/Skeleton";
 import {
   LayoutDashboard,
   LogOut,
+  ChevronDown,
   ChevronLeft,
   Menu,
-  Info,
+
   Users,
   ListChecks,
   Settings,
   PieChart,
   TrendingUp,
   ClipboardList,
-  X,
-  Loader2,
+  Plus,
   AlertTriangle,
 } from "lucide-react";
 
 interface FeatureItem {
   key: string;
   label: string;
-  icon: typeof Info;
+  icon: typeof PieChart;
   path: string;
 }
 
 const features: FeatureItem[] = [
-  { key: "overview", label: "Overview", icon: Info, path: "overview" },
   { key: "equity", label: "Equity", icon: PieChart, path: "equity" },
   { key: "members", label: "Anggota", icon: Users, path: "members" },
   { key: "contributions", label: "Kontribusi", icon: ListChecks, path: "contributions" },
@@ -40,50 +40,44 @@ const features: FeatureItem[] = [
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
+  const { currentTeamId, teams, isLoading: teamsLoading, setCurrentTeam, refreshTeams } = useTeamContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [teamsLoading, setTeamsLoading] = useState(true);
-  const [pendingFeature, setPendingFeature] = useState<FeatureItem | null>(null);
+  const [teamsOpen, setTeamsOpen] = useState(true);
+  const [featuresOpen, setFeaturesOpen] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
+
+  // ── Sync currentTeamId dari URL ──
+  const urlTeamId = location.pathname.match(/\/teams\/([^/]+)/)?.[1];
 
   useEffect(() => {
-    setTeamsLoading(true);
-    api
-      .get<{ data: Team[] }>("/teams")
-      .then((res) => setTeams(res.data.data))
-      .catch(() => setTeams([]))
-      .finally(() => setTeamsLoading(false));
-  }, []);
+    if (urlTeamId && urlTeamId !== currentTeamId) {
+      setCurrentTeam(urlTeamId);
+    }
+  }, [urlTeamId, currentTeamId, setCurrentTeam]);
 
-  useEffect(() => {
-    setPendingFeature(null);
-  }, [location.pathname]);
-
+  // ── Active feature detection ──
   const activeFeature = features.find((f) => {
     const match = location.pathname.match(/\/teams\/([^/]+)\/(.+)/);
     return match && match[2] === f.path;
   });
 
+  // ── Feature click: langsung navigasi pake currentTeamId ──
   const handleFeatureClick = (feature: FeatureItem) => {
-    if (!teamsLoading && teams.length === 1) {
-      navigate(`/teams/${teams[0].id}/${feature.path}`);
-      return;
-    }
-    setPendingFeature(feature);
-  };
-
-  const handleTeamSelect = (teamId: string) => {
-    if (pendingFeature) {
-      navigate(`/teams/${teamId}/${pendingFeature.path}`);
-      setPendingFeature(null);
+    if (currentTeamId) {
+      navigate(`/teams/${currentTeamId}/${feature.path}`);
     }
   };
 
-  const handleLogout = () => {
-    setShowLogoutModal(true);
+  // ── Handle create team ──
+  const handleCreateTeam = () => {
+    setShowCreateTeamModal(true);
   };
+
+  // ── Logout ──
+  const handleLogout = () => setShowLogoutModal(true);
 
   const confirmLogout = () => {
     logout();
@@ -98,6 +92,7 @@ export default function DashboardLayout() {
           collapsed ? "w-16" : "w-60"
         )}
       >
+        {/* ── Header ── */}
         <div className="flex h-14 items-center justify-between border-b border-gray-800 px-4">
           {!collapsed && (
             <span className="text-lg font-bold text-accent">SEIRIS</span>
@@ -112,6 +107,7 @@ export default function DashboardLayout() {
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-4">
+          {/* ── Dashboard Link ── */}
           <NavLink
             to="/dashboard"
             end
@@ -129,35 +125,172 @@ export default function DashboardLayout() {
             {!collapsed && <span>Dashboard</span>}
           </NavLink>
 
+          {/* ── Tim Section ── */}
           {!collapsed && (
-            <div className="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-widest text-gray-600">
-              Fitur
-            </div>
+            <button
+              type="button"
+              onClick={() => setTeamsOpen(!teamsOpen)}
+              className="flex w-full items-center gap-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 hover:text-gray-300 transition"
+            >
+              <ChevronDown
+                className={cn("size-3 transition-transform duration-200", !teamsOpen && "-rotate-90")}
+              />
+              Tim
+              <span className="ml-auto text-[10px] text-gray-600">{teams.length}</span>
+            </button>
           )}
 
-          {features.map((feat) => {
-            const Icon = feat.icon;
-            const isActive = activeFeature?.key === feat.key;
-            return (
-              <button
-                key={feat.key}
-                type="button"
-                onClick={() => handleFeatureClick(feat)}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition",
-                  isActive
-                    ? "bg-accent/10 text-accent"
-                    : "text-gray-400 hover:bg-gray-800 hover:text-white",
-                  collapsed && "justify-center px-2"
-                )}
-              >
-                <Icon className="size-4 shrink-0" />
-                {!collapsed && <span>{feat.label}</span>}
-              </button>
-            );
-          })}
+          {/* ── Team List (Discord-style) ── */}
+          <div
+            className={cn(
+              "transition-all duration-300 ease-in-out",
+              collapsed
+                ? ""
+                : [
+                    "grid",
+                    teamsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+                  ]
+            )}
+          >
+              <div className="overflow-hidden">
+                <div className={cn("space-y-1", collapsed ? "" : "px-2 pt-1")}>
+                  {teamsLoading ? (
+                    <div className="space-y-1">
+                      {[...Array(3)].map((_, i) => (
+                        <Skeleton key={i} className="h-12 w-full" />
+                      ))}
+                    </div>
+                  ) : (
+                    teams.map((team) => {
+                  const isActive = currentTeamId === team.id;
+                  return (
+                    <button
+                      key={team.id}
+                      type="button"
+                      onClick={() => {
+                        setCurrentTeam(team.id);
+                        navigate('/dashboard');
+                      }}
+                      className={cn(
+                        "group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition",
+                        isActive
+                          ? "bg-accent/10 text-accent"
+                          : "text-gray-400 hover:bg-gray-800 hover:text-white",
+                        collapsed && "justify-center px-2"
+                      )}
+                    >
+                      {/* Avatar lingkaran */}
+                      <span
+                        className={cn(
+                          "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition",
+                          isActive
+                            ? "bg-accent text-black"
+                            : "bg-gray-800 text-gray-500 group-hover:bg-gray-700"
+                        )}
+                      >
+                        {team.name.charAt(0).toUpperCase()}
+                      </span>
+
+                      {!collapsed && (
+                        <div className="flex-1 text-left">
+                          <p className="truncate font-medium leading-tight">
+                            {team.name}
+                            {team.status === "exited" && (
+                              <span className="ml-1.5 text-[10px] text-gray-500">(Keluar)</span>
+                            )}
+                          </p>
+                          <p className="text-[11px] text-gray-500">
+                            {team.role === "owner" ? "Pemilik" : "Anggota"}
+                            {" · "}
+                            {team.total_members} anggota
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Active indicator — small dot when collapsed */}
+                      {collapsed && isActive && (
+                        <span className="absolute right-1 top-1/2 -translate-y-1/2">
+                          <span className="block size-1.5 rounded-full bg-accent" />
+                        </span>
+                      )}
+                    </button>
+                  );
+                }))}
+
+                {/* ── Gabung / Buat Tim ── */}
+                <button
+                  type="button"
+                  onClick={handleCreateTeam}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-500 transition hover:bg-gray-800 hover:text-gray-300",
+                    collapsed && "justify-center px-2"
+                  )}
+                >
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-dashed border-gray-700">
+                    <Plus className="size-4" />
+                  </span>
+                  {!collapsed && <span>Gabung / Buat Tim</span>}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Fitur Section ── */}
+          {!collapsed && (
+            <button
+              type="button"
+              onClick={() => setFeaturesOpen(!featuresOpen)}
+              className="flex w-full items-center gap-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 hover:text-gray-300 transition"
+            >
+              <ChevronDown
+                className={cn("size-3 transition-transform duration-200", !featuresOpen && "-rotate-90")}
+              />
+              Fitur
+              <span className="ml-auto text-[10px] text-gray-600">{features.length}</span>
+            </button>
+          )}
+
+          {/* ── Feature Buttons ── */}
+          <div
+            className={cn(
+              "transition-all duration-300 ease-in-out",
+              collapsed
+                ? ""
+                : [
+                    "grid",
+                    featuresOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+                  ]
+            )}
+          >
+            <div className="overflow-hidden">
+              <div className={cn("space-y-1", collapsed ? "" : "px-2 pt-1")}>
+                {features.map((feat) => {
+                  const Icon = feat.icon;
+                  const isActive = activeFeature?.key === feat.key;
+                  return (
+                    <button
+                      key={feat.key}
+                      type="button"
+                      onClick={() => handleFeatureClick(feat)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition",
+                        isActive
+                          ? "bg-accent/10 text-accent"
+                          : "text-gray-400 hover:bg-gray-800 hover:text-white",
+                        collapsed && "justify-center px-2"
+                      )}
+                    >
+                      <Icon className="size-4 shrink-0" />
+                      {!collapsed && <span>{feat.label}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </nav>
 
+        {/* ── User Footer ── */}
         <div className="border-t border-gray-800 px-2 py-3">
           {!collapsed && (
             <div className="mb-2 truncate px-3 text-xs text-gray-500">
@@ -180,61 +313,12 @@ export default function DashboardLayout() {
         </div>
       </aside>
 
+      {/* ── Main Content ── */}
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
 
-      {pendingFeature && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="fixed inset-0 bg-black/60"
-            onClick={() => setPendingFeature(null)}
-          />
-          <div className="relative w-80 rounded-xl border border-gray-700 bg-gray-900 p-5 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-300">
-                Pilih Tim — {pendingFeature.label}
-              </p>
-              <button
-                type="button"
-                onClick={() => setPendingFeature(null)}
-                className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-white"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            {teamsLoading ? (
-              <div className="flex justify-center py-6">
-                <Loader2 className="size-5 animate-spin text-gray-500" />
-              </div>
-            ) : teams.length === 0 ? (
-              <p className="py-6 text-center text-sm text-gray-500">
-                Kamu belum bergabung tim manapun.
-              </p>
-            ) : (
-              <div className="space-y-1">
-                {teams.map((team) => (
-                  <button
-                    key={team.id}
-                    type="button"
-                    onClick={() => handleTeamSelect(team.id)}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-gray-300 transition hover:bg-gray-800"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/20 text-xs font-bold text-accent">
-                      {team.name.charAt(0).toUpperCase()}
-                    </span>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-white">{team.name}</p>
-                      <p className="text-xs text-gray-500">{team.members_count} anggota</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
+      {/* ── Logout Confirmation Modal ── */}
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/60" onClick={() => setShowLogoutModal(false)} />
@@ -267,6 +351,13 @@ export default function DashboardLayout() {
           </div>
         </div>
       )}
+
+      {/* ── Create Team Modal ── */}
+      <CreateTeamModal
+        open={showCreateTeamModal}
+        onClose={() => setShowCreateTeamModal(false)}
+        onCreated={refreshTeams}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Team } from "@/types";
 import { ArrowLeft } from "lucide-react";
+import Skeleton from "@/components/ui/Skeleton";
 
 export interface TeamContext {
   team: Team;
@@ -45,8 +46,14 @@ export default function TeamDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <p className="text-gray-500">Memuat...</p>
+      <div className="mx-auto max-w-4xl px-6 py-8 space-y-6">
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-4 w-1/4" />
+        <Skeleton className="h-48 w-full" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+        </div>
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }

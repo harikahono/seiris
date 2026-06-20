@@ -54,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       /* ignore */
     }
     localStorage.removeItem("token");
+    localStorage.removeItem("seiris_current_team_id");
     setToken(null);
     setUser(null);
   };

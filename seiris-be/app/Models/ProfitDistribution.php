@@ -35,4 +35,11 @@ class ProfitDistribution extends Model
     {
         return $this->belongsTo(TeamMember::class, 'member_id');
     }
+
+    // Append-only — block update & delete
+    protected static function booted(): void
+    {
+        static::updating(fn() => false);
+        static::deleting(fn() => false);
+    }
 }

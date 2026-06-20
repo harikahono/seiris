@@ -82,6 +82,7 @@ export interface DashboardTeamItem {
   name: string;
   description: string | null;
   role: TeamRole;
+  status?: MemberStatus;
   is_owner: boolean;
   my_equity_percentage: number;
   my_slices: number;

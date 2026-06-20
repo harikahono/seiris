@@ -6,6 +6,7 @@ import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { Loader2, Plus } from "lucide-react";
 import RevenueCard from "@/components/ui/RevenueCard";
 import CreateRevenueForm from "@/components/ui/CreateRevenueForm";
+import Skeleton from "@/components/ui/Skeleton";
 
 export default function RevenueTab() {
   const { team, isOwner } = useOutletContext<TeamContext>();
@@ -73,7 +74,13 @@ export default function RevenueTab() {
           <RevenueCard key={r.id} revenue={r} isOwner={isOwner} onDistributed={fetchRevenues} />
         ))}
 
-        {loading && (
+        {loading && page === 1 ? (
+          <div className="space-y-4">
+            {[...Array(2)].map((_, i) => (
+              <Skeleton key={i} className="h-32 w-full" />
+            ))}
+          </div>
+        ) : loading && (
           <div className="flex justify-center py-8">
             <Loader2 className="size-5 animate-spin text-gray-500" />
           </div>

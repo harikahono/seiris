@@ -21,11 +21,14 @@ const ACTION_META: Record<string, { icon: LucideIcon; color: string; bg: string;
   "contribution.created": {
     icon: FileText, color: "text-yellow-400", bg: "bg-yellow-500/10", label: "Membuat kontribusi",
   },
-  "vote.approved": {
-    icon: ThumbsUp, color: "text-green-400", bg: "bg-green-500/10", label: "Menyetujui kontribusi",
+  "vote.cast": {
+    icon: ThumbsUp, color: "text-blue-400", bg: "bg-blue-500/10", label: "Memberi vote",
   },
-  "vote.rejected": {
-    icon: ThumbsDown, color: "text-red-400", bg: "bg-red-500/10", label: "Menolak kontribusi",
+  "contribution.approved": {
+    icon: ThumbsUp, color: "text-green-400", bg: "bg-green-500/10", label: "Kontribusi disetujui",
+  },
+  "contribution.rejected": {
+    icon: ThumbsDown, color: "text-red-400", bg: "bg-red-500/10", label: "Kontribusi ditolak",
   },
   "equity.recalculated": {
     icon: PieChart, color: "text-orange-400", bg: "bg-orange-500/10", label: "Memperbarui equity",
@@ -111,10 +114,18 @@ export default function AuditLogEntry({ log }: AuditLogItemProps) {
 
 function renderPayload(action: string, payload: Record<string, unknown>): ReactNode {
   switch (true) {
-    case action.startsWith("vote."):
+    case action === "vote.cast":
       return payload.note ? <PayloadRow label="Catatan" value={payload.note as string} /> : null;
     case action === "contribution.created":
       return <PayloadRow label={payload.type as string} value={payload.description as string} />;
+    case action === "contribution.approved":
+      return payload.approve_count
+        ? <PayloadRow label="Disetujui" value={`${payload.approve_count} dari ${payload.total_voters} suara`} />
+        : null;
+    case action === "contribution.rejected":
+      return payload.reject_count
+        ? <PayloadRow label="Ditolak" value={`${payload.reject_count} dari ${payload.total_voters} suara`} />
+        : null;
     case action === "equity.recalculated":
       return <PayloadRow label="Total slices" value={Number(payload.total_slices).toLocaleString("id-ID")} />;
     case action === "equity.frozen":

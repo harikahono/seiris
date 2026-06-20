@@ -7,6 +7,7 @@ import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
 import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Skeleton from "@/components/ui/Skeleton";
 
 export default function ContributionDetailPage() {
   const { teamId, contributionId } = useParams<{ teamId: string; contributionId: string }>();
@@ -39,8 +40,13 @@ export default function ContributionDetailPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-3xl px-6 py-8">
-        <p className="text-gray-500">Memuat...</p>
+      <div className="mx-auto max-w-3xl px-6 py-8 space-y-6">
+        <Skeleton className="h-8 w-1/4" />
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-32 w-full" />
       </div>
     );
   }

@@ -3,11 +3,11 @@ import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import type { EquityData, Contribution } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
-import { Loader2 } from "lucide-react";
 import EquityPieCard from "@/components/ui/EquityPieCard";
 import ContributionTypeBar from "@/components/ui/ContributionTypeBar";
 import MemberEquityTable from "@/components/ui/MemberEquityTable";
 import ExportPdfButton from "@/components/ui/ExportPdfButton";
+import Skeleton from "@/components/ui/Skeleton";
 
 export default function EquityTab() {
   const { team } = useOutletContext<TeamContext>();
@@ -45,8 +45,14 @@ export default function EquityTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="size-5 animate-spin text-gray-500" />
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-4 w-1/4" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+        <Skeleton className="h-48 w-full" />
       </div>
     );
   }

@@ -6,7 +6,6 @@ import AuthPage from "@/pages/AuthPage";
 import DashboardLayout from "@/components/DashboardLayout";
 import DashboardPage from "@/pages/DashboardPage";
 import TeamDetailPage from "@/pages/teams/TeamDetailPage";
-import TeamOverviewTab from "@/components/teams/TeamOverviewTab";
 import TeamMembersTab from "@/components/teams/TeamMembersTab";
 import EquityTab from "@/components/teams/EquityTab";
 import RevenueTab from "@/components/teams/RevenueTab";
@@ -28,8 +27,7 @@ export default function App() {
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/teams/:teamId" element={<TeamDetailPage />}>
-                <Route index element={<Navigate to="overview" replace />} />
-                <Route path="overview" element={<TeamOverviewTab />} />
+                <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="equity" element={<EquityTab />} />
                 <Route path="members" element={<TeamMembersTab />} />
                 <Route path="contributions" element={<ContributionsTab />} />

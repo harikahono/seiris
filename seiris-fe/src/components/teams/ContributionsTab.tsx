@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import ContributionCard from "@/components/ui/ContributionCard";
 import ContributionForm from "@/components/ui/ContributionForm";
 import { Plus, Loader2 } from "lucide-react";
+import Skeleton from "@/components/ui/Skeleton";
 
 type Filter = "all" | ContributionStatus;
 
@@ -56,7 +57,7 @@ export default function ContributionsTab() {
             <button
               key={f.key}
               type="button"
-              onClick={() => { setFilter(f.key); setPage(1); setContributions([]); }}
+                  onClick={() => { setFilter(f.key); setPage(1); }}
               className={cn(
                 "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
                 filter === f.key
@@ -79,18 +80,29 @@ export default function ContributionsTab() {
       </div>
 
       <div className="space-y-3">
-        {filtered.map((c) => (
-          <ContributionCard key={c.id} contribution={c} teamId={teamId} />
-        ))}
-        {!loading && filtered.length === 0 && (
-          <p className="py-8 text-center text-sm text-gray-500">
-            {filter === "all" ? "Belum ada kontribusi. Buat kontribusi pertama!" : "Tidak ada kontribusi dengan status ini."}
-          </p>
-        )}
-        {loading && (
-          <div className="flex justify-center py-8">
-            <Loader2 className="size-5 animate-spin text-gray-500" />
+        {loading && page === 1 ? (
+          // Initial load skeleton
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))}
           </div>
+        ) : (
+          <>
+            {filtered.map((c) => (
+              <ContributionCard key={c.id} contribution={c} teamId={teamId} />
+            ))}
+            {!loading && filtered.length === 0 && (
+              <p className="py-8 text-center text-sm text-gray-500">
+                {filter === "all" ? "Belum ada kontribusi. Buat kontribusi pertama!" : "Tidak ada kontribusi dengan status ini."}
+              </p>
+            )}
+            {loading && (
+              <div className="flex justify-center py-8">
+                <Loader2 className="size-5 animate-spin text-gray-500" />
+              </div>
+            )}
+          </>
         )}
       </div>
 

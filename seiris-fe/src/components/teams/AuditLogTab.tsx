@@ -6,6 +6,7 @@ import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
 import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings } from "lucide-react";
 import AuditLogEntry from "@/components/ui/AuditLogEntry";
+import Skeleton from "@/components/ui/Skeleton";
 
 interface FilterDef {
   key: string;
@@ -96,7 +97,14 @@ export default function AuditLogTab() {
         {logs.map((log) => (
           <AuditLogEntry key={log.id} log={log} />
         ))}
-        {loading && (
+        {loading && page === 1 && (
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
+        )}
+        {loading && page > 1 && (
           <div className="flex justify-center py-8">
             <Loader2 className="size-5 animate-spin text-gray-500" />
           </div>
