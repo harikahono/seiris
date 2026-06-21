@@ -13,6 +13,7 @@ class TeamMemberResource extends JsonResource
     {
         return [
             'id'         => $this->id,
+            'team_id'    => $this->team_id,
             'role'       => $this->role,
             'fmr'        => $this->fmr,
             'status'     => $this->status,

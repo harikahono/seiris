@@ -57,7 +57,7 @@ class Contribution extends Model
         return $this->status === 'APPROVED';
     }
 
-    // total_slices immutable after creation
+    // total_slices immutable after creation + block delete (append-only)
     protected static function booted(): void
     {
         static::updating(function (Contribution $contribution) {
@@ -65,5 +65,7 @@ class Contribution extends Model
                 $contribution->total_slices = $contribution->getOriginal('total_slices');
             }
         });
+
+        static::deleting(fn() => false);
     }
 }

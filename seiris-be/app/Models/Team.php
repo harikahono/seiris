@@ -53,11 +53,6 @@ class Team extends Model
         return $this->hasMany(EquitySnapshot::class)->orderByDesc('created_at');
     }
 
-    public function latestSnapshot(): HasMany
-    {
-        return $this->hasMany(EquitySnapshot::class)->latest()->limit(1);
-    }
-
     public function revenues(): HasMany
     {
         return $this->hasMany(Revenue::class);

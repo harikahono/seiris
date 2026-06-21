@@ -4,17 +4,20 @@
 // ============================================================
 namespace App\Http\Controllers\Api;
 
+use App\Events\EquityUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contribution\StoreVoteRequest;
 use App\Http\Resources\ContributionResource;
 use App\Models\Contribution;
 use App\Models\ContributionApproval;
+use App\Models\EquitySnapshot;
 use App\Models\TeamMember;
 use App\Services\AuditLogService;
 use App\Services\SlicingPieService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ApprovalController extends Controller
 {
@@ -85,7 +88,7 @@ class ApprovalController extends Controller
             AuditLogService::logFromRequest(
                 request:     $request,
                 teamId:      $team->id,
-                action:      'contribution.voted',
+                action:      'vote.cast',
                 subjectType: Contribution::class,
                 subjectId:   $contribution->id,
                 payload:     ['vote' => $request->vote, 'voter_id' => $voter->id],
@@ -96,6 +99,21 @@ class ApprovalController extends Controller
 
             return $contribution->fresh()->load(['member.user', 'approvals.member.user']);
         });
+
+        // Broadcast equity update SETELAH transaksi commit — data udah aman di DB
+        if ($result->status === 'APPROVED') {
+            try {
+                $snapshot = EquitySnapshot::where('team_id', $team->id)
+                    ->latest()
+                    ->first();
+
+                if ($snapshot) {
+                    broadcast(new EquityUpdated($team, $snapshot))->toOthers();
+                }
+            } catch (\Throwable $e) {
+                Log::warning('Broadcast equity update gagal — data tetap aman: ' . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'message' => 'Vote berhasil dicatat.',

@@ -25,7 +25,7 @@ class ContributionController extends Controller
      */
     public function index(Request $request, Team $team): JsonResponse
     {
-        $this->authorizeMember($request, $team);
+        // authorizeMember di-handle middleware EnsureTeamMember
 
         $contributions = Contribution::where('team_id', $team->id)
             ->with(['member.user'])
@@ -48,7 +48,7 @@ class ContributionController extends Controller
      */
     public function store(StoreContributionRequest $request, Team $team): JsonResponse
     {
-        $this->authorizeMember($request, $team);
+        // authorizeMember di-handle middleware EnsureTeamMember
 
         if ($team->is_frozen) {
             return response()->json([
@@ -56,11 +56,8 @@ class ContributionController extends Controller
             ], 403);
         }
 
-        // Ambil team_member record user ini di tim ini
-        $member = TeamMember::where('team_id', $team->id)
-            ->where('user_id', $request->user()->id)
-            ->where('status', 'active')
-            ->first();
+        // TeamMember sudah di-attach oleh middleware EnsureTeamMember
+        $member = $request->teamMember;
 
         // Bug 1 fix — FMR = 0 tidak boleh log TIME/IDEA/NETWORK
         if (in_array($request->type, ['TIME', 'IDEA', 'NETWORK']) && $member->fmr === 0) {
@@ -136,7 +133,7 @@ class ContributionController extends Controller
      */
     public function show(Request $request, Team $team, Contribution $contribution): JsonResponse
     {
-        $this->authorizeMember($request, $team);
+        // authorizeMember di-handle middleware EnsureTeamMember
 
         if ($contribution->team_id !== $team->id) {
             return response()->json(['message' => 'Kontribusi tidak ditemukan.'], 404);
@@ -168,15 +165,4 @@ class ContributionController extends Controller
         };
     }
 
-    private function authorizeMember(Request $request, Team $team): void
-    {
-        $isMember = $team->members()
-            ->where('user_id', $request->user()->id)
-            ->where('status', 'active')
-            ->exists();
-
-        if (!$isMember) {
-            abort(403, 'Kamu bukan anggota tim ini.');
-        }
-    }
 }

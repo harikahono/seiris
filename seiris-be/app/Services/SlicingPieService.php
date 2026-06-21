@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Team;
 use App\Models\EquitySnapshot;
-use App\Events\EquityUpdated;
 use Illuminate\Support\Facades\DB;
 
 class SlicingPieService
@@ -50,24 +49,33 @@ class SlicingPieService
             }
         }
 
-        // Persist snapshot inside a transaction dengan explicit lock
-        $snapshot = DB::transaction(function () use ($team, $triggeredByContributionId, $totalSlicesTeam, $equityMap) {
-            // Lock table equity_snapshots untuk mencegah concurrent writes
-            DB::table('equity_snapshots')
-                ->where('team_id', $team->id)
-                ->lockForUpdate();
-                
-            return EquitySnapshot::create([
-                'team_id'                    => $team->id,
-                'triggered_by_contribution'  => $triggeredByContributionId,
-                'total_slices'               => $totalSlicesTeam,
-                'equity_map'                 => $equityMap,
-                'is_frozen'                  => false,
-            ]);
-        });
+        // Persist snapshot — caller sudah handle outer transaction dengan lockForUpdate di teams table
+        // Lock equity_snapshots untuk cegah concurrent writes antar sesama recalculate()
+        DB::table('equity_snapshots')
+            ->where('team_id', $team->id)
+            ->lockForUpdate()
+            ->get();
 
-        // Broadcast realtime update to team channel
-        broadcast(new EquityUpdated($team, $snapshot))->toOthers();
+        $snapshot = EquitySnapshot::create([
+            'team_id'                    => $team->id,
+            'triggered_by_contribution'  => $triggeredByContributionId,
+            'total_slices'               => $totalSlicesTeam,
+            'equity_map'                 => $equityMap,
+            'is_frozen'                  => false,
+        ]);
+
+        // Log equity recalculation
+        AuditLogService::log(
+            teamId:      $team->id,
+            action:      'equity.recalculated',
+            actorId:     null, // system-triggered
+            subjectType: 'equity_snapshot',
+            subjectId:   $snapshot->id,
+            payload:     [
+                'total_slices'  => $totalSlicesTeam,
+                'members_count' => count($equityMap),
+            ],
+        );
 
         return $snapshot;
     }

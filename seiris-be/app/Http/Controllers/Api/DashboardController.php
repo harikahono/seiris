@@ -5,20 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Team;
 use App\Models\Contribution;
-use App\Services\SlicingPieService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    protected $slicingPieService;
-
-    public function __construct(SlicingPieService $slicingPieService)
-    {
-        $this->slicingPieService = $slicingPieService;
-    }
-
     /**
      * Get dashboard summary for the authenticated user.
      * Includes: Profile summary, List of teams with equity %, Pending approvals count.
@@ -45,35 +36,38 @@ class DashboardController extends Controller
 
                 if ($latestSnapshot) {
                     $totalSlices = $latestSnapshot->total_slices;
-                    // Cari slices user di detail snapshot
-                    $memberDetail = collect($latestSnapshot->member_details)->firstWhere('user_id', $user->id);
-                    $mySlices = $memberDetail ? ($memberDetail['total_slices'] ?? 0) : 0;
-                    
-                    if ($totalSlices > 0) {
-                        $myEquityPercentage = round(($mySlices / $totalSlices) * 100, 2);
-                    }
+                    // Cari slices user via member_id (equity_map key = TeamMember ID)
+                    $myMember = $team->members->firstWhere('user_id', $user->id);
+                    $myMemberId = $myMember?->id;
+                    $mySlices = ($myMemberId && isset($latestSnapshot->equity_map[$myMemberId]))
+                        ? $latestSnapshot->equity_map[$myMemberId]['slices']
+                        : 0;
+                    $myEquityPercentage = $totalSlices > 0
+                        ? round(($mySlices / $totalSlices) * 100, 2)
+                        : 0;
                 } else {
-                    // Fallback: Hitung manual jika belum ada snapshot (tim baru)
-                    // Ini bisa berat jika tim besar, tapi aman untuk tim kecil
-                    $calculation = $this->slicingPieService->calculateEquity($team->id);
-                    $mySlices = $calculation['members'][$user->id]['total_slices'] ?? 0;
-                    $totalSlices = $calculation['total_slices'];
-                    if ($totalSlices > 0) {
-                        $myEquityPercentage = round(($mySlices / $totalSlices) * 100, 2);
-                    }
+                    // Tim baru, belum ada snapshot — semua 0
+                    $mySlices = 0;
+                    $totalSlices = 0;
+                    $myEquityPercentage = 0;
                 }
 
-                // Hitung kontribusi pending approval di tim ini milik user
-                $pendingCount = Contribution::where('team_id', $team->id)
-                    ->where('created_by', $user->id)
-                    ->where('status', 'PENDING')
-                    ->count();
+                // Hitung kontribusi pending approval milik user di tim ini
+                $myMember = $team->members->firstWhere('user_id', $user->id);
+                $myMemberId = $myMember?->id;
+                $pendingCount = $myMemberId
+                    ? Contribution::where('team_id', $team->id)
+                        ->where('member_id', $myMemberId)
+                        ->where('status', 'PENDING')
+                        ->count()
+                    : 0;
 
                 return [
                     'id' => $team->id,
                     'name' => $team->name,
                     'description' => $team->description,
-                    'role' => $team->members()->where('user_id', $user->id)->first()?->role ?? 'member',
+                    'role' => $myMember?->role ?? 'member',
+                    'status' => $myMember?->status ?? 'active',
                     'is_owner' => $team->owner_id === $user->id,
                     'my_equity_percentage' => $myEquityPercentage,
                     'my_slices' => $mySlices,

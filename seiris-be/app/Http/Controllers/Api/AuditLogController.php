@@ -19,10 +19,15 @@ class AuditLogController extends Controller
      */
     public function index(Request $request, Team $team): JsonResponse
     {
-        $this->authorizeMember($request, $team);
+        // authorizeMember di-handle middleware EnsureTeamMember
 
-        $logs = AuditLog::where('team_id', $team->id)
-            ->with('actor')
+        $query = AuditLog::where('team_id', $team->id);
+
+        if ($request->filled('filter')) {
+            $query->where('action', 'like', $request->filter . '.%');
+        }
+
+        $logs = $query->with('actor')
             ->orderByDesc('created_at')
             ->paginate(20);
 
@@ -48,15 +53,4 @@ class AuditLogController extends Controller
         ]);
     }
 
-    private function authorizeMember(Request $request, Team $team): void
-    {
-        $isMember = $team->members()
-            ->where('user_id', $request->user()->id)
-            ->where('status', 'active')
-            ->exists();
-
-        if (!$isMember) {
-            abort(403, 'Kamu bukan anggota tim ini.');
-        }
-    }
 }
