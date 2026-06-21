@@ -1,14 +1,16 @@
 import { useState, type FormEvent } from "react";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Loader2, LogIn } from "lucide-react";
 
 interface JoinTeamCardProps {
   onJoined: () => void;
+  compact?: boolean;
 }
 
-export default function JoinTeamCard({ onJoined }: JoinTeamCardProps) {
+export default function JoinTeamCard({ onJoined, compact }: JoinTeamCardProps) {
   const [inviteCode, setInviteCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -42,14 +44,21 @@ export default function JoinTeamCard({ onJoined }: JoinTeamCardProps) {
   };
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-      <div className="mb-3 flex items-center gap-2">
-        <LogIn className="size-4 text-accent" />
-        <h3 className="text-sm font-semibold text-white">Gabung Tim</h3>
+    <div className={cn(
+      "rounded-lg border",
+      compact
+        ? "border-gray-800/60 bg-gray-800/30 p-3"
+        : "border-gray-800 bg-gray-900 p-5"
+    )}>
+      <div className={cn("flex items-center gap-2", compact ? "mb-2" : "mb-3")}>
+        <LogIn className={cn("text-accent", compact ? "size-3.5" : "size-4")} />
+        <h3 className={cn("font-semibold text-white", compact ? "text-xs" : "text-sm")}>Gabung Tim</h3>
       </div>
-      <p className="mb-3 text-xs text-gray-500">
-        Masukkan kode undangan 8 karakter dari owner tim.
-      </p>
+      {!compact && (
+        <p className="mb-3 text-xs text-gray-500">
+          Masukkan kode undangan 8 karakter dari owner tim.
+        </p>
+      )}
       <form onSubmit={handleSubmit} noValidate className="flex gap-2">
         <input
           type="text"
@@ -71,7 +80,7 @@ export default function JoinTeamCard({ onJoined }: JoinTeamCardProps) {
           )}
         </button>
       </form>
-      {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+      {error && <p className={cn("text-xs text-red-500", compact ? "mt-1" : "mt-2")}>{error}</p>}
     </div>
   );
 }

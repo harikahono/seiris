@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTeamContext } from "@/contexts/TeamContext";
 import { cn } from "@/lib/utils";
 import CreateTeamModal from "@/components/ui/CreateTeamModal";
+
 import Skeleton from "@/components/ui/Skeleton";
 import {
   LayoutDashboard,
@@ -30,7 +31,6 @@ interface FeatureItem {
 }
 
 const features: FeatureItem[] = [
-  { key: "equity", label: "Equity", icon: PieChart, path: "equity" },
   { key: "members", label: "Anggota", icon: Users, path: "members" },
   { key: "contributions", label: "Kontribusi", icon: ListChecks, path: "contributions" },
   { key: "revenue", label: "Revenue", icon: TrendingUp, path: "revenue" },
@@ -356,7 +356,13 @@ export default function DashboardLayout() {
       <CreateTeamModal
         open={showCreateTeamModal}
         onClose={() => setShowCreateTeamModal(false)}
-        onCreated={refreshTeams}
+        onCreated={(teamId) => {
+          if (teamId) {
+            setCurrentTeam(teamId);
+            navigate('/dashboard');
+          }
+          refreshTeams();
+        }}
       />
     </div>
   );

@@ -3,15 +3,13 @@ import { Link } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamContext } from "@/contexts/TeamContext";
-import type { DashboardData, Team, EquityData, Contribution } from "@/types";
-import CreateTeamModal from "@/components/ui/CreateTeamModal";
-import JoinTeamCard from "@/components/ui/JoinTeamCard";
+import type { Team, EquityData, Contribution } from "@/types";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import Skeleton from "@/components/ui/Skeleton";
 import {
-  Plus, Users, Copy, Check, ChevronRight,
+  Copy, Check, ChevronRight,
   TrendingUp, FileText, UserCheck, PieChart,
 } from "lucide-react";
 
@@ -276,163 +274,47 @@ function TeamDashboardSkeleton() {
   );
 }
 
-// ── TeamGrid Skeleton ──────────────────────────────────────────
-function TeamGridSkeleton() {
+// ── Empty State (no teams at all) ──────────────────────────────
+function EmptyState() {
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-6 py-8">
-      {/* Summary cards */}
-      <div className="flex flex-wrap gap-4">
-        {[...Array(2)].map((_, i) => (
-          <Skeleton key={i} className="flex-1 min-w-[200px] h-24" />
-        ))}
-      </div>
-      {/* Team cards grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-52 w-full" />
-        ))}
-      </div>
+    <div className="mx-auto max-w-6xl px-6 py-16 text-center">
+      <p className="text-lg text-gray-500">Belum punya tim.</p>
+      <p className="mt-2 text-sm text-gray-600">
+        Buat tim baru dari tombol{" "}
+        <span className="text-accent">Gabung / Buat Tim</span> di sidebar.
+      </p>
     </div>
-  );
-}
-
-// ── Team Grid (when NO team is selected) ──────────────────────
-function TeamGrid({ data, onRefresh }: { data: DashboardData; onRefresh: () => void }) {
-  const { setCurrentTeam, refreshTeams } = useTeamContext();
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
-  return (
-    <>
-      <section className="mb-8">
-        <h2 className="mb-4 text-lg font-semibold">Ringkasan</h2>
-        <div className="flex flex-wrap gap-4">
-          <div className="rounded-lg border border-gray-800 bg-gray-900 px-5 py-3">
-            <p className="text-2xl font-bold text-accent">{data.summary.total_teams}</p>
-            <p className="text-xs text-gray-500">Total Tim</p>
-          </div>
-          <div className="rounded-lg border border-gray-800 bg-gray-900 px-5 py-3">
-            <p className="text-2xl font-bold text-yellow-400">{data.summary.total_pending_to_review}</p>
-            <p className="text-xs text-gray-500">Pending Review</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="mb-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Tim Saya</h2>
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-accent-hover"
-          >
-            <Plus className="size-4" />
-            Buat Tim
-          </button>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.teams.map((team) => (
-            <Link
-              key={team.id}
-              to={`/teams/${team.id}`}
-              onClick={() => setCurrentTeam(team.id)}
-              className="block rounded-lg border border-gray-800 bg-gray-900 p-4 transition hover:border-accent"
-            >
-              <div className="mb-2 flex items-center justify-between">
-                <h3 className="font-semibold">{team.name}</h3>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] uppercase ${
-                    team.role === "owner"
-                      ? "bg-accent/20 text-accent"
-                      : "bg-gray-800 text-gray-400"
-                  }`}
-                >
-                  {team.role}
-                </span>
-              </div>
-              <div className="space-y-1 text-xs text-gray-500">
-                <p>
-                  Equity: <span className="text-gray-300">{team.my_equity_percentage}%</span>
-                </p>
-                <p>
-                  Slices: <span className="text-gray-300">{team.my_slices}</span>
-                </p>
-                <p>
-                  Anggota: <span className="text-gray-300">{team.total_members}</span>
-                </p>
-                {team.pending_approvals_count > 0 && (
-                  <p className="text-yellow-400">{team.pending_approvals_count} pending approval</p>
-                )}
-              </div>
-            </Link>
-          ))}
-          {data.teams.length === 0 && (
-            <p className="col-span-full text-gray-600">
-              Belum bergabung ke tim mana pun. Buat tim baru atau gunakan kode undangan.
-            </p>
-          )}
-        </div>
-      </section>
-
-      {data.teams.length === 0 && (
-        <section>
-          <div className="mb-3 flex items-center gap-2">
-            <Users className="size-4 text-accent" />
-            <h2 className="text-sm font-semibold text-gray-300">Gabung ke Tim</h2>
-          </div>
-          <JoinTeamCard onJoined={() => { onRefresh(); refreshTeams(); }} />
-        </section>
-      )}
-
-      <CreateTeamModal
-        open={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onCreated={() => { onRefresh(); refreshTeams(); }}
-      />
-    </>
   );
 }
 
 // ── Main Dashboard Page ──────────────────────────────────────
 export default function DashboardPage() {
-  const { currentTeamId, teams, isLoading } = useTeamContext();
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { currentTeamId, teams, isLoading, setCurrentTeam } = useTeamContext();
 
-  const fetchDashboard = useCallback(() => {
-    setLoading(true);
-    api
-      .get<{ message: string; data: DashboardData }>("/my-dashboard")
-      .then((res) => setData(res.data.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
+  // Auto-select first team if currentTeamId is missing or invalid
   useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+    if (isLoading) return;
+    if (teams.length === 0) return;
+    if (currentTeamId && teams.some((t) => t.id === currentTeamId)) return;
 
-  // Mode 1: Team selected → show enhanced overview
+    setCurrentTeam(teams[0].id);
+  }, [isLoading, teams, currentTeamId, setCurrentTeam]);
+
+  // Mode 1: loading
+  if (isLoading) {
+    return <TeamDashboardSkeleton />;
+  }
+
+  // Mode 2: team selected → show overview
   if (currentTeamId && teams.some((t) => t.id === currentTeamId)) {
     return <TeamDashboard teamId={currentTeamId} />;
   }
 
-  // Mode 2: No team → show grid
-  if (loading || isLoading) {
-    return <TeamGridSkeleton />;
+  // Mode 3: no teams at all
+  if (teams.length === 0) {
+    return <EmptyState />;
   }
 
-  if (!data) {
-    return (
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <p className="text-red-400">Gagal memuat data dashboard.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <TeamGrid data={data} onRefresh={fetchDashboard} />
-    </div>
-  );
+  // Safe guard: has teams but still loading auto-select
+  return <TeamDashboardSkeleton />;
 }

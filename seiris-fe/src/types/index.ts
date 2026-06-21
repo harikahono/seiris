@@ -72,6 +72,16 @@ export interface JoinTeamPayload {
   invite_code: string;
 }
 
+export interface FmrProposal {
+  id: string;
+  proposed_fmr: number;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  member: TeamMember;
+  reviewer: { id: string; name: string } | null;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
 export interface UpdateFmrPayload {
   fmr: number;
 }

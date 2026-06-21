@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Team;
 use App\Models\EquitySnapshot;
-use App\Events\EquityUpdated;
 use Illuminate\Support\Facades\DB;
 
 class SlicingPieService
@@ -64,9 +63,6 @@ class SlicingPieService
             'equity_map'                 => $equityMap,
             'is_frozen'                  => false,
         ]);
-
-        // Broadcast realtime update to team channel
-        broadcast(new EquityUpdated($team, $snapshot))->toOthers();
 
         // Log equity recalculation
         AuditLogService::log(

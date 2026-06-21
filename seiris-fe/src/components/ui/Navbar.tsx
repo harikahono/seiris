@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { CustomEase } from "gsap/CustomEase";
 import logo from "@/assets/logo.png";
+import { useAuth } from "@/contexts/AuthContext";
 import "@/styles/navbar.css";
 
 if (typeof window !== "undefined") {
@@ -13,6 +14,7 @@ if (typeof window !== "undefined") {
 export function Navbar() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isLoading } = useAuth();
 
   useGSAP(() => {
     try {
@@ -89,10 +91,17 @@ export function Navbar() {
                   </a>
                 </li>
                 <li className="menu-list-item">
-                  <Link to="/login" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-                    <p className="nav-link-text">Login</p>
-                    <div className="nav-link-hover-bg"></div>
-                  </Link>
+                  {!isLoading && user ? (
+                    <Link to="/dashboard" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+                      <p className="nav-link-text">Dashboard</p>
+                      <div className="nav-link-hover-bg"></div>
+                    </Link>
+                  ) : (
+                    <Link to="/login" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+                      <p className="nav-link-text">Login</p>
+                      <div className="nav-link-hover-bg"></div>
+                    </Link>
+                  )}
                 </li>
                 <li className="menu-list-item">
                   <Link to="/register" className="nav-link cta-link" onClick={() => setIsMenuOpen(false)}>
