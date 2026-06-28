@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\ContributionController;
@@ -26,6 +28,9 @@ Route::prefix('auth')->group(function () {
 
 // ── Authenticated Routes ───────────────────────────────────────
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+
+    // Broadcasting auth (Pusher presence channel)
+    Route::post('broadcasting/auth', fn (Request $request) => Broadcast::auth($request));
 
     // Auth
     Route::post('auth/logout', [AuthController::class, 'logout']);
