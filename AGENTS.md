@@ -50,23 +50,38 @@ pnpm preview      # vite preview
 |--------|------|---------|
 | POST | `/api/auth/register` | Register |
 | POST | `/api/auth/login` | Login (returns token) |
-| GET | `/api/teams` | List user's teams |
+| POST | `/api/auth/logout` | Logout |
+| GET | `/api/auth/me` | Current user |
 | POST | `/api/teams` | Create team |
+| GET | `/api/teams` | List user's teams |
 | POST | `/api/teams/join` | Join via invite_code |
-| POST | `/api/teams/{team}/contributions` | Create claim (DRAFT->PENDING) |
+| GET | `/api/teams/{team}` | Show team detail |
+| PUT | `/api/teams/{team}` | Update team (owner only) |
+| PUT | `/api/teams/{team}/members/{member}/fmr` | Set member FMR (owner only) |
+| POST | `/api/teams/{team}/members/{member}/exit` | Exit member (owner only) |
+| POST | `/api/teams/{team}/freeze` | Freeze equity (owner only) |
+| GET | `/api/teams/{team}/contributions` | List contributions (paginated) |
+| POST | `/api/teams/{team}/contributions` | Create contribution (PENDING) |
+| GET | `/api/teams/{team}/contributions/{contribution}` | Single contribution detail |
 | POST | `/api/contributions/{contribution}/vote` | Vote APPROVE/REJECT |
+| GET | `/api/teams/{team}/revenues` | List revenues (paginated) |
+| POST | `/api/teams/{team}/revenues` | Create revenue (owner only) |
+| POST | `/api/revenues/{revenue}/distribute` | Distribute profit (owner only) |
+| POST | `/api/teams/{team}/fmr-proposals` | Propose FMR change |
+| GET | `/api/teams/{team}/fmr-proposals` | List FMR proposals |
+| POST | `/api/fmr-proposals/{proposal}/approve` | Approve FMR proposal (owner only) |
+| POST | `/api/fmr-proposals/{proposal}/reject` | Reject FMR proposal (owner only) |
 | GET | `/api/teams/{team}/equity` | Latest equity snapshot |
 | GET | `/api/teams/{team}/equity/history` | Paginated snapshot history |
 | GET | `/api/teams/{team}/equity/export` | PDF export (dompdf) |
-| POST | `/api/teams/{team}/freeze` | Freeze equity (owner only) |
-| POST | `/api/revenues/{revenue}/distribute` | Distribute profit |
-| GET | `/api/teams/{team}/audit-logs` | Immutable audit trail |
+| GET | `/api/teams/{team}/audit-logs` | Immutable audit trail (paginated) |
+| GET | `/api/my-dashboard` | Dashboard summary |
 | GET | `/api/ping` | Health check (public) |
 
 ## Core Business Logic
 
-### FSM Flow: DRAFT → PENDING → APPROVED/REJECTED
-- Contribution starts as PENDING (no DRAFT state in code, created directly as PENDING)
+### FSM Flow: PENDING → APPROVED/REJECTED
+- Contribution starts as PENDING directly (no DRAFT state)
 - Only **other** team members can vote (creator cannot vote own claim)
 - Threshold based on `team.approval_threshold` (50/75/100%)
 - **Tie-breaker**: team owner's casting vote wins; if owner is creator, falls back to longest-tenured active member
@@ -107,7 +122,8 @@ pnpm preview      # vite preview
 
 ## Routing
 - All API routes in `routes/api.php` (no web routes for auth/views)
-- `auth:sanctum` middleware — no additional tenant middleware; tenant isolation via `$team` route binding and manual `authorizeMember()` checks in controllers
+- `auth:sanctum` middleware — routes with `{team}` param get `team.member` middleware (`EnsureTeamMember`) that verifies active membership + attaches `TeamMember` to `$request->teamMember`
+- Owner-only actions use `Gate::authorize('update', $team)` via `TeamPolicy`
 
 ## Quirks & Constraints
 - PHP 8.2 required (composer.json: `^8.2`)
@@ -116,4 +132,4 @@ pnpm preview      # vite preview
 - Storage link needed for invoice uploads: `php artisan storage:link`
 - No dedicated tenant-scope global middleware — isolation relies on route model binding and manual checks
 - SEIRIS-specific config in `config/seiris.php` reads `MAX_STUDENT_FMR` env var
-- Frontend is landing-page only; main feature integration (claims/equity UI) is incomplete
+- Frontend has full feature pages (team detail, contributions, voting, revenue, audit), but real-time Pusher subscription is not yet wired on the client side
