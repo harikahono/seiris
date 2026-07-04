@@ -50,7 +50,7 @@ export function usePusher(
 
     pusherRef.current = pusher;
 
-    const channel = pusher.subscribe(`presence-team.${teamId}`);
+    const channel = pusher.subscribe(`team.${teamId}`);
 
     // Equity berubah → trigger refetch
     channel.bind("equity.updated", () => {
@@ -66,7 +66,7 @@ export function usePusher(
 
     return () => {
       channel.unbind_all();
-      pusher.unsubscribe(`presence-team.${teamId}`);
+      pusher.unsubscribe(`team.${teamId}`);
       pusher.disconnect();
       pusherRef.current = null;
     };

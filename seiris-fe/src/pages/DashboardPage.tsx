@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamContext } from "@/contexts/TeamContext";
+import { usePusher } from "@/hooks/usePusher";
 import type { Team, EquityData, Contribution } from "@/types";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,14 @@ function TeamDashboard({ teamId }: { teamId: string }) {
   }, [teamId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // ── Pusher: realtime equity update ──
+  usePusher(teamId, {
+    onEquityUpdated: () => {
+      fetchData();
+      toast("Ekuitas tim telah diperbarui!");
+    },
+  });
 
   const copyInviteCode = () => {
     if (!team) return;
