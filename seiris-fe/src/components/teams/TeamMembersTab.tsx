@@ -85,10 +85,14 @@ export default function TeamMembersTab() {
     try {
       await api.post(`/fmr-proposals/${proposal.id}/approve`);
       toast.success(`FMR ${proposal.member.user.name} disetujui`);
-      fetchProposals();
-      fetchTeam();
-    } catch {
-      toast.error("Gagal menyetujui proposal");
+      await fetchProposals();
+      await fetchTeam();
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Gagal menyetujui proposal");
+      }
     }
   };
 
@@ -96,9 +100,13 @@ export default function TeamMembersTab() {
     try {
       await api.post(`/fmr-proposals/${proposal.id}/reject`);
       toast.success(`Proposal FMR ${proposal.member.user.name} ditolak`);
-      fetchProposals();
-    } catch {
-      toast.error("Gagal menolak proposal");
+      await fetchProposals();
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Gagal menolak proposal");
+      }
     }
   };
 
