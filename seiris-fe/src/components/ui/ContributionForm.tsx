@@ -282,12 +282,11 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
                     {errors.actual_amount && <p className="mt-1 text-xs text-red-500">{errors.actual_amount}</p>}
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-300">Upload Invoice</label>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-300">Upload Invoice <span className="text-gray-500">(opsional)</span></label>
                     <input
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={(e) => setInvoiceFile(e.target.files?.[0] ?? null)}
-                      required
                       className={inputClass("invoice")}
                     />
                     {errors.invoice && <p className="mt-1 text-xs text-red-500">{errors.invoice}</p>}
