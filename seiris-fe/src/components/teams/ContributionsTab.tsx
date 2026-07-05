@@ -202,6 +202,7 @@ export default function ContributionsTab() {
             onCreated={() => {
               setPage(1);
               setContributions([]);
+              fetchContributions(); // ← fetch immediately after clear
             }}
           />
         </>

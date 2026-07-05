@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import Pusher from "pusher-js";
 
 interface PresenceUser {
@@ -8,12 +8,13 @@ interface PresenceUser {
   role: string;
 }
 
+type ConnectionState = "idle" | "connecting" | "connected" | "disconnected";
+
 /**
  * Subscribe to Pusher presence channel for a team.
  *
- * Pusher fires `equity.updated` → callbacks.onEquityUpdated
- * Gunakan callback untuk refetch data dari API (lebih reliable daripada
- * parsing raw payload dari Pusher yang formatnya beda sama API response).
+ * Handles React Strict Mode double-invoke by using connection state guards.
+ * Prevents rapid connect/disconnect cycles that corrupt WebSocket state.
  *
  * Usage:
  *   usePusher(teamId, {
@@ -27,18 +28,58 @@ export function usePusher(
     onMembersChange?: (members: PresenceUser[]) => void;
   } = {}
 ) {
+  const connectionStateRef = useRef<ConnectionState>("idle");
   const pusherRef = useRef<Pusher | null>(null);
+  const cleanupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cleanup = useCallback(() => {
+    // Clear any pending cleanup timeout
+    if (cleanupTimeoutRef.current) {
+      clearTimeout(cleanupTimeoutRef.current);
+      cleanupTimeoutRef.current = null;
+    }
+
+    // Debounce cleanup to prevent race conditions with React Strict Mode
+    cleanupTimeoutRef.current = setTimeout(() => {
+      if (pusherRef.current) {
+        try {
+          const pusher = pusherRef.current;
+          pusherRef.current = null;
+          connectionStateRef.current = "disconnected";
+          pusher.disconnect();
+        } catch (e) {
+          console.warn('[usePusher] Cleanup error:', e);
+        }
+      }
+    }, 100);
+  }, []);
 
   useEffect(() => {
+    // Guard: no teamId or token
     if (!teamId) return;
-
     const token = localStorage.getItem("token");
     if (!token) return;
 
+    // Guard: check env vars
     const appKey = import.meta.env.VITE_PUSHER_APP_KEY;
     const cluster = import.meta.env.VITE_PUSHER_CLUSTER;
-    if (!appKey || !cluster) return;
+    if (!appKey || !cluster) {
+      console.warn('[usePusher] Missing Pusher env vars');
+      return;
+    }
 
+    // Guard: already connecting or connected — prevent duplicate connections
+    if (
+      connectionStateRef.current === "connecting" ||
+      connectionStateRef.current === "connected"
+    ) {
+      console.log('[usePusher] Already connecting/connected, skipping');
+      return;
+    }
+
+    connectionStateRef.current = "connecting";
+
+    // Create Pusher instance
     const pusher = new Pusher(appKey, {
       cluster,
       channelAuthorization: {
@@ -50,25 +91,48 @@ export function usePusher(
 
     pusherRef.current = pusher;
 
+    // Subscribe to channel
     const channel = pusher.subscribe(`team.${teamId}`);
 
-    // Equity berubah → trigger refetch
+    // Handle subscription success
+    channel.bind("pusher:subscription_succeeded", () => {
+      connectionStateRef.current = "connected";
+      console.log('[usePusher] Connected to channel:', `team.${teamId}`);
+    });
+
+    // Handle connection error
+    pusher.connection.bind("error", (err: any) => {
+      console.error('[usePusher] Connection error:', err);
+      connectionStateRef.current = "disconnected";
+    });
+
+    // Handle connection closed
+    pusher.connection.bind("closed", () => {
+      console.log('[usePusher] Connection closed');
+      connectionStateRef.current = "disconnected";
+    });
+
+    // Bind equity.updated event
     channel.bind("equity.updated", () => {
+      console.log('[usePusher] Received equity.updated event');
       callbacks.onEquityUpdated?.();
     });
 
-    // (Optional) track online members
-    channel.bind("pusher:subscription_succeeded", (members: any) => {
-      const list: PresenceUser[] = [];
-      members.each((m: any) => list.push(m.info));
-      callbacks.onMembersChange?.(list);
+    // Bind members change (optional)
+    channel.bind("pusher:member_added", (member: any) => {
+      console.log('[usePusher] Member added:', member);
     });
 
+    channel.bind("pusher:member_removed", (member: any) => {
+      console.log('[usePusher] Member removed:', member);
+    });
+
+    // Cleanup on unmount
     return () => {
-      channel.unbind_all();
-      pusher.unsubscribe(`team.${teamId}`);
-      pusher.disconnect();
-      pusherRef.current = null;
+      // Only cleanup if this is the same pusher instance
+      if (pusherRef.current === pusher) {
+        cleanup();
+      }
     };
-  }, [teamId]);
+  }, [teamId, cleanup, callbacks]);
 }
