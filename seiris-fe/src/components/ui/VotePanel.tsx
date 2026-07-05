@@ -16,7 +16,6 @@ export default function VotePanel({ contribution, currentMemberId, onVoted }: Vo
   const [vote, setVote] = useState<"APPROVE" | "REJECT" | null>(null);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   if (contribution.status !== "PENDING") return null;
 
@@ -27,17 +26,15 @@ export default function VotePanel({ contribution, currentMemberId, onVoted }: Vo
   const handleVote = async () => {
     if (!vote) return;
     setLoading(true);
-    setError("");
     try {
       await api.post(`/contributions/${contribution.id}/vote`, { vote, note: note.trim() || undefined });
       toast.success(vote === "APPROVE" ? "Vote disetujui" : "Vote ditolak");
       onVoted();
     } catch (err) {
       if (isAxiosError(err) && err.response) {
-        const msg = err.response.data?.message;
-        setError(msg ?? "Gagal melakukan vote");
+        toast.error(err.response.data?.message ?? "Gagal melakukan vote");
       } else {
-        setError("Gagal melakukan vote");
+        toast.error("Gagal melakukan vote");
       }
     } finally {
       setLoading(false);
@@ -85,8 +82,6 @@ export default function VotePanel({ contribution, currentMemberId, onVoted }: Vo
         maxLength={300}
         className="mb-3 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
       />
-
-      {error && <p className="mb-2 text-xs text-red-500">{error}</p>}
 
       <button
         type="button"

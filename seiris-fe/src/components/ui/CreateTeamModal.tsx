@@ -98,9 +98,9 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
     } catch (err) {
       if (isAxiosError(err) && err.response?.status === 422) {
         const data = err.response.data as { errors?: Record<string, string[]> };
-        setJoinError(data.errors?.invite_code?.[0] ?? "Kode undangan tidak valid");
+        toast.error(data.errors?.invite_code?.[0] ?? "Kode undangan tidak valid");
       } else {
-        setJoinError("Gagal bergabung. Periksa kode undangan.");
+        toast.error("Gagal bergabung. Periksa kode undangan.");
       }
     } finally {
       setLoadingJoin(false);
