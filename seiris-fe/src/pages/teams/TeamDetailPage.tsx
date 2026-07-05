@@ -20,12 +20,11 @@ export default function TeamDetailPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [team, setTeam] = useState<Team | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
 
   const fetchTeam = useCallback(() => {
     if (!teamId) return;
-    setLoading(true);
     setError("");
     api
       .get<{ data: Team }>(`/teams/${teamId}`)
@@ -37,13 +36,13 @@ export default function TeamDetailPage() {
           setError("Gagal memuat data tim.");
         }
       })
-      .finally(() => setLoading(false));
+      .finally(() => setInitialLoading(false));
   }, [teamId]);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchTeam(); }, [fetchTeam]);
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="mx-auto max-w-4xl px-6 py-8 space-y-6">
         <Skeleton className="h-8 w-1/3" />
