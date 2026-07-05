@@ -33,12 +33,23 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Broadcasting auth (Pusher presence channel)
     Route::post('broadcasting/auth', function (Request $request) {
         $user = $request->user();
-        Log::info('[broadcasting/auth]', [
-            'channel' => $request->get('channel_name'),
+        $channel = $request->get('channel_name');
+        Log::info('[broadcasting/auth] REQUEST', [
+            'channel' => $channel,
             'user_id' => $user?->id,
             'user_name' => $user?->name,
         ]);
-        return Broadcast::auth($request);
+        try {
+            $response = Broadcast::auth($request);
+            Log::info('[broadcasting/auth] SUCCESS', ['channel' => $channel]);
+            return $response;
+        } catch (\Throwable $e) {
+            Log::warning('[broadcasting/auth] FAILED', [
+                'channel' => $channel,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
     });
 
     // Auth

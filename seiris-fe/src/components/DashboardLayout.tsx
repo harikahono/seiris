@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTeamContext } from "@/contexts/TeamContext";
 import { useRealtime } from "@/contexts/RealtimeContext";
 import { usePusher } from "@/hooks/usePusher";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import CreateTeamModal from "@/components/ui/CreateTeamModal";
 
@@ -65,6 +66,13 @@ export default function DashboardLayout() {
   // ── Pusher: realtime equity update across ALL pages ──
   usePusher(currentTeamId ?? undefined, {
     onEquityUpdated: useCallback(() => {
+      triggerRefresh();
+    }, [triggerRefresh]),
+    onContributionCreated: useCallback((data) => {
+      toast(`${data.member_name} membuat kontribusi ${data.type}: ${data.description}`);
+      triggerRefresh();
+    }, [triggerRefresh]),
+    onTeamUpdated: useCallback(() => {
       triggerRefresh();
     }, [triggerRefresh]),
   });

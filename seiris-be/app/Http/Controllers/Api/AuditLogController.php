@@ -29,7 +29,7 @@ class AuditLogController extends Controller
 
         $logs = $query->with('actor')
             ->orderByDesc('created_at')
-            ->paginate(20);
+            ->paginate(6);
 
         return response()->json([
             'data' => $logs->map(fn($log) => [

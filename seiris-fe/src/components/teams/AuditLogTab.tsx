@@ -6,6 +6,7 @@ import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
 import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings } from "lucide-react";
 import AuditLogEntry from "@/components/ui/AuditLogEntry";
+import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
 
 interface FilterDef {
@@ -46,7 +47,7 @@ export default function AuditLogTab() {
         { params }
       )
       .then((res) => {
-        setLogs((prev) => (page === 1 ? res.data.data : [...prev, ...res.data.data]));
+        setLogs(res.data.data);
         setLastPage(res.data.meta.last_page);
         setTotal(res.data.meta.total);
       })
@@ -111,15 +112,9 @@ export default function AuditLogTab() {
         )}
       </div>
 
-      {!loading && page < lastPage && (
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => setPage((p) => p + 1)}
-            className="text-sm text-accent hover:underline"
-          >
-            Muat lebih banyak
-          </button>
+      {!loading && (
+        <div className="flex justify-center">
+          <Pagination current={page} last={lastPage} onChange={setPage} />
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\TeamUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\JoinTeamRequest;
 use App\Http\Requests\Team\StoreTeamRequest;
@@ -175,6 +176,8 @@ class TeamController extends Controller
             return $member;
         });
 
+        broadcast(new TeamUpdated($team))->toOthers();
+
         return response()->json([
             'message' => 'Berhasil bergabung ke tim.',
             'data'    => new TeamMemberResource($member->load('user')),
@@ -210,6 +213,8 @@ class TeamController extends Controller
             payload:     ['old_fmr' => $oldFmr, 'new_fmr' => $request->fmr],
         );
 
+        broadcast(new TeamUpdated($team))->toOthers();
+
         return response()->json([
             'message' => 'FMR berhasil diperbarui.',
             'data'    => new TeamMemberResource($member->fresh()->load('user')),
@@ -242,6 +247,8 @@ class TeamController extends Controller
             subjectId:   $team->id,
             payload:     ['snapshot_id' => $snapshot->id],
         );
+
+        broadcast(new TeamUpdated($team))->toOthers();
 
         return response()->json([
             'message' => 'Equity tim berhasil di-freeze.',
@@ -307,6 +314,8 @@ class TeamController extends Controller
                 payload:     ['user_id' => $member->user_id],
             );
         });
+
+        broadcast(new TeamUpdated($team))->toOthers();
 
         return response()->json([
             'message' => 'Anggota berhasil dikeluarkan dari tim.',

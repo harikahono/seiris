@@ -11,6 +11,7 @@ import EquityPieCard from "@/components/ui/EquityPieCard";
 import ContributionTypeBar from "@/components/ui/ContributionTypeBar";
 import MemberEquityTable from "@/components/ui/MemberEquityTable";
 import ExportPdfButton from "@/components/ui/ExportPdfButton";
+import Pagination from "@/components/ui/Pagination";
 import { Plus, Loader2 } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 
@@ -63,7 +64,7 @@ export default function ContributionsTab() {
         { params: { page } }
       )
       .then((res) => {
-        setContributions((prev) => (page === 1 ? res.data.data : [...prev, ...res.data.data]));
+        setContributions(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
       .catch(console.error)
@@ -173,15 +174,9 @@ export default function ContributionsTab() {
               )}
             </div>
 
-            {!loading && page < lastPage && (
-              <div className="mt-4 text-center">
-                <button
-                  type="button"
-                  onClick={() => setPage((p) => p + 1)}
-                  className="text-sm text-accent hover:underline"
-                >
-                  Muat lebih banyak
-                </button>
+            {!loading && (
+              <div className="mt-4 flex justify-center">
+                <Pagination current={page} last={lastPage} onChange={setPage} />
               </div>
             )}
           </div>

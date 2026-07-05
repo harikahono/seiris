@@ -4,6 +4,7 @@
 // ============================================================
 namespace App\Http\Controllers\Api;
 
+use App\Events\TeamUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Revenue\StoreRevenueRequest;
 use App\Http\Resources\RevenueResource;
@@ -29,7 +30,7 @@ class RevenueController extends Controller
         $revenues = Revenue::where('team_id', $team->id)
             ->with(['recordedBy.user', 'distributions.member.user'])
             ->orderByDesc('revenue_date')
-            ->paginate(15);
+            ->paginate(6);
 
         return response()->json([
             'data' => RevenueResource::collection($revenues),
@@ -84,6 +85,8 @@ class RevenueController extends Controller
 
             return $revenue;
         });
+
+        broadcast(new TeamUpdated($team))->toOthers();
 
         return response()->json([
             'message' => 'Revenue berhasil dicatat.',
@@ -154,6 +157,8 @@ class RevenueController extends Controller
 
             return $distributions;
         });
+
+        broadcast(new TeamUpdated($team))->toOthers();
 
         return response()->json([
             'message' => 'Profit berhasil didistribusikan.',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\TeamUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FmrProposal\StoreFmrProposalRequest;
 use App\Http\Resources\FmrProposalResource;
@@ -66,6 +67,8 @@ class FmrProposalController extends Controller
             return $proposal;
         });
 
+        broadcast(new TeamUpdated($team))->toOthers();
+
         return response()->json([
             'message' => 'Proposal FMR berhasil diajukan. Menunggu persetujuan owner.',
             'data'    => new FmrProposalResource($proposal->load(['member.user'])),
@@ -93,7 +96,7 @@ class FmrProposalController extends Controller
             $query->where('member_id', $member->id);
         }
 
-        $proposals = $query->orderByDesc('created_at')->paginate(20);
+        $proposals = $query->orderByDesc('created_at')->paginate(6);
 
         return response()->json([
             'data' => FmrProposalResource::collection($proposals),
@@ -160,6 +163,8 @@ class FmrProposalController extends Controller
             return $locked->fresh()->load(['member.user', 'reviewer']);
         });
 
+        broadcast(new TeamUpdated($team))->toOthers();
+
         return response()->json([
             'message' => 'Proposal FMR disetujui. FMR anggota berhasil diperbarui.',
             'data'    => new FmrProposalResource($result),
@@ -200,6 +205,8 @@ class FmrProposalController extends Controller
                 ],
             );
         });
+
+        broadcast(new TeamUpdated($team))->toOthers();
 
         return response()->json([
             'message' => 'Proposal FMR ditolak.',

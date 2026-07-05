@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { Revenue } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { Loader2, Plus } from "lucide-react";
 import RevenueCard from "@/components/ui/RevenueCard";
 import CreateRevenueForm from "@/components/ui/CreateRevenueForm";
+import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
 
 export default function RevenueTab() {
   const { team, isOwner } = useOutletContext<TeamContext>();
   const teamId = team.id;
+  const { refreshVersion } = useRealtime();
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -25,7 +28,7 @@ export default function RevenueTab() {
         { params: { page } }
       )
       .then((res) => {
-        setRevenues((prev) => (page === 1 ? res.data.data : [...prev, ...res.data.data]));
+        setRevenues(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
       .catch(console.error)
@@ -34,7 +37,7 @@ export default function RevenueTab() {
 
   useEffect(() => {
     fetchRevenues();
-  }, [fetchRevenues]);
+  }, [fetchRevenues, refreshVersion]);
 
   const totalAmount = revenues.reduce((s, r) => s + r.amount, 0);
 
@@ -87,15 +90,9 @@ export default function RevenueTab() {
         )}
       </div>
 
-      {!loading && page < lastPage && (
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => setPage((p) => p + 1)}
-            className="text-sm text-accent hover:underline"
-          >
-            Muat lebih banyak
-          </button>
+      {!loading && (
+        <div className="flex justify-center">
+          <Pagination current={page} last={lastPage} onChange={setPage} />
         </div>
       )}
 

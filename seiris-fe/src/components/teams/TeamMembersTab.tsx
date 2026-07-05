@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { TeamMember, FmrProposal } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ export default function TeamMembersTab() {
   const [loadingProposals, setLoadingProposals] = useState(false);
   const [proposalsOpen, setProposalsOpen] = useState(true);
 
+  const { refreshVersion } = useRealtime();
   const isOwner = team.owner.id === currentUserId;
   const activeMembers = team.members.filter((m) => m.status === "active");
   const currentMember = activeMembers.find((m) => m.user.id === currentUserId);
@@ -43,7 +45,12 @@ export default function TeamMembersTab() {
 
   useEffect(() => {
     fetchProposals();
-  }, [fetchProposals]);
+  }, [fetchProposals, refreshVersion]);
+
+  // Re-fetch team data when realtime event arrives
+  useEffect(() => {
+    if (refreshVersion > 0) fetchTeam();
+  }, [refreshVersion, fetchTeam]);
 
   // ── Submit FMR Proposal (non-owner) ──
   const handleProposeFmr = async () => {

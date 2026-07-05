@@ -8,6 +8,15 @@ interface PresenceUser {
   role: string;
 }
 
+interface ContributionCreatedData {
+  id: string;
+  type: string;
+  description: string;
+  value: number;
+  member_name: string;
+  status: string;
+}
+
 /**
  * Subscribe to Pusher presence channel for a team.
  *
@@ -28,6 +37,8 @@ export function usePusher(
   teamId: string | undefined,
   callbacks: {
     onEquityUpdated?: () => void;
+    onContributionCreated?: (data: ContributionCreatedData) => void;
+    onTeamUpdated?: () => void;
     onMembersChange?: (members: PresenceUser[]) => void;
   } = {}
 ) {
@@ -130,6 +141,18 @@ export function usePusher(
     channel.bind("equity.updated", () => {
       console.log("[usePusher] Received equity.updated event!");
       callbacksRef.current.onEquityUpdated?.();
+    });
+
+    // Bind contribution.created event
+    channel.bind("contribution.created", (data: ContributionCreatedData) => {
+      console.log("[usePusher] Received contribution.created event:", data);
+      callbacksRef.current.onContributionCreated?.(data);
+    });
+
+    // Bind team.updated event (revenue, member, FMR, freeze, etc)
+    channel.bind("team.updated", () => {
+      console.log("[usePusher] Received team.updated event");
+      callbacksRef.current.onTeamUpdated?.();
     });
 
     // Cleanup on unmount - IMMEDIATE, no debounce
