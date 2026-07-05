@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
-import { toast } from "sonner";
 import api from "@/api/axios";
-import { usePusher } from "@/hooks/usePusher";
 import type { Contribution, ContributionStatus, EquityData } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -69,14 +67,6 @@ export default function ContributionsTab() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [teamId, page]);
-
-  // ── Pusher: realtime equity update ──
-  usePusher(teamId, {
-    onEquityUpdated: () => {
-      fetchEquity();
-      toast("Ekuitas tim telah diperbarui!");
-    },
-  });
 
   useEffect(() => {
     fetchEquity();
