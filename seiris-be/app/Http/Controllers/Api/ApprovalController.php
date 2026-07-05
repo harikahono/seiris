@@ -11,6 +11,7 @@ use App\Http\Resources\ContributionResource;
 use App\Models\Contribution;
 use App\Models\ContributionApproval;
 use App\Models\EquitySnapshot;
+use App\Models\Revenue;
 use App\Models\TeamMember;
 use App\Services\AuditLogService;
 use App\Services\SlicingPieService;
@@ -109,7 +110,25 @@ class ApprovalController extends Controller
 
                 if ($snapshot) {
                     broadcast(new EquityUpdated($team, $snapshot))->toOthers();
-                }
+    /**
+     * Auto-create Revenue record jika kontribusi type REVENUE disetujui.
+     */
+    private function autoCreateRevenue(Contribution $contribution): void
+    {
+        if ($contribution->type !== 'REVENUE') return;
+
+        Revenue::create([
+            'team_id'              => $contribution->team_id,
+            'recorded_by'          => $contribution->member_id,
+            'description'          => $contribution->description,
+            'amount'               => $contribution->actual_amount ?? 0,
+            'distributable_amount' => $contribution->value,
+            'proof_path'           => $contribution->invoice_path,
+            'revenue_date'         => $contribution->contribution_date,
+            'is_distributed'       => false,
+        ]);
+    }
+}
             } catch (\Throwable $e) {
                 Log::warning('[ApprovalController] Broadcast failed: ' . $e->getMessage());
             }
@@ -149,6 +168,7 @@ class ApprovalController extends Controller
             // Hanya ada 1 anggota di tim — auto approve
             $contribution->update(['status' => 'APPROVED']);
             $this->slicingPie->recalculate($team, $contribution->id);
+            $this->autoCreateRevenue($contribution);
             return;
         }
 
@@ -175,6 +195,9 @@ class ApprovalController extends Controller
 
             // Trigger SlicingPie recalculation
             $this->slicingPie->recalculate($team, $contribution->id);
+
+            // Auto-create Revenue record jika type REVENUE
+            $this->autoCreateRevenue($contribution);
 
         // Cek kondisi REJECTED
         } elseif ($rejectPct > (100 - $threshold)) {
@@ -265,6 +288,7 @@ class ApprovalController extends Controller
             // Jika approved, trigger recalculation dengan lock
             if ($finalStatus === 'APPROVED') {
                 $this->slicingPie->recalculate($team, $contribution->id);
+                $this->autoCreateRevenue($contribution);
             }
         } else {
             // Tie-breaker belum vote, catat dalam audit bahwa perlu tie-breaker
