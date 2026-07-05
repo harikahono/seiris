@@ -28,7 +28,6 @@ export default function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/teams/:teamId" element={<TeamDetailPage />}>
                 <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="equity" element={<Navigate to="../contributions" replace />} />
                 <Route path="members" element={<TeamMembersTab />} />
                 <Route path="contributions" element={<ContributionsTab />} />
                 <Route path="revenue" element={<RevenueTab />} />

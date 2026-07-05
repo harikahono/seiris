@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ContributionController extends Controller
 {
-    public function __construct(private SlicingPieService $slicingPie) {}
+
 
     /**
      * GET /api/teams/{team}/contributions

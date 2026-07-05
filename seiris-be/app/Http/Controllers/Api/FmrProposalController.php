@@ -115,7 +115,7 @@ class FmrProposalController extends Controller
     public function approve(Request $request, FmrProposal $proposal): JsonResponse
     {
         $team = $proposal->team;
-        Gate::authorize('manageMembers', $team);
+        Gate::authorize('update', $team);
 
         if (!$proposal->isPending()) {
             return response()->json([
@@ -178,7 +178,7 @@ class FmrProposalController extends Controller
     public function reject(Request $request, FmrProposal $proposal): JsonResponse
     {
         $team = $proposal->team;
-        Gate::authorize('manageMembers', $team);
+        Gate::authorize('update', $team);
 
         if (!$proposal->isPending()) {
             return response()->json([

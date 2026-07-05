@@ -102,38 +102,17 @@ class ApprovalController extends Controller
 
         // Broadcast equity update SETELAH transaksi commit — data udah aman di DB
         if ($result->status === 'APPROVED') {
-            Log::info('[ApprovalController] Status APPROVED, attempting broadcast', [
-                'contribution_id' => $result->id,
-                'team_id' => $team->id,
-            ]);
             try {
                 $snapshot = EquitySnapshot::where('team_id', $team->id)
                     ->latest()
                     ->first();
 
-                Log::info('[ApprovalController] Snapshot fetched', [
-                    'snapshot_id' => $snapshot?->id,
-                    'team_id' => $team->id,
-                ]);
-
                 if ($snapshot) {
-                    Log::info('[ApprovalController] Broadcasting EquityUpdated event', [
-                        'team_id' => $team->id,
-                        'snapshot_id' => $snapshot->id,
-                    ]);
                     broadcast(new EquityUpdated($team, $snapshot))->toOthers();
-                    Log::info('[ApprovalController] Broadcast called successfully');
-                } else {
-                    Log::warning('[ApprovalController] Snapshot is NULL, not broadcasting');
                 }
             } catch (\Throwable $e) {
-                Log::error('[ApprovalController] Broadcast failed: ' . $e->getMessage(), [
-                    'exception' => get_class($e),
-                    'team_id' => $team->id,
-                ]);
+                Log::warning('[ApprovalController] Broadcast failed: ' . $e->getMessage());
             }
-        } else {
-            Log::info('[ApprovalController] Status is ' . $result->status . ', not broadcasting');
         }
 
         return response()->json([

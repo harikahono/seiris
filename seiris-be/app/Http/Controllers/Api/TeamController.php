@@ -190,7 +190,7 @@ class TeamController extends Controller
      */
     public function updateFmr(UpdateFmrRequest $request, Team $team, TeamMember $member): JsonResponse
     {
-        Gate::authorize('manageMembers', $team);
+        Gate::authorize('update', $team);
 
         // Pastikan member ini memang ada di tim ini
         if ($member->team_id !== $team->id) {
@@ -262,7 +262,7 @@ class TeamController extends Controller
      */
     public function exitMember(Request $request, Team $team, TeamMember $member): JsonResponse
     {
-        Gate::authorize('manageMembers', $team);
+        Gate::authorize('update', $team);
 
         if ($member->team_id !== $team->id) {
             return response()->json(['message' => 'Anggota tidak ditemukan di tim ini.'], 404);

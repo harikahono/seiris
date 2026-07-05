@@ -48,7 +48,7 @@ class RevenueController extends Controller
      */
     public function store(StoreRevenueRequest $request, Team $team): JsonResponse
     {
-        Gate::authorize('manageRevenues', $team);
+        Gate::authorize('update', $team);
 
         // TeamMember sudah di-attach oleh middleware EnsureTeamMember
         $member = $request->teamMember;
@@ -101,7 +101,7 @@ class RevenueController extends Controller
     public function distribute(Request $request, Revenue $revenue): JsonResponse
     {
         $team = $revenue->team;
-        Gate::authorize('manageRevenues', $team);
+        Gate::authorize('update', $team);
 
         if ($revenue->is_distributed) {
             return response()->json([
