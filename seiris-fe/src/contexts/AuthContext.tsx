@@ -51,7 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.post("/auth/logout");
     } catch {
-      /* ignore */
+      // token tetap diclear meski request logout gagal
+      if (import.meta.env.DEV) console.warn("[Auth] logout API failed, clearing local state anyway");
     }
     localStorage.removeItem("token");
     localStorage.removeItem("seiris_current_team_id");

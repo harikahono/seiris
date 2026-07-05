@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import type { Contribution, ContributionType } from "@/types";
+import type { Contribution } from "@/types";
 import { StatusBadge, TypeIcon } from "@/components/ui/StatusBadge";
 
-function formatValue(value: number, _type: ContributionType) {
+function formatValue(value: number) {
+
   return `Rp ${value.toLocaleString("id-ID")}`;
 }
 
@@ -38,7 +39,7 @@ export default function ContributionCard({
       <div className="flex items-center justify-between text-xs text-gray-500">
         <div className="flex items-center gap-3">
           <span>{contribution.member.user.name}</span>
-          <span>{formatValue(contribution.value, contribution.type)}</span>
+          <span>{formatValue(contribution.value)}</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-accent">{formatSlices(contribution.total_slices)} slices</span>

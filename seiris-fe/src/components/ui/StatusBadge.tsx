@@ -18,9 +18,4 @@ export function TypeIcon({ type, className }: { type: ContributionType; classNam
   return <Icon className={cn("size-4 shrink-0", def.color, className)} />;
 }
 
-export function formatValue(value: number, type: ContributionType) {
-  if (type === "TIME" || type === "IDEA" || type === "NETWORK") {
-    return `${value.toLocaleString("id-ID")} slices`;
-  }
-  return `Rp ${value.toLocaleString("id-ID")}`;
-}
+

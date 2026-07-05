@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { isAxiosError } from "axios";
 import api from "@/api/axios";
+import { parseErrors } from "@/lib/parseErrors";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { X, Loader2, LogIn } from "lucide-react";
@@ -64,16 +64,10 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
       onCreated(teamId);
       handleClose();
     } catch (err) {
-      if (isAxiosError(err) && err.response?.status === 422) {
-        const data = err.response.data as { errors?: Record<string, string[]> };
-        if (data.errors) {
-          const errs: CreateFieldErrors = {};
-          for (const [field, messages] of Object.entries(data.errors)) {
-            (errs as Record<string, string>)[field] = messages[0];
-          }
-          setCreateErrors(errs);
-          return;
-        }
+      const parsed = parseErrors(err);
+      if (Object.keys(parsed).length > 0) {
+        setCreateErrors(parsed as CreateFieldErrors);
+        return;
       }
       toast.error("Gagal membuat tim");
     } finally {

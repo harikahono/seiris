@@ -76,8 +76,11 @@ export default function TeamDetailPage() {
     );
   }
 
-  const isOwner = user?.id === team.owner.id;
-  const currentMember = team.members.find((m) => m.user.id === user!.id);
+  // ProtectedRoute ensures user is logged in, but TS needs a guard
+  if (!user) return null;
+
+  const isOwner = user.id === team.owner.id;
+  const currentMember = team.members.find((m) => m.user.id === user.id);
   const currentMemberId = currentMember?.id ?? "";
   const fmr = currentMember?.fmr ?? 0;
 
@@ -85,7 +88,7 @@ export default function TeamDetailPage() {
     team,
     fetchTeam,
     isOwner,
-    currentUserId: user!.id,
+    currentUserId: user.id,
     currentMemberId,
     fmr,
   };

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { isAxiosError } from "axios";
 import api from "@/api/axios";
+import { parseErrors } from "@/lib/parseErrors";
 import { cn } from "@/lib/utils";
 import { CONTRIBUTION_TYPES } from "@/lib/contribution";
 import { toast } from "sonner";
@@ -89,16 +89,10 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
       onCreated();
       handleClose();
     } catch (err) {
-      if (isAxiosError(err) && err.response?.status === 422) {
-        const data = err.response.data as { errors?: Record<string, string[]> };
-        if (data.errors) {
-          const errs: FieldErrors = {};
-          for (const [field, messages] of Object.entries(data.errors)) {
-            (errs as Record<string, string>)[field] = messages[0];
-          }
-          setErrors(errs);
-          return;
-        }
+      const parsed = parseErrors(err);
+      if (Object.keys(parsed).length > 0) {
+        setErrors(parsed as FieldErrors);
+        return;
       }
       toast.error("Gagal mencatat kontribusi");
     } finally {

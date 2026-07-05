@@ -37,7 +37,7 @@ export default function TeamMembersTab() {
       );
       setProposals(data.data ?? []);
     } catch {
-      // silent
+      if (import.meta.env.DEV) console.warn("[TeamMembersTab] Failed to fetch proposals");
     } finally {
       setLoadingProposals(false);
     }

@@ -47,7 +47,7 @@ export default function EquityPieCard({ members, totalSlices, isFrozen }: Equity
       </p>
       <EvilPieChart
         className="h-[280px] w-full"
-        data={members as unknown as Record<string, unknown>[]}
+        data={members as unknown as Record<string, unknown>[] /* ponytail: no index sig on EquityMemberEntry */}
         dataKey="equity_pct"
         nameKey="member_id"
         config={chartConfig}
