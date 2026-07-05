@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamContext } from "@/contexts/TeamContext";
+import { useRealtime } from "@/contexts/RealtimeContext";
+import { usePusher } from "@/hooks/usePusher";
 import { cn } from "@/lib/utils";
 import CreateTeamModal from "@/components/ui/CreateTeamModal";
 
@@ -57,6 +59,15 @@ export default function DashboardLayout() {
       setCurrentTeam(urlTeamId);
     }
   }, [urlTeamId, currentTeamId, setCurrentTeam]);
+
+  const { triggerRefresh } = useRealtime();
+
+  // ── Pusher: realtime equity update across ALL pages ──
+  usePusher(currentTeamId ?? undefined, {
+    onEquityUpdated: useCallback(() => {
+      triggerRefresh();
+    }, [triggerRefresh]),
+  });
 
   // ── Active feature detection ──
   const activeFeature = features.find((f) => {

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamContext } from "@/contexts/TeamContext";
-import { usePusher } from "@/hooks/usePusher";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { Team, EquityData, Contribution } from "@/types";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ import {
 // ── Team Overview (when a team is selected) ──────────────────
 function TeamDashboard({ teamId }: { teamId: string }) {
   const { user } = useAuth();
+  const { refreshVersion } = useRealtime();
   const [team, setTeam] = useState<Team | null>(null);
   const [equity, setEquity] = useState<EquityData | null>(null);
   const [recentContribs, setRecentContribs] = useState<Contribution[]>([]);
@@ -51,15 +52,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
       .finally(() => setLoading(false));
   }, [teamId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  // ── Pusher: realtime equity update ──
-  usePusher(teamId, {
-    onEquityUpdated: () => {
-      fetchData();
-      toast("Ekuitas tim telah diperbarui!");
-    },
-  });
+  useEffect(() => { fetchData(); }, [fetchData, refreshVersion]);
 
   const copyInviteCode = () => {
     if (!team) return;

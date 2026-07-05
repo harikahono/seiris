@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { Contribution, ContributionStatus, EquityData } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 export default function ContributionsTab() {
   const { team, fmr } = useOutletContext<TeamContext>();
   const teamId = team.id;
+  const { refreshVersion } = useRealtime();
 
   // ── Toggle view ──
   const [view, setView] = useState<View>("contributions");
@@ -71,7 +73,7 @@ export default function ContributionsTab() {
   useEffect(() => {
     fetchEquity();
     fetchContributions();
-  }, [fetchEquity, fetchContributions]);
+  }, [fetchEquity, fetchContributions, refreshVersion]);
 
   const filtered = filter === "all" ? contributions : contributions.filter((c) => c.status === filter);
   const members = equity?.equity_map ?? [];
