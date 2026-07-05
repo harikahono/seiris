@@ -159,6 +159,11 @@ class ApprovalController extends Controller
             throw new \RuntimeException('Kontribusi tidak ditemukan saat proses update status.');
         }
 
+        // Guard: kalo status udah bukan PENDING, berarti udah diproses transaksi lain
+        if ($contribution->status !== 'PENDING') {
+            return;
+        }
+
         // Total member aktif selain pembuat kontribusi
         $totalVoters = $team->activeMembers()
             ->where('id', '!=', $contribution->member_id)
