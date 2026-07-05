@@ -227,7 +227,7 @@ class TeamController extends Controller
      */
     public function freeze(Request $request, Team $team): JsonResponse
     {
-        Gate::authorize('freeze', $team);
+        Gate::authorize('update', $team);
 
         if ($team->is_frozen) {
             return response()->json(['message' => 'Tim sudah di-freeze sebelumnya.'], 409);

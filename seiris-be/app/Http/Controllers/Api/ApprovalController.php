@@ -110,6 +110,18 @@ class ApprovalController extends Controller
 
                 if ($snapshot) {
                     broadcast(new EquityUpdated($team, $snapshot))->toOthers();
+                }
+            } catch (\Throwable $e) {
+                Log::warning('[ApprovalController] Broadcast failed: ' . $e->getMessage());
+            }
+        }
+
+        return response()->json([
+            'message' => 'Vote berhasil dicatat.',
+            'data'    => new ContributionResource($result),
+        ]);
+    }
+
     /**
      * Auto-create Revenue record jika kontribusi type REVENUE disetujui.
      */
@@ -126,17 +138,6 @@ class ApprovalController extends Controller
             'proof_path'           => $contribution->invoice_path,
             'revenue_date'         => $contribution->contribution_date,
             'is_distributed'       => false,
-        ]);
-    }
-}
-            } catch (\Throwable $e) {
-                Log::warning('[ApprovalController] Broadcast failed: ' . $e->getMessage());
-            }
-        }
-
-        return response()->json([
-            'message' => 'Vote berhasil dicatat.',
-            'data'    => new ContributionResource($result),
         ]);
     }
 
