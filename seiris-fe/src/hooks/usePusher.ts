@@ -113,12 +113,12 @@ export function usePusher(
       console.warn("[usePusher] Connection unavailable");
     });
 
-    // Subscribe to channel
-    const channel = pusher.subscribe(`team.${teamId}`);
+    // Subscribe to PRESENCE channel — match backend PresenceChannel('team.{id}')
+    const channel = pusher.subscribe(`presence-team.${teamId}`);
 
-    // Handle subscription success
-    channel.bind("pusher:subscription_succeeded", () => {
-      console.log("[usePusher] Subscribed to channel:", `team.${teamId}`);
+    // Handle subscription success (presence returns members data)
+    channel.bind("pusher:subscription_succeeded", (members: any) => {
+      console.log("[usePusher] Subscribed to presence channel:", `presence-team.${teamId}`, "members:", members.count ?? Object.keys(members.members ?? {}).length);
     });
 
     // Handle subscription error
