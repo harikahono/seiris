@@ -31,7 +31,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => { refreshTeams(); }, [refreshTeams]);
 
   const setCurrentTeam = useCallback((id: string) => {

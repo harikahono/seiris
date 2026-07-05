@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
@@ -45,20 +45,17 @@ export default function ContributionsTab() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
-  // ── Fetch Equity ──
+  // ── Fetch Equity (no loading state — caller manages it) ──
   const fetchEquity = useCallback(() => {
-    setEquityLoading(true);
-    api
+    return api
       .get<{ data: EquityData }>(`/teams/${teamId}/equity`)
       .then((res) => setEquity(res.data.data))
-      .catch(() => setEquity(null))
-      .finally(() => setEquityLoading(false));
+      .catch(() => setEquity(null));
   }, [teamId]);
 
-  // ── Fetch Contributions ──
+  // ── Fetch Contributions (no loading state — caller manages it) ──
   const fetchContributions = useCallback(() => {
-    setLoading(true);
-    api
+    return api
       .get<{ data: Contribution[]; meta: { current_page: number; last_page: number } }>(
         `/teams/${teamId}/contributions`,
         { params: { page } }
@@ -67,17 +64,32 @@ export default function ContributionsTab() {
         setContributions(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch(console.error);
   }, [teamId, page]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { fetchEquity(); fetchContributions(); }, [fetchEquity, fetchContributions, refreshVersion]);
+  // Initial load + page change → loading=true from initial state
+  useEffect(() => {
+    Promise.all([fetchEquity(), fetchContributions()])
+      .finally(() => { setLoading(false); setEquityLoading(false); });
+  }, [fetchEquity, fetchContributions]);
+
+  // Background refresh dari Pusher → silent, no skeleton
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    fetchEquity();
+    fetchContributions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
 
   const filtered = filter === "all" ? contributions : contributions.filter((c) => c.status === filter);
   const members = equity?.equity_map ?? [];
   const totalSlices = equity?.total_slices ?? 0;
   const isFrozen = equity?.is_frozen ?? false;
+
+  // Page change → loading supaya spinner muncul
+  const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
 
   return (
     <div className="space-y-6">
@@ -174,7 +186,7 @@ export default function ContributionsTab() {
 
             {!loading && (
               <div className="mt-4 flex justify-center">
-                <Pagination current={page} last={lastPage} onChange={setPage} />
+                <Pagination current={page} last={lastPage} onChange={handlePageChange} />
               </div>
             )}
           </div>

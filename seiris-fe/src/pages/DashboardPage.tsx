@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,8 +28,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
   const [copied, setCopied] = useState(false);
 
   const fetchData = useCallback(() => {
-    setLoading(true);
-    Promise.all([
+    return Promise.all([
       api.get<{ data: Team }>(`/teams/${teamId}`),
       api.get<{ data: EquityData }>(`/teams/${teamId}/equity`),
       api.get<{ data: Contribution[]; meta: { total: number } }>(
@@ -48,12 +47,22 @@ function TeamDashboard({ teamId }: { teamId: string }) {
         setTotalRevenue(revs.reduce((s, r) => s + r.amount, 0));
         setTotalDistributed(revs.reduce((s, r) => s + (r.is_distributed ? r.distributable_amount : 0), 0));
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch(console.error);
   }, [teamId]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { fetchData(); }, [fetchData, refreshVersion]);
+  // Initial load → loading=true dari initial state
+  useEffect(() => {
+    fetchData().finally(() => setLoading(false));
+  }, [fetchData]);
+
+  // Background refresh dari Pusher → silent, no skeleton
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
 
   const copyInviteCode = () => {
     if (!team) return;

@@ -29,7 +29,6 @@ export default function TeamMembersTab() {
 
   // ── Fetch Pending Proposals ──
   const fetchProposals = useCallback(async () => {
-    setLoadingProposals(true);
     try {
       const { data } = await api.get<{ data: FmrProposal[] }>(
         `/teams/${team.id}/fmr-proposals`,
@@ -43,8 +42,14 @@ export default function TeamMembersTab() {
     }
   }, [team.id]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { fetchProposals(); }, [fetchProposals, refreshVersion]);
+  // Initial load → loading=true dari initial state
+  useEffect(() => { fetchProposals(); }, [fetchProposals]);
+
+  // Background refresh dari Pusher → silent
+  useEffect(() => {
+    if (refreshVersion > 0) fetchProposals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
 
   // Re-fetch team data when realtime event arrives
   useEffect(() => {

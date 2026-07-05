@@ -34,7 +34,7 @@ export default function ContributionDetailPage() {
       .finally(() => setLoading(false));
   }, [teamId, contributionId, user]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => { fetchData(); }, [fetchData]);
 
   if (loading) {

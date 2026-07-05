@@ -55,7 +55,7 @@ export default function AuditLogTab() {
       .finally(() => setLoading(false));
   }, [teamId, page, filter]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
   return (

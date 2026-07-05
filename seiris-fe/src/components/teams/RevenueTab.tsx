@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
@@ -20,9 +20,9 @@ export default function RevenueTab() {
   const [lastPage, setLastPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
 
+  // ── Fetch Revenues (no loading state — caller manages it) ──
   const fetchRevenues = useCallback(() => {
-    setLoading(true);
-    api
+    return api
       .get<{ data: Revenue[]; meta: { current_page: number; last_page: number; total: number } }>(
         `/teams/${teamId}/revenues`,
         { params: { page } }
@@ -31,14 +31,27 @@ export default function RevenueTab() {
         setRevenues(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch(console.error);
   }, [teamId, page]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { fetchRevenues(); }, [fetchRevenues, refreshVersion]);
+  // Initial load + page change → loading=true dari initial state
+  useEffect(() => {
+    fetchRevenues().finally(() => setLoading(false));
+  }, [fetchRevenues]);
+
+  // Background refresh dari Pusher → silent, no skeleton
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    fetchRevenues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
 
   const totalAmount = revenues.reduce((s, r) => s + r.amount, 0);
+
+  // Page change → loading supaya spinner muncul
+  const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
 
   return (
     <div className="space-y-6">
@@ -91,7 +104,7 @@ export default function RevenueTab() {
 
       {!loading && (
         <div className="flex justify-center">
-          <Pagination current={page} last={lastPage} onChange={setPage} />
+          <Pagination current={page} last={lastPage} onChange={handlePageChange} />
         </div>
       )}
 
