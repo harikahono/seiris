@@ -17,6 +17,7 @@ interface PresenceUser {
  * - No debounce on cleanup (immediate disconnect)
  * - Check Pusher internal connection.state before connecting
  * - Single connection per teamId
+ * - callbacksRef to avoid effect re-run on inline callback object recreation
  *
  * Usage:
  *   usePusher(teamId, {
@@ -32,6 +33,8 @@ export function usePusher(
 ) {
   const pusherRef = useRef<Pusher | null>(null);
   const teamIdRef = useRef<string | undefined>(undefined);
+  const callbacksRef = useRef(callbacks);
+  callbacksRef.current = callbacks;
 
   useEffect(() => {
     // Skip if no teamId
@@ -67,6 +70,7 @@ export function usePusher(
     // Create Pusher instance
     const pusher = new Pusher(appKey, {
       cluster,
+      forceTLS: true,
       channelAuthorization: {
         endpoint: `${
           import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api"
@@ -94,6 +98,21 @@ export function usePusher(
       console.log("[usePusher] Connection closed");
     });
 
+    // Handle state changes
+    pusher.connection.bind("state_change", (states: { current: string; previous: string }) => {
+      console.log(`[usePusher] State changed: ${states.previous} -> ${states.current}`);
+    });
+
+    // Handle connecting state
+    pusher.connection.bind("connecting", () => {
+      console.log("[usePusher] Connecting...");
+    });
+
+    // Handle unavailable
+    pusher.connection.bind("unavailable", () => {
+      console.warn("[usePusher] Connection unavailable");
+    });
+
     // Subscribe to channel
     const channel = pusher.subscribe(`team.${teamId}`);
 
@@ -110,7 +129,7 @@ export function usePusher(
     // Bind equity.updated event
     channel.bind("equity.updated", () => {
       console.log("[usePusher] Received equity.updated event!");
-      callbacks.onEquityUpdated?.();
+      callbacksRef.current.onEquityUpdated?.();
     });
 
     // Cleanup on unmount - IMMEDIATE, no debounce
@@ -122,5 +141,5 @@ export function usePusher(
         teamIdRef.current = undefined;
       }
     };
-  }, [teamId, callbacks]);
+  }, [teamId]);
 }
