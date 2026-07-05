@@ -63,6 +63,9 @@ export default function DashboardLayout() {
 
   const { triggerRefresh } = useRealtime();
 
+  // ── Online members count ──
+  const [onlineCount, setOnlineCount] = useState(0);
+
   // ── Pusher: realtime equity update across ALL pages ──
   usePusher(currentTeamId ?? undefined, {
     onEquityUpdated: useCallback(() => {
@@ -75,6 +78,9 @@ export default function DashboardLayout() {
     onTeamUpdated: useCallback(() => {
       triggerRefresh();
     }, [triggerRefresh]),
+    onMembersChange: useCallback((members) => {
+      setOnlineCount(members.length);
+    }, []),
   });
 
   // ── Active feature detection ──
@@ -155,7 +161,15 @@ export default function DashboardLayout() {
                 className={cn("size-3 transition-transform duration-200", !teamsOpen && "-rotate-90")}
               />
               Tim
-              <span className="ml-auto text-[10px] text-gray-600">{teams.length}</span>
+              <span className="ml-auto flex items-center gap-2">
+                {onlineCount > 0 && (
+                  <span className="flex items-center gap-1 text-[10px] text-green-400">
+                    <span className="size-1.5 rounded-full bg-green-400" />
+                    {onlineCount} online
+                  </span>
+                )}
+                <span className="text-[10px] text-gray-600">{teams.length}</span>
+              </span>
             </button>
           )}
 

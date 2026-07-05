@@ -37,6 +37,7 @@ export function usePusher(
   const pusherRef = useRef<Pusher | null>(null);
   const teamIdRef = useRef<string | undefined>(undefined);
   const callbacksRef = useRef(callbacks);
+  const membersRef = useRef<PresenceUser[]>([]);
 
   // Keep ref in sync after render — lint rule prevents setting ref during render
   useEffect(() => { callbacksRef.current = callbacks; });
@@ -99,6 +100,27 @@ export function usePusher(
 
     channel.bind("team.updated", () => {
       callbacksRef.current.onTeamUpdated?.();
+    });
+
+    // ── Presence tracking ──
+    channel.bind("pusher:subscription_succeeded", (members: { members: Record<string, unknown>; count: number }) => {
+      const list: PresenceUser[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (members as any).each?.((member: any) => {
+        list.push(member.info as PresenceUser);
+      });
+      membersRef.current = list;
+      callbacksRef.current.onMembersChange?.(list);
+    });
+
+    channel.bind("pusher:member_added", (member: { user_id: string; user_info: PresenceUser }) => {
+      membersRef.current = [...membersRef.current, member.user_info];
+      callbacksRef.current.onMembersChange?.(membersRef.current);
+    });
+
+    channel.bind("pusher:member_removed", (member: { user_id: string }) => {
+      membersRef.current = membersRef.current.filter((m) => m.id !== member.user_id);
+      callbacksRef.current.onMembersChange?.(membersRef.current);
     });
 
     return () => {
