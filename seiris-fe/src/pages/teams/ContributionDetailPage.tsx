@@ -34,17 +34,14 @@ export default function ContributionDetailPage() {
       .finally(() => setLoading(false));
   }, [teamId, contributionId, user]);
 
-   
   useEffect(() => { fetchData(); }, [fetchData]);
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-3xl px-6 py-8 space-y-6">
-        <Skeleton className="h-8 w-1/4" />
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
+      <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-48 w-full" />
         <Skeleton className="h-32 w-full" />
       </div>
     );
@@ -52,8 +49,11 @@ export default function ContributionDetailPage() {
 
   if (!contribution) {
     return (
-      <div className="mx-auto max-w-3xl px-6 py-8">
-        <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white">
+      <div className="mx-auto max-w-7xl px-6 pt-10 pb-8">
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
+        >
           <ArrowLeft className="size-4" /> Kembali
         </button>
         <p className="text-red-400">Kontribusi tidak ditemukan.</p>
@@ -65,15 +65,22 @@ export default function ContributionDetailPage() {
   const rejectCount = contribution.approvals.filter((a) => a.vote === "REJECT").length;
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
-      <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white">
+    <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
+      {/* ── Back ── */}
+      <button
+        onClick={() => navigate(-1)}
+        className="animate-fade-in-up flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
+      >
         <ArrowLeft className="size-4" /> Kembali
       </button>
 
-      <div className="mb-6 rounded-lg border border-gray-800 bg-gray-900 p-6">
-        <div className="mb-4 flex items-start justify-between">
+      {/* ── Contribution Detail ── */}
+      <div className="animate-fade-in-up rounded-xl border border-gray-800 bg-card p-6 transition-all duration-200 hover:border-gray-700">
+        <div className="mb-5 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <TypeIcon type={contribution.type} className="size-5" />
+            <div className="flex size-10 items-center justify-center rounded-full bg-accent/10">
+              <TypeIcon type={contribution.type} className="size-5 text-accent" />
+            </div>
             <div>
               <h1 className="text-lg font-bold text-white">{contribution.type}</h1>
               <p className="text-xs text-gray-500">
@@ -85,61 +92,80 @@ export default function ContributionDetailPage() {
           <StatusBadge status={contribution.status} />
         </div>
 
-        <p className="mb-4 text-sm text-gray-300">{contribution.description}</p>
+        <p className="mb-5 text-sm text-gray-300 leading-relaxed">{contribution.description}</p>
 
-        <div className="flex gap-6 text-sm">
-          <div>
-            <p className="text-gray-500">Nilai</p>
-            <p className="font-medium text-white">Rp {contribution.value.toLocaleString("id-ID")}</p>
+        <div className="flex flex-wrap gap-6">
+          <div className="min-w-[120px] rounded-lg border border-gray-800 bg-gray-950/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500">Nilai</p>
+            <p className="mt-1 font-mono text-sm font-medium text-white">
+              Rp {contribution.value.toLocaleString("id-ID")}
+            </p>
           </div>
-          <div>
-            <p className="text-gray-500">Multiplier</p>
-            <p className="font-medium text-white">&times;{contribution.multiplier}</p>
+          <div className="min-w-[100px] rounded-lg border border-gray-800 bg-gray-950/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500">Multiplier</p>
+            <p className="mt-1 font-mono text-sm font-medium text-white">
+              &times;{contribution.multiplier}
+            </p>
           </div>
-          <div>
-            <p className="text-gray-500">Total Slices</p>
-            <p className="font-medium text-accent">{contribution.total_slices.toLocaleString("id-ID")}</p>
+          <div className="min-w-[120px] rounded-lg border border-gray-800 bg-gray-950/50 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500">Total Slices</p>
+            <p className="mt-1 font-mono text-sm font-medium text-accent">
+              {contribution.total_slices.toLocaleString("id-ID")}
+            </p>
           </div>
+          {contribution.invoice_url && (
+            <div className="flex items-end">
+              <a
+                href={contribution.invoice_url}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent"
+              >
+                Lihat Invoice
+              </a>
+            </div>
+          )}
         </div>
-
-        {contribution.invoice_url && (
-          <div className="mt-4">
-            <a href={contribution.invoice_url} target="_blank" rel="noreferrer" className="text-sm text-accent hover:underline">
-              Lihat Invoice
-            </a>
-          </div>
-        )}
       </div>
 
-      <div className="mb-6 rounded-lg border border-gray-800 bg-gray-900 p-5">
-        <h3 className="mb-3 text-sm font-semibold text-white">
-          Voting ({contribution.approvals_count} suara)
-        </h3>
-        <div className="mb-3 flex gap-4 text-sm">
-          <span className="flex items-center gap-1 text-green-400">
-            <ThumbsUp className="size-4" /> {approveCount}
-          </span>
-          <span className="flex items-center gap-1 text-red-400">
-            <ThumbsDown className="size-4" /> {rejectCount}
-          </span>
+      {/* ── Voting Section ── */}
+      <div className="animate-fade-in-up rounded-xl border border-gray-800 bg-card p-5" style={{ animationDelay: "80ms" }}>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-white">
+            Voting ({contribution.approvals_count} suara)
+          </h3>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="flex items-center gap-1 text-green-400">
+              <ThumbsUp className="size-3.5" /> {approveCount}
+            </span>
+            <span className="flex items-center gap-1 text-red-400">
+              <ThumbsDown className="size-3.5" /> {rejectCount}
+            </span>
+          </div>
         </div>
+
         <div className="space-y-2">
           {contribution.approvals.map((a) => (
             <div
               key={a.id}
-              className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900/50 px-3 py-2"
+              className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-950/50 px-3 py-2.5 transition hover:border-gray-700"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <div className={cn(
-                  "flex size-6 items-center justify-center rounded-full",
+                  "flex size-7 items-center justify-center rounded-full",
                   a.vote === "APPROVE" ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"
                 )}>
-                  {a.vote === "APPROVE" ? <ThumbsUp className="size-3" /> : <ThumbsDown className="size-3" />}
+                  {a.vote === "APPROVE" ? <ThumbsUp className="size-3.5" /> : <ThumbsDown className="size-3.5" />}
                 </div>
                 <span className="text-sm text-white">{a.member.user.name}</span>
+                {a.note && (
+                  <span className="hidden text-xs text-gray-500 sm:inline">&ldquo;{a.note}&rdquo;</span>
+                )}
               </div>
-              <div className="flex items-center gap-3">
-                {a.note && <span className="text-xs text-gray-500">"{a.note}"</span>}
+              <div className="flex items-center gap-2">
+                {a.note && (
+                  <span className="text-xs text-gray-500 sm:hidden">&ldquo;{a.note}&rdquo;</span>
+                )}
                 <span className="text-xs text-gray-500">
                   {new Date(a.voted_at).toLocaleDateString("id-ID")}
                 </span>
@@ -147,13 +173,16 @@ export default function ContributionDetailPage() {
             </div>
           ))}
           {contribution.approvals.length === 0 && (
-            <p className="text-xs text-gray-500">Belum ada vote.</p>
+            <p className="text-xs text-gray-500 py-1">Belum ada vote.</p>
           )}
         </div>
       </div>
 
+      {/* ── Vote Panel ── */}
       {currentMemberId && (
-        <VotePanel contribution={contribution} currentMemberId={currentMemberId} onVoted={fetchData} />
+        <div className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
+          <VotePanel contribution={contribution} currentMemberId={currentMemberId} onVoted={fetchData} />
+        </div>
       )}
     </div>
   );

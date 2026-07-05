@@ -4,6 +4,7 @@ import api from "@/api/axios";
 import type { Revenue } from "@/types";
 import { toast } from "sonner";
 import { CheckCircle2, Clock, Download, Loader2, ExternalLink } from "lucide-react";
+import { formatRp } from "@/lib/constants";
 
 interface RevenueCardProps {
   revenue: Revenue;
@@ -14,8 +15,6 @@ interface RevenueCardProps {
 export default function RevenueCard({ revenue, isOwner, onDistributed }: RevenueCardProps) {
   const [distributing, setDistributing] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
-
-  const formatRp = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
   const handleDistribute = async () => {
     if (!confirm("Yakin ingin mendistribusikan profit ini?")) return;
@@ -37,7 +36,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
   };
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
+    <div className="group rounded-xl border border-gray-800 bg-card p-5 transition-all duration-200 hover:border-gray-700 hover:-translate-y-0.5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-2">
@@ -57,9 +56,9 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
           <p className="mt-1 text-sm text-gray-300">{revenue.description}</p>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
             <span>Distribusi: {formatRp(revenue.distributable_amount)}</span>
-            <span>·</span>
+            <span className="text-gray-700">·</span>
             <span>{new Date(revenue.revenue_date).toLocaleDateString("id-ID")}</span>
-            <span>·</span>
+            <span className="text-gray-700">·</span>
             <span>Dicatat oleh {revenue.recorded_by.user.name}</span>
           </div>
         </div>
@@ -80,11 +79,11 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
       </div>
 
       {revenue.is_distributed && (
-        <div className="mt-3">
+        <div className="mt-4">
           <button
             type="button"
             onClick={() => setShowBreakdown(!showBreakdown)}
-            className="text-xs text-accent hover:underline"
+            className="text-xs text-accent hover:underline transition"
           >
             {showBreakdown ? "Sembunyikan" : "Lihat"} rincian distribusi
           </button>
@@ -141,7 +140,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
             type="button"
             onClick={handleDistribute}
             disabled={distributing}
-            className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {distributing ? (
               <Loader2 className="size-4 animate-spin" />

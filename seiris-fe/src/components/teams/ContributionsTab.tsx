@@ -12,8 +12,9 @@ import ContributionTypeBar from "@/components/ui/ContributionTypeBar";
 import MemberEquityTable from "@/components/ui/MemberEquityTable";
 import ExportPdfButton from "@/components/ui/ExportPdfButton";
 import Pagination from "@/components/ui/Pagination";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, ListChecks } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
 
 type Filter = "all" | ContributionStatus;
 type View = "contributions" | "equity";
@@ -53,19 +54,21 @@ export default function ContributionsTab() {
       .catch(() => setEquity(null));
   }, [teamId]);
 
-  // ── Fetch Contributions (no loading state — caller manages it) ──
+  // ── Fetch Contributions (server-side filter) ──
   const fetchContributions = useCallback(() => {
+    const params: Record<string, unknown> = { page };
+    if (filter !== 'all') params.status = filter;
     return api
       .get<{ data: Contribution[]; meta: { current_page: number; last_page: number } }>(
         `/teams/${teamId}/contributions`,
-        { params: { page } }
+        { params }
       )
       .then((res) => {
         setContributions(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
       .catch(console.error);
-  }, [teamId, page]);
+  }, [teamId, page, filter]);
 
   // Initial load + page change → loading=true from initial state
   useEffect(() => {
@@ -83,7 +86,6 @@ export default function ContributionsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
 
-  const filtered = filter === "all" ? contributions : contributions.filter((c) => c.status === filter);
   const members = equity?.equity_map ?? [];
   const totalSlices = equity?.total_slices ?? 0;
   const isFrozen = equity?.is_frozen ?? false;
@@ -94,7 +96,7 @@ export default function ContributionsTab() {
   return (
     <div className="space-y-6">
       {/* ── Toggle: Kontribusi / Equity ── */}
-      <div className="flex gap-1 rounded-lg border border-gray-800 bg-gray-900/50 p-1 w-fit">
+      <div className="flex gap-1 rounded-lg border border-gray-800 bg-card/50 p-1 w-fit">
         <button
           type="button"
           onClick={() => setView("contributions")}
@@ -126,7 +128,8 @@ export default function ContributionsTab() {
         <>
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <div className="flex gap-1 rounded-lg border border-gray-800 bg-gray-900/50 p-1">
+              <h2 className="text-lg font-semibold text-white">Kontribusi</h2>
+              <div className="flex gap-1 rounded-lg border border-gray-800 bg-card/50 p-1">
                 {FILTERS.map((f) => (
                   <button
                     key={f.key}
@@ -134,6 +137,7 @@ export default function ContributionsTab() {
                     onClick={() => {
                       setFilter(f.key);
                       setPage(1);
+                      setLoading(true);
                     }}
                     className={cn(
                       "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
@@ -165,15 +169,18 @@ export default function ContributionsTab() {
                 </div>
               ) : (
                 <>
-                  {filtered.map((c) => (
+                  {contributions.map((c) => (
                     <ContributionCard key={c.id} contribution={c} teamId={teamId} />
                   ))}
-                  {!loading && filtered.length === 0 && (
-                    <p className="py-8 text-center text-sm text-gray-500">
-                      {filter === "all"
-                        ? "Belum ada kontribusi. Buat kontribusi pertama!"
-                        : "Tidak ada kontribusi dengan status ini."}
-                    </p>
+                  {!loading && contributions.length === 0 && (
+                    <EmptyState
+                      icon={ListChecks}
+                      title={filter === "all" ? "Belum ada kontribusi" : "Tidak ditemukan"}
+                      description={filter === "all"
+                        ? "Buat kontribusi pertama untuk mulai menghitung equity."
+                        : `Tidak ada kontribusi dengan status "${filter}".`}
+                      action={filter === "all" ? { label: "Buat Kontribusi", onClick: () => setShowForm(true) } : undefined}
+                    />
                   )}
                   {loading && (
                     <div className="flex justify-center py-8">

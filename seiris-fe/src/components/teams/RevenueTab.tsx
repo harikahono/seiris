@@ -4,11 +4,12 @@ import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
 import type { Revenue } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, TrendingUp } from "lucide-react";
 import RevenueCard from "@/components/ui/RevenueCard";
 import CreateRevenueForm from "@/components/ui/CreateRevenueForm";
 import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function RevenueTab() {
   const { team, isOwner } = useOutletContext<TeamContext>();
@@ -76,13 +77,14 @@ export default function RevenueTab() {
 
       <div className="space-y-4">
         {revenues.length === 0 && !loading && (
-          <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center">
-            <p className="text-sm text-gray-500">
-              {isOwner
-                ? "Belum ada revenue. Catat revenue pertama untuk mulai distribusi profit."
-                : "Belum ada revenue yang dicatat."}
-            </p>
-          </div>
+          <EmptyState
+            icon={TrendingUp}
+            title="Belum ada revenue"
+            description={isOwner
+              ? "Catat revenue pertama untuk mulai distribusi profit."
+              : "Belum ada revenue yang dicatat."}
+            action={isOwner ? { label: "Catat Revenue", onClick: () => setShowForm(true) } : undefined}
+          />
         )}
 
         {revenues.map((r) => (

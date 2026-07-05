@@ -28,9 +28,15 @@ class ContributionController extends Controller
     {
         // authorizeMember di-handle middleware EnsureTeamMember
 
-        $contributions = Contribution::where('team_id', $team->id)
-            ->with(['member.user'])
-            ->orderByDesc('created_at')
+        $query = Contribution::where('team_id', $team->id)
+            ->with(['member.user']);
+
+        // Server-side filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $contributions = $query->orderByDesc('created_at')
             ->paginate(6);
 
         return response()->json([

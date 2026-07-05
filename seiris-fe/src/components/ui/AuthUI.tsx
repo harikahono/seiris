@@ -298,7 +298,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
           alt=""
           className="size-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent" />
       </div>
     </div>
   );

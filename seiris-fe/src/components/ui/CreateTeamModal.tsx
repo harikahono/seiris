@@ -123,7 +123,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
 
   const createInputClass = (field: keyof CreateFieldErrors) =>
     cn(
-      "w-full rounded-lg border bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
+      "w-full rounded-lg border bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
       createErrors[field]
         ? "border-red-500 focus:border-red-500 focus:ring-red-500"
         : "border-gray-700 focus:border-accent focus:ring-accent"
@@ -254,7 +254,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
         {/* ── Tab: Gabung Tim ── */}
         {tab === "join" && (
           <form onSubmit={handleJoin} noValidate className="space-y-4">
-            <div className="flex items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 p-4">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-800 bg-card p-4">
               <LogIn className="size-5 text-accent shrink-0" />
               <p className="text-sm text-gray-300">
                 Masukkan kode undangan 8 karakter dari owner tim.
@@ -274,7 +274,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
                 maxLength={8}
                 required
                 className={cn(
-                  "w-full rounded-lg border bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
+                  "w-full rounded-lg border bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
                   joinError
                     ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                     : "border-gray-700 focus:border-accent focus:ring-accent"

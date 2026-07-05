@@ -110,7 +110,7 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-[#0a0a0a]">
+    <div className="flex h-screen bg-surface">
       <aside
         className={cn(
           "flex flex-col border-r border-gray-800 bg-[#0d0d0d] transition-all duration-200",
@@ -355,7 +355,7 @@ export default function DashboardLayout() {
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/60" onClick={() => setShowLogoutModal(false)} />
-          <div className="relative w-80 rounded-xl border border-gray-700 bg-gray-900 p-6 shadow-2xl">
+          <div className="relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
             <div className="flex flex-col items-center text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
                 <AlertTriangle className="size-6 text-red-400" />

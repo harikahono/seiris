@@ -4,10 +4,11 @@ import api from "@/api/axios";
 import type { AuditLogItem } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
-import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings } from "lucide-react";
+import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings, ClipboardList } from "lucide-react";
 import AuditLogEntry from "@/components/ui/AuditLogEntry";
 import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface FilterDef {
   key: string;
@@ -65,7 +66,7 @@ export default function AuditLogTab() {
         <span className="text-xs text-gray-500">{total} log</span>
       </div>
 
-      <div className="flex flex-wrap gap-1 rounded-lg border border-gray-800 bg-gray-900/50 p-1">
+      <div className="flex flex-wrap gap-1 rounded-lg border border-gray-800 bg-card/50 p-1">
         {FILTERS.map((f) => {
           const Icon = f.icon;
           return (
@@ -88,9 +89,11 @@ export default function AuditLogTab() {
       </div>
 
       {logs.length === 0 && !loading && (
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center">
-          <p className="text-sm text-gray-500">Belum ada log untuk filter ini.</p>
-        </div>
+        <EmptyState
+          icon={ClipboardList}
+          title="Belum ada log"
+          description={filter ? `Tidak ada log untuk filter "${FILTERS.find(f => f.key === filter)?.label ?? filter}".` : "Belum ada aktivitas yang tercatat."}
+        />
       )}
 
       <div className="space-y-3">

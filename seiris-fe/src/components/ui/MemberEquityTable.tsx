@@ -9,14 +9,14 @@ export default function MemberEquityTable({ members }: MemberEquityTableProps) {
 
   if (sorted.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-800 bg-gray-900 p-6 text-center">
+      <div className="rounded-lg border border-gray-800 bg-card p-6 text-center">
         <p className="text-sm text-gray-500">Belum ada anggota.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900">
+    <div className="rounded-lg border border-gray-800 bg-card">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

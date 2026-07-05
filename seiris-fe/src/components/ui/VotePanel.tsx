@@ -42,18 +42,18 @@ export default function VotePanel({ contribution, currentMemberId, onVoted }: Vo
   };
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-      <h3 className="mb-3 text-sm font-semibold text-white">Vote</h3>
+    <div className="rounded-xl border border-gray-800 bg-card p-5 transition-all duration-200 hover:border-gray-700">
+      <h3 className="mb-4 text-sm font-semibold text-white">Vote</h3>
 
       <div className="mb-3 flex gap-2">
         <button
           type="button"
           onClick={() => setVote("APPROVE")}
           className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2 text-sm font-medium transition",
+            "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200",
             vote === "APPROVE"
               ? "border-green-500 bg-green-500/10 text-green-400"
-              : "border-gray-700 text-gray-400 hover:border-green-500/50 hover:text-green-400"
+              : "border-gray-700 text-gray-400 hover:border-green-500/50 hover:text-green-400 hover:bg-green-500/5"
           )}
         >
           <ThumbsUp className="size-4" />
@@ -63,10 +63,10 @@ export default function VotePanel({ contribution, currentMemberId, onVoted }: Vo
           type="button"
           onClick={() => setVote("REJECT")}
           className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2 text-sm font-medium transition",
+            "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200",
             vote === "REJECT"
               ? "border-red-500 bg-red-500/10 text-red-400"
-              : "border-gray-700 text-gray-400 hover:border-red-500/50 hover:text-red-400"
+              : "border-gray-700 text-gray-400 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/5"
           )}
         >
           <ThumbsDown className="size-4" />
@@ -80,14 +80,14 @@ export default function VotePanel({ contribution, currentMemberId, onVoted }: Vo
         value={note}
         onChange={(e) => setNote(e.target.value)}
         maxLength={300}
-        className="mb-3 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+        className="mb-3 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none"
       />
 
       <button
         type="button"
         onClick={handleVote}
         disabled={!vote || loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading && <Loader2 className="size-4 animate-spin" />}
         {loading ? "Menyimpan..." : "Kirim Vote"}

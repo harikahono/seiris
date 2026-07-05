@@ -116,7 +116,7 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
 
   const inputClass = (field: keyof FieldErrors) =>
     cn(
-      "w-full rounded-lg border bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
+      "w-full rounded-lg border bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
       errors[field]
         ? "border-red-500 focus:border-red-500 focus:ring-red-500"
         : "border-gray-700 focus:border-accent focus:ring-accent"

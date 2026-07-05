@@ -162,7 +162,7 @@ export default function TeamMembersTab() {
     <div className="space-y-4">
       {/* ── Ajukan FMR (hanya untuk non-owner) ── */}
       {!isOwner && currentMember && (
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+        <div className="rounded-lg border border-gray-800 bg-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-sm text-white">
@@ -232,11 +232,12 @@ export default function TeamMembersTab() {
       )}
 
       {/* ── Daftar Anggota ── */}
+      <h2 className="text-lg font-semibold text-white">Anggota</h2>
       <div className="space-y-3">
         {activeMembers.map((member) => (
           <div
             key={member.id}
-            className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900 p-4"
+            className="flex items-center justify-between rounded-lg border border-gray-800 bg-card p-4"
           >
             <div className="flex items-center gap-3">
               <div className="flex size-9 items-center justify-center rounded-full bg-accent/20 text-sm font-bold text-accent">
@@ -336,7 +337,7 @@ export default function TeamMembersTab() {
 
       {/* ── Proposal FMR Tertunda ── */}
       {proposals.length > 0 && (
-        <div className="rounded-lg border border-gray-800 bg-gray-900">
+        <div className="rounded-lg border border-gray-800 bg-card">
           <button
             type="button"
             onClick={() => setProposalsOpen(!proposalsOpen)}
@@ -360,7 +361,7 @@ export default function TeamMembersTab() {
                 return (
                   <div
                     key={proposal.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-gray-800 bg-gray-900/50 p-3"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-gray-800 bg-card/50 p-3"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-800 text-xs font-bold text-gray-400">
