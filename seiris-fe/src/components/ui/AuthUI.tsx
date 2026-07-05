@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { isAxiosError } from "axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { parseErrors } from "@/lib/parseErrors";
