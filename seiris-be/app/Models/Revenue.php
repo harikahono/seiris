@@ -18,6 +18,7 @@ class Revenue extends Model
         'team_id', 'recorded_by', 'description',
         'amount', 'distributable_amount', 'proof_path',
         'revenue_date', 'is_distributed', 'distributed_at',
+        'status',
     ];
 
     protected function casts(): array
@@ -28,7 +29,17 @@ class Revenue extends Model
             'revenue_date'         => 'date',
             'is_distributed'       => 'boolean',
             'distributed_at'       => 'datetime',
+            'status'               => 'string',
         ];
+    }
+
+    /**
+     * Backward-compat: is_distributed = true when status === 'distributed'
+     */
+    public function getIsDistributedAttribute($value): bool
+    {
+        // If DB already has the boolean, use it; otherwise compute from status
+        return $this->attributes['is_distributed'] ?? ($this->status === 'distributed');
     }
 
     public function team(): BelongsTo

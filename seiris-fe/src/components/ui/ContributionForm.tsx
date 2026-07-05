@@ -150,7 +150,7 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
                         : "border-gray-700 hover:border-accent hover:bg-accent/5"
                     )}
                   >
-                    <Icon className={cn("size-6", ct.color)} />
+                    <Icon className="size-6" style={{ color: ct.color }} />
                     <span className="text-sm font-medium text-white">{ct.label}</span>
                     <span className="text-[10px] text-gray-500">{ct.desc}</span>
                   </button>

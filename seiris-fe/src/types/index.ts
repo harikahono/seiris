@@ -184,6 +184,7 @@ export interface Revenue {
   distributable_amount: number;
   proof_url: string | null;
   revenue_date: string;
+  status: 'pending' | 'distribute_requested' | 'distributed';
   is_distributed: boolean;
   distributed_at: string | null;
   recorded_by: TeamMember;

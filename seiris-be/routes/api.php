@@ -66,7 +66,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Routes without {team} param — member check inline di controller
     Route::post('contributions/{contribution}/vote', [ApprovalController::class, 'vote']);
-    Route::post('revenues/{revenue}/distribute',     [RevenueController::class, 'distribute']);
+    Route::post('revenues/{revenue}/distribute',        [RevenueController::class, 'distribute']);
+    Route::post('revenues/{revenue}/request-distribute',[RevenueController::class, 'requestDistribute']);
     Route::post('fmr-proposals/{proposal}/approve',  [FmrProposalController::class, 'approve']);
     Route::post('fmr-proposals/{proposal}/reject',   [FmrProposalController::class, 'reject']);
 
