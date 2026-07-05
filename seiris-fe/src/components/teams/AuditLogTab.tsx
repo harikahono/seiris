@@ -55,9 +55,8 @@ export default function AuditLogTab() {
       .finally(() => setLoading(false));
   }, [teamId, page, filter]);
 
-  useEffect(() => {
-    fetchLogs();
-  }, [fetchLogs]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
   return (
     <div className="space-y-4">

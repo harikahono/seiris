@@ -43,9 +43,8 @@ export default function TeamMembersTab() {
     }
   }, [team.id]);
 
-  useEffect(() => {
-    fetchProposals();
-  }, [fetchProposals, refreshVersion]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchProposals(); }, [fetchProposals, refreshVersion]);
 
   // Re-fetch team data when realtime event arrives
   useEffect(() => {

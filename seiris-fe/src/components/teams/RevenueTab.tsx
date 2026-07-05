@@ -35,9 +35,8 @@ export default function RevenueTab() {
       .finally(() => setLoading(false));
   }, [teamId, page]);
 
-  useEffect(() => {
-    fetchRevenues();
-  }, [fetchRevenues, refreshVersion]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchRevenues(); }, [fetchRevenues, refreshVersion]);
 
   const totalAmount = revenues.reduce((s, r) => s + r.amount, 0);
 

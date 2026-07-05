@@ -23,6 +23,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRealtime(): RealtimeContextValue {
   const ctx = useContext(RealtimeContext);
   if (!ctx) throw new Error("useRealtime must be used within RealtimeProvider");

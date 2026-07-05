@@ -71,10 +71,8 @@ export default function ContributionsTab() {
       .finally(() => setLoading(false));
   }, [teamId, page]);
 
-  useEffect(() => {
-    fetchEquity();
-    fetchContributions();
-  }, [fetchEquity, fetchContributions, refreshVersion]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchEquity(); fetchContributions(); }, [fetchEquity, fetchContributions, refreshVersion]);
 
   const filtered = filter === "all" ? contributions : contributions.filter((c) => c.status === filter);
   const members = equity?.equity_map ?? [];

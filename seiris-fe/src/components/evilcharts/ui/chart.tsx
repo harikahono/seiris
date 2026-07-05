@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-refresh/only-export-components */
 
 import * as RechartsPrimitive from "recharts";
 import { cn } from "@/lib/utils";

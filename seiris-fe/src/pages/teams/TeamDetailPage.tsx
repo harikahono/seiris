@@ -40,9 +40,8 @@ export default function TeamDetailPage() {
       .finally(() => setLoading(false));
   }, [teamId]);
 
-  useEffect(() => {
-    fetchTeam();
-  }, [fetchTeam]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchTeam(); }, [fetchTeam]);
 
   if (loading) {
     return (

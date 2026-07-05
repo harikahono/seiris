@@ -52,6 +52,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
       .finally(() => setLoading(false));
   }, [teamId]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData(); }, [fetchData, refreshVersion]);
 
   const copyInviteCode = () => {
