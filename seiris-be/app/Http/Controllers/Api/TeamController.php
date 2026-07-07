@@ -120,6 +120,8 @@ class TeamController extends Controller
             payload:     $request->only(['name', 'description', 'approval_threshold']),
         );
 
+        broadcast(new TeamUpdated($team, 'team.updated', $request->user()->name))->toOthers();
+
         return response()->json([
             'message' => 'Tim berhasil diperbarui.',
             'data'    => new TeamResource($team->fresh()->load(['members.user', 'owner'])),
@@ -176,7 +178,7 @@ class TeamController extends Controller
             return $member;
         });
 
-        broadcast(new TeamUpdated($team))->toOthers();
+        broadcast(new TeamUpdated($team, 'member.joined', $request->user()->name))->toOthers();
 
         return response()->json([
             'message' => 'Berhasil bergabung ke tim.',
@@ -213,7 +215,7 @@ class TeamController extends Controller
             payload:     ['old_fmr' => $oldFmr, 'new_fmr' => $request->fmr],
         );
 
-        broadcast(new TeamUpdated($team))->toOthers();
+        broadcast(new TeamUpdated($team, 'member.fmr_updated', $member->user()->first()->name))->toOthers();
 
         return response()->json([
             'message' => 'FMR berhasil diperbarui.',
@@ -248,7 +250,7 @@ class TeamController extends Controller
             payload:     ['snapshot_id' => $snapshot->id],
         );
 
-        broadcast(new TeamUpdated($team))->toOthers();
+        broadcast(new TeamUpdated($team, 'team.frozen'))->toOthers();
 
         return response()->json([
             'message' => 'Equity tim berhasil di-freeze.',
@@ -315,7 +317,7 @@ class TeamController extends Controller
             );
         });
 
-        broadcast(new TeamUpdated($team))->toOthers();
+        broadcast(new TeamUpdated($team, 'member.exited', $member->user?->name ?? ''))->toOthers();
 
         return response()->json([
             'message' => 'Anggota berhasil dikeluarkan dari tim.',

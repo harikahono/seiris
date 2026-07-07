@@ -127,6 +127,16 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
       <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
         {step === "select" && (
           <>
+            {fmr === 0 && (
+              <div className="mb-4 rounded-lg border border-yellow-700 bg-yellow-900/20 p-3 text-sm text-yellow-300">
+                <p className="font-medium">⚠️ FMR belum diset</p>
+                <p className="mt-1 text-yellow-400/80">
+                  Owner belum mengatur FMR kamu. Kamu hanya bisa membuat kontribusi{" "}
+                  <strong>Cash, Facility, atau Revenue</strong> sampai FMR diatur.
+                  Minta owner untuk set FMR di halaman <strong>Anggota</strong>.
+                </p>
+              </div>
+            )}
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Pilih Jenis Kontribusi</h2>
               <button type="button" onClick={handleClose} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white">

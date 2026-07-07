@@ -14,7 +14,9 @@ class TeamUpdated implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
-        public Team $team
+        public Team $team,
+        public string $action = '',
+        public string $userName = '',
     ) {}
 
     public function broadcastOn(): array
@@ -34,6 +36,8 @@ class TeamUpdated implements ShouldBroadcastNow
         return [
             'team_id'   => $this->team->id,
             'timestamp' => now()->toISOString(),
+            'action'    => $this->action,
+            'user_name' => $this->userName,
         ];
     }
 }
