@@ -32,6 +32,7 @@ interface TeamUpdatedData {
   timestamp: string;
   action: string;
   user_name: string;
+  contribution_desc: string | null;
 }
 
 /**
