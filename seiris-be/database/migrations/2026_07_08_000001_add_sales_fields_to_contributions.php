@@ -21,7 +21,7 @@ return new class extends Migration
         Schema::table('contributions', function (Blueprint $table) {
             $table->unsignedBigInteger('deal_value')->nullable()->after('contribution_date');
             $table->unsignedBigInteger('estimated_value')->nullable()->after('deal_value');
-            $table->unsignedDecimal('commission_rate', 5, 2)->nullable()->after('estimated_value');
+            $table->decimal('commission_rate', 5, 2)->unsigned()->nullable()->after('estimated_value');
         });
     }
 
