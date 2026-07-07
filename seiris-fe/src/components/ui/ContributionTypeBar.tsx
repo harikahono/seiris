@@ -82,7 +82,24 @@ export default function ContributionTypeBar({ slices_by_type }: ContributionType
             tickLine={false}
           />
           <ChartTooltip
-            content={<ChartTooltipContent variant="frosted-glass" roundness="lg" hideIndicator />}
+            content={
+              <ChartTooltipContent
+                variant="frosted-glass"
+                roundness="lg"
+                hideIndicator
+                hideLabel
+                formatter={(value, _name, item) => (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-medium text-white">
+                      {item.payload.label} {value}%
+                    </span>
+                    <span className="text-gray-400">
+                      Total Slice: {item.payload.slices.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                )}
+              />
+            }
           />
           <Bar dataKey="pct" radius={[0, 4, 4, 0]} maxBarSize={20}>
             {data.map((entry) => (
