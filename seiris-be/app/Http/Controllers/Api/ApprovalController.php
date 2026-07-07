@@ -109,7 +109,12 @@ class ApprovalController extends Controller
                     ->first();
 
                 if ($snapshot) {
-                    broadcast(new EquityUpdated($team, $snapshot))->toOthers();
+                    broadcast(new EquityUpdated(
+                        $team,
+                        $snapshot,
+                        approvedByName: $voter->user->name,
+                        contributionDescription: $contribution->description,
+                    ))->toOthers();
                 }
             } catch (\Throwable $e) {
                 Log::warning('[ApprovalController] Broadcast failed: ' . $e->getMessage());

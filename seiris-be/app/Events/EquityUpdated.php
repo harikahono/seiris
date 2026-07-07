@@ -17,7 +17,9 @@ class EquityUpdated implements ShouldBroadcastNow
 
     public function __construct(
         public Team $team,
-        public EquitySnapshot $snapshot
+        public EquitySnapshot $snapshot,
+        public ?string $approvedByName = null,
+        public ?string $contributionDescription = null,
     ) {}
 
     /**
@@ -39,11 +41,13 @@ class EquityUpdated implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'snapshot_id'  => $this->snapshot->id,
-            'total_slices' => $this->snapshot->total_slices,
-            'equity_map'   => $this->snapshot->equity_map,
-            'is_frozen'    => $this->snapshot->is_frozen,
-            'updated_at'   => $this->snapshot->created_at->toISOString(),
+            'snapshot_id'         => $this->snapshot->id,
+            'total_slices'        => $this->snapshot->total_slices,
+            'equity_map'          => $this->snapshot->equity_map,
+            'is_frozen'           => $this->snapshot->is_frozen,
+            'updated_at'          => $this->snapshot->created_at->toISOString(),
+            'approved_by'         => $this->approvedByName,
+            'contribution_desc'   => $this->contributionDescription,
         ];
     }
 }

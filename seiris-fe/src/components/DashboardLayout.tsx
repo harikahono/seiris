@@ -68,16 +68,55 @@ export default function DashboardLayout() {
 
   // ── Pusher: realtime equity update across ALL pages ──
   usePusher(currentTeamId ?? undefined, {
-    onEquityUpdated: useCallback(() => {
+    onEquityUpdated: useCallback((data) => {
       triggerRefresh();
+      if (data?.approved_by) {
+        toast(`✅ "${data.contribution_desc}" disetujui oleh ${data.approved_by}`);
+      }
     }, [triggerRefresh]),
     onContributionCreated: useCallback((data) => {
-      toast(`${data.member_name} membuat kontribusi ${data.type}: ${data.description}`);
+      toast(`📝 ${data.member_name} membuat kontribusi ${data.type}: ${data.description}`);
       triggerRefresh();
     }, [triggerRefresh]),
-    onTeamUpdated: useCallback(() => {
+    onTeamUpdated: useCallback((data) => {
       triggerRefresh();
-    }, [triggerRefresh]),
+      refreshTeams();
+      switch (data?.action) {
+        case 'member.joined':
+          toast(`👋 ${data.user_name} bergabung ke tim`);
+          break;
+        case 'member.exited':
+          toast(`🚪 ${data.user_name} keluar dari tim`);
+          break;
+        case 'team.updated':
+          toast(`⚙️ ${data.user_name} mengubah pengaturan tim`);
+          break;
+        case 'team.frozen':
+          toast(`❄️ Equity tim di-freeze`);
+          break;
+        case 'member.fmr_updated':
+          toast(`💰 FMR ${data.user_name} diperbarui`);
+          break;
+        case 'fmr.proposed':
+          toast(`📊 ${data.user_name} mengusulkan perubahan FMR`);
+          break;
+        case 'fmr.approved':
+          toast(`✅ Usulan FMR disetujui`);
+          break;
+        case 'fmr.rejected':
+          toast(`❌ Usulan FMR ditolak`);
+          break;
+        case 'revenue.created':
+          toast(`💰 ${data.user_name} mencatat revenue baru`);
+          break;
+        case 'profit.requested':
+          toast(`📤 ${data.user_name} meminta distribusi profit`);
+          break;
+        case 'profit.distributed':
+          toast(`✅ ${data.user_name} mendistribusikan profit`);
+          break;
+      }
+    }, [triggerRefresh, refreshTeams]),
     onMembersChange: useCallback((members) => {
       setOnlineCount(members.length);
     }, []),
