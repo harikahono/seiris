@@ -14,7 +14,7 @@ use App\Services\SlicingPieService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+
 
 class ContributionController extends Controller
 {
@@ -79,13 +79,7 @@ class ContributionController extends Controller
         // Hitung slices
         $slicesData = SlicingPieService::calculateSlices($request->type, $value);
 
-        // ponytail: invoice upload dulu untuk REVENUE, sekarang SALES gak perlu upload
-        $invoicePath = null;
-        if ($request->type === 'SALES' && $request->hasFile('invoice')) {
-            $invoicePath = $request->file('invoice')->store('invoices', 'public');
-        }
-
-        $contribution = DB::transaction(function () use ($request, $team, $member, $value, $slicesData, $invoicePath) {
+        $contribution = DB::transaction(function () use ($request, $team, $member, $value, $slicesData) {
             // LOCK: Ambil data tim dengan row-level lock untuk mencegah race condition
             // saat multiple kontribusi dibuat/diproses bersamaan untuk tim yang sama
             $lockedTeam = DB::table('teams')
