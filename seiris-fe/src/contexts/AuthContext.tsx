@@ -18,6 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("token"));
   const [isLoading, setIsLoading] = useState(true);
 
+   
   useEffect(() => {
     if (!token) {
       setIsLoading(false);
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => setIsLoading(false));
   }, [token]);
+   
 
   const login = async (payload: LoginPayload) => {
     const { data } = await api.post<AuthResponse>("/auth/login", payload);
@@ -51,7 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.post("/auth/logout");
     } catch {
-      /* ignore */
+      // token tetap diclear meski request logout gagal
+      if (import.meta.env.DEV) console.warn("[Auth] logout API failed, clearing local state anyway");
     }
     localStorage.removeItem("token");
     localStorage.removeItem("seiris_current_team_id");
@@ -66,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");

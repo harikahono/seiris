@@ -36,7 +36,7 @@ class StoreContributionRequest extends FormRequest
             case 'REVENUE':
                 $rules['invoice_amount'] = ['required', 'integer', 'min:0'];
                 $rules['actual_amount']  = ['required', 'integer', 'min:0', 'gte:invoice_amount'];
-                $rules['invoice']        = ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'];
+                $rules['invoice']        = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'];
                 break;
         }
 
@@ -60,7 +60,6 @@ class StoreContributionRequest extends FormRequest
             'invoice_amount.required'    => 'Nominal yang dilaporkan wajib diisi.',
             'actual_amount.required'     => 'Nominal sebenarnya wajib diisi.',
             'actual_amount.gte'          => 'Nominal sebenarnya tidak boleh kurang dari yang dilaporkan.',
-            'invoice.required'           => 'Invoice wajib diupload untuk kontribusi REVENUE.',
             'invoice.mimes'              => 'Invoice harus berformat PDF, JPG, atau PNG.',
             'invoice.max'                => 'Ukuran invoice maksimal 5MB.',
         ];

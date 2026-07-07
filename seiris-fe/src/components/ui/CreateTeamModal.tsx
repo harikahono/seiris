@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
-import { isAxiosError } from "axios";
 import api from "@/api/axios";
+import { isAxiosError } from "axios";
+import { parseErrors } from "@/lib/parseErrors";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { X, Loader2, LogIn } from "lucide-react";
@@ -64,16 +65,10 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
       onCreated(teamId);
       handleClose();
     } catch (err) {
-      if (isAxiosError(err) && err.response?.status === 422) {
-        const data = err.response.data as { errors?: Record<string, string[]> };
-        if (data.errors) {
-          const errs: CreateFieldErrors = {};
-          for (const [field, messages] of Object.entries(data.errors)) {
-            (errs as Record<string, string>)[field] = messages[0];
-          }
-          setCreateErrors(errs);
-          return;
-        }
+      const parsed = parseErrors(err);
+      if (Object.keys(parsed).length > 0) {
+        setCreateErrors(parsed as CreateFieldErrors);
+        return;
       }
       toast.error("Gagal membuat tim");
     } finally {
@@ -103,9 +98,9 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
     } catch (err) {
       if (isAxiosError(err) && err.response?.status === 422) {
         const data = err.response.data as { errors?: Record<string, string[]> };
-        setJoinError(data.errors?.invite_code?.[0] ?? "Kode undangan tidak valid");
+        toast.error(data.errors?.invite_code?.[0] ?? "Kode undangan tidak valid");
       } else {
-        setJoinError("Gagal bergabung. Periksa kode undangan.");
+        toast.error("Gagal bergabung. Periksa kode undangan.");
       }
     } finally {
       setLoadingJoin(false);
@@ -128,7 +123,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
 
   const createInputClass = (field: keyof CreateFieldErrors) =>
     cn(
-      "w-full rounded-lg border bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
+      "w-full rounded-lg border bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
       createErrors[field]
         ? "border-red-500 focus:border-red-500 focus:ring-red-500"
         : "border-gray-700 focus:border-accent focus:ring-accent"
@@ -259,7 +254,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
         {/* ── Tab: Gabung Tim ── */}
         {tab === "join" && (
           <form onSubmit={handleJoin} noValidate className="space-y-4">
-            <div className="flex items-center gap-2 rounded-lg border border-gray-800 bg-gray-900 p-4">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-800 bg-card p-4">
               <LogIn className="size-5 text-accent shrink-0" />
               <p className="text-sm text-gray-300">
                 Masukkan kode undangan 8 karakter dari owner tim.
@@ -279,7 +274,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
                 maxLength={8}
                 required
                 className={cn(
-                  "w-full rounded-lg border bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
+                  "w-full rounded-lg border bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
                   joinError
                     ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                     : "border-gray-700 focus:border-accent focus:ring-accent"

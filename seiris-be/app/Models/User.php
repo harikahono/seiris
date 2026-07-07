@@ -13,7 +13,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasUuids;
 
-    protected $fillable = ['name', 'email', 'password', 'avatar'];
+        protected $fillable = ['name', 'email', 'password'];
 
     protected $hidden = ['password', 'remember_token'];
 

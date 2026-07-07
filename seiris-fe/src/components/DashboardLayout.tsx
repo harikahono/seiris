@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamContext } from "@/contexts/TeamContext";
+import { useRealtime } from "@/contexts/RealtimeContext";
+import { usePusher } from "@/hooks/usePusher";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import CreateTeamModal from "@/components/ui/CreateTeamModal";
 
@@ -58,6 +61,28 @@ export default function DashboardLayout() {
     }
   }, [urlTeamId, currentTeamId, setCurrentTeam]);
 
+  const { triggerRefresh } = useRealtime();
+
+  // ── Online members count ──
+  const [onlineCount, setOnlineCount] = useState(0);
+
+  // ── Pusher: realtime equity update across ALL pages ──
+  usePusher(currentTeamId ?? undefined, {
+    onEquityUpdated: useCallback(() => {
+      triggerRefresh();
+    }, [triggerRefresh]),
+    onContributionCreated: useCallback((data) => {
+      toast(`${data.member_name} membuat kontribusi ${data.type}: ${data.description}`);
+      triggerRefresh();
+    }, [triggerRefresh]),
+    onTeamUpdated: useCallback(() => {
+      triggerRefresh();
+    }, [triggerRefresh]),
+    onMembersChange: useCallback((members) => {
+      setOnlineCount(members.length);
+    }, []),
+  });
+
   // ── Active feature detection ──
   const activeFeature = features.find((f) => {
     const match = location.pathname.match(/\/teams\/([^/]+)\/(.+)/);
@@ -85,7 +110,7 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-[#0a0a0a]">
+    <div className="flex h-screen bg-surface">
       <aside
         className={cn(
           "flex flex-col border-r border-gray-800 bg-[#0d0d0d] transition-all duration-200",
@@ -136,7 +161,15 @@ export default function DashboardLayout() {
                 className={cn("size-3 transition-transform duration-200", !teamsOpen && "-rotate-90")}
               />
               Tim
-              <span className="ml-auto text-[10px] text-gray-600">{teams.length}</span>
+              <span className="ml-auto flex items-center gap-2">
+                {onlineCount > 0 && (
+                  <span className="flex items-center gap-1 text-[10px] text-green-400">
+                    <span className="size-1.5 rounded-full bg-green-400" />
+                    {onlineCount} online
+                  </span>
+                )}
+                <span className="text-[10px] text-gray-600">{teams.length}</span>
+              </span>
             </button>
           )}
 
@@ -322,7 +355,7 @@ export default function DashboardLayout() {
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/60" onClick={() => setShowLogoutModal(false)} />
-          <div className="relative w-80 rounded-xl border border-gray-700 bg-gray-900 p-6 shadow-2xl">
+          <div className="relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
             <div className="flex flex-col items-center text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
                 <AlertTriangle className="size-6 text-red-400" />

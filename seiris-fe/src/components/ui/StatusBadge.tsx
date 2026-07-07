@@ -15,12 +15,7 @@ export function TypeIcon({ type, className }: { type: ContributionType; classNam
   const def = CONTRIBUTION_TYPES.find((t) => t.value === type);
   if (!def) return null;
   const Icon = def.icon;
-  return <Icon className={cn("size-4 shrink-0", def.color, className)} />;
+  return <Icon className={cn("size-4 shrink-0", className)} style={{ color: def.color }} />;
 }
 
-export function formatValue(value: number, type: ContributionType) {
-  if (type === "TIME" || type === "IDEA" || type === "NETWORK") {
-    return `${value.toLocaleString("id-ID")} slices`;
-  }
-  return `Rp ${value.toLocaleString("id-ID")}`;
-}
+

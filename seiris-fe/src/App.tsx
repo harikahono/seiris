@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { RealtimeProvider } from "@/contexts/RealtimeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AuthPage from "@/pages/AuthPage";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -23,11 +24,10 @@ export default function App() {
           <Route path="/login" element={<AuthPage />} />
           <Route path="/register" element={<AuthPage />} />
           <Route element={<ProtectedRoute />}>
-            <Route element={<DashboardLayout />}>
+            <Route element={<RealtimeProvider><DashboardLayout /></RealtimeProvider>}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/teams/:teamId" element={<TeamDetailPage />}>
                 <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="equity" element={<Navigate to="../contributions" replace />} />
                 <Route path="members" element={<TeamMembersTab />} />
                 <Route path="contributions" element={<ContributionsTab />} />
                 <Route path="revenue" element={<RevenueTab />} />

@@ -1,1 +1,24 @@
-Nothing should be ignored based on the provided file changes. The only added file is README.md, which is a source/config file and should not be ignored.
+# Docs - local documentation (do not push)
+docs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# System files
+*.bak

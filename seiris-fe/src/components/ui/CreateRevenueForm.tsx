@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { isAxiosError } from "axios";
 import api from "@/api/axios";
+import { parseErrors } from "@/lib/parseErrors";
 import { toast } from "sonner";
 import { Loader2, X, Upload } from "lucide-react";
 
@@ -86,16 +86,10 @@ export default function CreateRevenueForm({ teamId, open, onClose, onCreated }: 
       onCreated();
       onClose();
     } catch (err) {
-      if (isAxiosError(err) && err.response?.status === 422) {
-        const data = err.response.data as { errors?: Record<string, string[]> };
-        if (data.errors) {
-          const errs: FieldErrors = {};
-          for (const [field, messages] of Object.entries(data.errors)) {
-            (errs as Record<string, string>)[field] = messages[0];
-          }
-          setErrors(errs);
-          return;
-        }
+      const parsed = parseErrors(err);
+      if (Object.keys(parsed).length > 0) {
+        setErrors(parsed as FieldErrors);
+        return;
       }
       toast.error("Gagal mencatat revenue");
     } finally {
@@ -106,7 +100,7 @@ export default function CreateRevenueForm({ teamId, open, onClose, onCreated }: 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/60" onClick={handleClose} />
-      <div className="relative w-full max-w-lg rounded-xl border border-gray-700 bg-gray-900 p-6 shadow-2xl">
+      <div className="relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Catat Revenue Baru</h2>
           <button type="button" onClick={handleClose} className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-white">

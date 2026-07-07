@@ -1,6 +1,6 @@
 // src/components/landing/Problem.tsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -90,17 +90,21 @@ function getDiceBearUrl(seed: string): string {
 export function Problem() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIsAnimating(true);
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         setCurrentIndex((prev) => (prev + BATCH_SIZE) % problems.length);
         setIsAnimating(false);
       }, 500);
     }, ROTATE_INTERVAL);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeoutRef.current);
+    };
   }, []);
 
   const activeCards = Array.from({ length: BATCH_SIZE }).map((_, i) =>

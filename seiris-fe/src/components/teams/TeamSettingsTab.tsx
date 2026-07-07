@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useOutletContext } from "react-router-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
+import { parseErrors } from "@/lib/parseErrors";
 import type { ApprovalThreshold } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -25,7 +26,7 @@ export default function TeamSettingsTab() {
 
   if (!isOwner) {
     return (
-      <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center">
+      <div className="rounded-lg border border-gray-800 bg-card p-8 text-center">
         <p className="text-sm text-gray-500">Hanya owner yang bisa mengakses pengaturan tim.</p>
       </div>
     );
@@ -50,16 +51,10 @@ export default function TeamSettingsTab() {
       toast.success("Tim berhasil diperbarui");
       fetchTeam();
     } catch (err) {
-      if (isAxiosError(err) && err.response?.status === 422) {
-        const data = err.response.data as { errors?: Record<string, string[]> };
-        if (data.errors) {
-          const errs: FieldErrors = {};
-          for (const [field, messages] of Object.entries(data.errors)) {
-            (errs as Record<string, string>)[field] = messages[0];
-          }
-          setErrors(errs);
-          return;
-        }
+      const parsed = parseErrors(err);
+      if (Object.keys(parsed).length > 0) {
+        setErrors(parsed as FieldErrors);
+        return;
       }
       toast.error("Gagal memperbarui tim");
     } finally {
@@ -87,7 +82,7 @@ export default function TeamSettingsTab() {
 
   const inputClass = (field: keyof FieldErrors) =>
     cn(
-      "w-full rounded-lg border bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
+      "w-full rounded-lg border bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
       errors[field]
         ? "border-red-500 focus:border-red-500 focus:ring-red-500"
         : "border-gray-700 focus:border-accent focus:ring-accent"
@@ -101,8 +96,8 @@ export default function TeamSettingsTab() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSave} className="space-y-4 rounded-lg border border-gray-800 bg-gray-900 p-5">
-        <h3 className="text-sm font-semibold text-white">Informasi Tim</h3>
+      <form onSubmit={handleSave} className="space-y-4 rounded-lg border border-gray-800 bg-card p-5">
+        <h2 className="text-lg font-semibold text-white">Informasi Tim</h2>
 
         <div>
           <label htmlFor="settings-name" className="mb-1.5 block text-sm font-medium text-gray-300">
@@ -174,7 +169,7 @@ export default function TeamSettingsTab() {
       <div className="space-y-4 rounded-lg border border-red-500/20 bg-red-500/5 p-5">
         <div className="flex items-center gap-2">
           <Snowflake className="size-4 text-red-400" />
-          <h3 className="text-sm font-semibold text-white">Freeze Equity</h3>
+          <h2 className="text-lg font-semibold text-white">Freeze Equity</h2>
         </div>
         <p className="text-xs text-gray-500">
           Ketika tim di-freeze, semua perubahan equity akan dihentikan. Aksi ini tidak bisa dibatalkan.

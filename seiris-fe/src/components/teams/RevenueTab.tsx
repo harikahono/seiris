@@ -1,42 +1,58 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { Revenue } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, TrendingUp } from "lucide-react";
 import RevenueCard from "@/components/ui/RevenueCard";
 import CreateRevenueForm from "@/components/ui/CreateRevenueForm";
+import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function RevenueTab() {
   const { team, isOwner } = useOutletContext<TeamContext>();
   const teamId = team.id;
+  const { refreshVersion } = useRealtime();
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
 
+  // ── Fetch Revenues (no loading state — caller manages it) ──
   const fetchRevenues = useCallback(() => {
-    setLoading(true);
-    api
+    return api
       .get<{ data: Revenue[]; meta: { current_page: number; last_page: number; total: number } }>(
         `/teams/${teamId}/revenues`,
         { params: { page } }
       )
       .then((res) => {
-        setRevenues((prev) => (page === 1 ? res.data.data : [...prev, ...res.data.data]));
+        setRevenues(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch(console.error);
   }, [teamId, page]);
 
+  // Initial load + page change → loading=true dari initial state
   useEffect(() => {
-    fetchRevenues();
+    fetchRevenues().finally(() => setLoading(false));
   }, [fetchRevenues]);
 
+  // Background refresh dari Pusher → silent, no skeleton
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    fetchRevenues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
+
   const totalAmount = revenues.reduce((s, r) => s + r.amount, 0);
+
+  // Page change → loading supaya spinner muncul
+  const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
 
   return (
     <div className="space-y-6">
@@ -61,13 +77,14 @@ export default function RevenueTab() {
 
       <div className="space-y-4">
         {revenues.length === 0 && !loading && (
-          <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center">
-            <p className="text-sm text-gray-500">
-              {isOwner
-                ? "Belum ada revenue. Catat revenue pertama untuk mulai distribusi profit."
-                : "Belum ada revenue yang dicatat."}
-            </p>
-          </div>
+          <EmptyState
+            icon={TrendingUp}
+            title="Belum ada revenue"
+            description={isOwner
+              ? "Catat revenue pertama untuk mulai distribusi profit."
+              : "Belum ada revenue yang dicatat."}
+            action={isOwner ? { label: "Catat Revenue", onClick: () => setShowForm(true) } : undefined}
+          />
         )}
 
         {revenues.map((r) => (
@@ -87,15 +104,9 @@ export default function RevenueTab() {
         )}
       </div>
 
-      {!loading && page < lastPage && (
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => setPage((p) => p + 1)}
-            className="text-sm text-accent hover:underline"
-          >
-            Muat lebih banyak
-          </button>
+      {!loading && (
+        <div className="flex justify-center">
+          <Pagination current={page} last={lastPage} onChange={handlePageChange} />
         </div>
       )}
 

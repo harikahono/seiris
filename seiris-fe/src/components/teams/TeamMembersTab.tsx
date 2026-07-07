@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { TeamMember, FmrProposal } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { toast } from "sonner";
@@ -21,13 +22,13 @@ export default function TeamMembersTab() {
   const [loadingProposals, setLoadingProposals] = useState(false);
   const [proposalsOpen, setProposalsOpen] = useState(true);
 
+  const { refreshVersion } = useRealtime();
   const isOwner = team.owner.id === currentUserId;
   const activeMembers = team.members.filter((m) => m.status === "active");
   const currentMember = activeMembers.find((m) => m.user.id === currentUserId);
 
   // ── Fetch Pending Proposals ──
   const fetchProposals = useCallback(async () => {
-    setLoadingProposals(true);
     try {
       const { data } = await api.get<{ data: FmrProposal[] }>(
         `/teams/${team.id}/fmr-proposals`,
@@ -35,15 +36,25 @@ export default function TeamMembersTab() {
       );
       setProposals(data.data ?? []);
     } catch {
-      // silent
+      if (import.meta.env.DEV) console.warn("[TeamMembersTab] Failed to fetch proposals");
     } finally {
       setLoadingProposals(false);
     }
   }, [team.id]);
 
+  // Initial load → loading=true dari initial state
+  useEffect(() => { fetchProposals(); }, [fetchProposals]);
+
+  // Background refresh dari Pusher → silent
   useEffect(() => {
-    fetchProposals();
-  }, [fetchProposals]);
+    if (refreshVersion > 0) fetchProposals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
+
+  // Re-fetch team data when realtime event arrives
+  useEffect(() => {
+    if (refreshVersion > 0) fetchTeam();
+  }, [refreshVersion, fetchTeam]);
 
   // ── Submit FMR Proposal (non-owner) ──
   const handleProposeFmr = async () => {
@@ -79,10 +90,14 @@ export default function TeamMembersTab() {
     try {
       await api.post(`/fmr-proposals/${proposal.id}/approve`);
       toast.success(`FMR ${proposal.member.user.name} disetujui`);
-      fetchProposals();
-      fetchTeam();
-    } catch {
-      toast.error("Gagal menyetujui proposal");
+      await fetchProposals();
+      await fetchTeam();
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Gagal menyetujui proposal");
+      }
     }
   };
 
@@ -90,9 +105,13 @@ export default function TeamMembersTab() {
     try {
       await api.post(`/fmr-proposals/${proposal.id}/reject`);
       toast.success(`Proposal FMR ${proposal.member.user.name} ditolak`);
-      fetchProposals();
-    } catch {
-      toast.error("Gagal menolak proposal");
+      await fetchProposals();
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Gagal menolak proposal");
+      }
     }
   };
 
@@ -143,7 +162,7 @@ export default function TeamMembersTab() {
     <div className="space-y-4">
       {/* ── Ajukan FMR (hanya untuk non-owner) ── */}
       {!isOwner && currentMember && (
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+        <div className="rounded-lg border border-gray-800 bg-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-sm text-white">
@@ -213,11 +232,12 @@ export default function TeamMembersTab() {
       )}
 
       {/* ── Daftar Anggota ── */}
+      <h2 className="text-lg font-semibold text-white">Anggota</h2>
       <div className="space-y-3">
         {activeMembers.map((member) => (
           <div
             key={member.id}
-            className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900 p-4"
+            className="flex items-center justify-between rounded-lg border border-gray-800 bg-card p-4"
           >
             <div className="flex items-center gap-3">
               <div className="flex size-9 items-center justify-center rounded-full bg-accent/20 text-sm font-bold text-accent">
@@ -317,7 +337,7 @@ export default function TeamMembersTab() {
 
       {/* ── Proposal FMR Tertunda ── */}
       {proposals.length > 0 && (
-        <div className="rounded-lg border border-gray-800 bg-gray-900">
+        <div className="rounded-lg border border-gray-800 bg-card">
           <button
             type="button"
             onClick={() => setProposalsOpen(!proposalsOpen)}
@@ -341,7 +361,7 @@ export default function TeamMembersTab() {
                 return (
                   <div
                     key={proposal.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-gray-800 bg-gray-900/50 p-3"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-gray-800 bg-card/50 p-3"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-800 text-xs font-bold text-gray-400">

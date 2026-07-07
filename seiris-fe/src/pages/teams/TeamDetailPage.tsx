@@ -20,12 +20,11 @@ export default function TeamDetailPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [team, setTeam] = useState<Team | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
 
   const fetchTeam = useCallback(() => {
     if (!teamId) return;
-    setLoading(true);
     setError("");
     api
       .get<{ data: Team }>(`/teams/${teamId}`)
@@ -37,16 +36,14 @@ export default function TeamDetailPage() {
           setError("Gagal memuat data tim.");
         }
       })
-      .finally(() => setLoading(false));
+      .finally(() => setInitialLoading(false));
   }, [teamId]);
 
-  useEffect(() => {
-    fetchTeam();
-  }, [fetchTeam]);
+  useEffect(() => { fetchTeam(); }, [fetchTeam]);
 
-  if (loading) {
+  if (initialLoading) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-8 space-y-6">
+      <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
         <Skeleton className="h-8 w-1/3" />
         <Skeleton className="h-4 w-1/4" />
         <Skeleton className="h-48 w-full" />
@@ -60,24 +57,26 @@ export default function TeamDetailPage() {
 
   if (error || !team) {
     return (
-      <div className="mx-auto max-w-4xl px-6 py-8">
+      <div className="mx-auto max-w-7xl px-6 pt-10 pb-8">
         <button
           type="button"
           onClick={() => navigate("/dashboard")}
-          className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white"
+          className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
         >
           <ArrowLeft className="size-4" />
           Kembali
         </button>
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-8 text-center">
+        <div className="rounded-xl border border-gray-800 bg-card p-8 text-center">
           <p className="text-red-400">{error || "Tim tidak ditemukan."}</p>
         </div>
       </div>
     );
   }
 
-  const isOwner = user?.id === team.owner.id;
-  const currentMember = team.members.find((m) => m.user.id === user!.id);
+  if (!user) return null;
+
+  const isOwner = user.id === team.owner.id;
+  const currentMember = team.members.find((m) => m.user.id === user.id);
   const currentMemberId = currentMember?.id ?? "";
   const fmr = currentMember?.fmr ?? 0;
 
@@ -85,19 +84,23 @@ export default function TeamDetailPage() {
     team,
     fetchTeam,
     isOwner,
-    currentUserId: user!.id,
+    currentUserId: user.id,
     currentMemberId,
     fmr,
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-white">{team.name}</h1>
+    <div className="mx-auto max-w-7xl px-6 pt-10 pb-8">
+      {/* ── Team Header ── */}
+      <div className="animate-fade-in-up mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white">{team.name}</h1>
         <p className="mt-1 text-sm text-gray-500">
           {team.description || "Tidak ada deskripsi."}
         </p>
+        <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
       </div>
+
+      {/* ── Tab Content ── */}
       <Outlet context={context} />
     </div>
   );

@@ -4,6 +4,7 @@
 // ============================================================
 namespace App\Http\Controllers\Api;
 
+use App\Events\TeamUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Revenue\StoreRevenueRequest;
 use App\Http\Resources\RevenueResource;
@@ -29,7 +30,7 @@ class RevenueController extends Controller
         $revenues = Revenue::where('team_id', $team->id)
             ->with(['recordedBy.user', 'distributions.member.user'])
             ->orderByDesc('revenue_date')
-            ->paginate(15);
+            ->paginate(6);
 
         return response()->json([
             'data' => RevenueResource::collection($revenues),
@@ -47,7 +48,7 @@ class RevenueController extends Controller
      */
     public function store(StoreRevenueRequest $request, Team $team): JsonResponse
     {
-        Gate::authorize('manageRevenues', $team);
+        Gate::authorize('update', $team);
 
         // TeamMember sudah di-attach oleh middleware EnsureTeamMember
         $member = $request->teamMember;
@@ -68,6 +69,7 @@ class RevenueController extends Controller
                 'proof_path'           => $proofPath,
                 'revenue_date'         => $request->revenue_date,
                 'is_distributed'       => false,
+                'status'               => 'pending',
             ]);
 
             AuditLogService::logFromRequest(
@@ -85,6 +87,8 @@ class RevenueController extends Controller
             return $revenue;
         });
 
+        broadcast(new TeamUpdated($team))->toOthers();
+
         return response()->json([
             'message' => 'Revenue berhasil dicatat.',
             'data'    => new RevenueResource($revenue->load(['recordedBy.user'])),
@@ -92,15 +96,56 @@ class RevenueController extends Controller
     }
 
     /**
+     * POST /api/revenues/{revenue}/request-distribute
+     * Ajukan distribusi revenue — semua active member bisa
+     */
+    public function requestDistribute(Request $request, Revenue $revenue): JsonResponse
+    {
+        $team = $revenue->team;
+
+        if ($revenue->status === 'distributed') {
+            return response()->json([
+                'message' => 'Revenue ini sudah didistribusikan.',
+            ], 409);
+        }
+
+        if ($revenue->status !== 'pending') {
+            return response()->json([
+                'message' => 'Distribusi sudah diajukan sebelumnya. Tunggu persetujuan owner.',
+            ], 409);
+        }
+
+        $revenue->update(['status' => 'distribute_requested']);
+
+        AuditLogService::logFromRequest(
+            request:     $request,
+            teamId:      $team->id,
+            action:      'profit.requested',
+            subjectType: Revenue::class,
+            subjectId:   $revenue->id,
+            payload:     [
+                'distributable_amount' => $revenue->distributable_amount,
+            ],
+        );
+
+        broadcast(new TeamUpdated($team))->toOthers();
+
+        return response()->json([
+            'message' => 'Permintaan distribusi diajukan. Menunggu persetujuan owner.',
+            'data'    => new RevenueResource($revenue->fresh()->load(['recordedBy.user'])),
+        ]);
+    }
+
+    /**
      * POST /api/revenues/{revenue}/distribute
-     * Distribusikan profit ke semua anggota aktif — hanya owner
+     * Setujui dan distribusikan profit ke semua anggota aktif — hanya owner
      */
     public function distribute(Request $request, Revenue $revenue): JsonResponse
     {
         $team = $revenue->team;
-        Gate::authorize('manageRevenues', $team);
+        Gate::authorize('update', $team);
 
-        if ($revenue->is_distributed) {
+        if ($revenue->status === 'distributed') {
             return response()->json([
                 'message' => 'Revenue ini sudah didistribusikan sebelumnya.',
             ], 409);
@@ -136,6 +181,7 @@ class RevenueController extends Controller
             // Tandai revenue sudah didistribusikan
             $revenue->update([
                 'is_distributed' => true,
+                'status'         => 'distributed',
                 'distributed_at' => now(),
             ]);
 
@@ -154,6 +200,8 @@ class RevenueController extends Controller
 
             return $distributions;
         });
+
+        broadcast(new TeamUpdated($team))->toOthers();
 
         return response()->json([
             'message' => 'Profit berhasil didistribusikan.',

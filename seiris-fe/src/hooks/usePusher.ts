@@ -8,12 +8,17 @@ interface PresenceUser {
   role: string;
 }
 
+interface ContributionCreatedData {
+  id: string;
+  type: string;
+  description: string;
+  value: number;
+  member_name: string;
+  status: string;
+}
+
 /**
  * Subscribe to Pusher presence channel for a team.
- *
- * Pusher fires `equity.updated` → callbacks.onEquityUpdated
- * Gunakan callback untuk refetch data dari API (lebih reliable daripada
- * parsing raw payload dari Pusher yang formatnya beda sama API response).
  *
  * Usage:
  *   usePusher(teamId, {
@@ -24,23 +29,50 @@ export function usePusher(
   teamId: string | undefined,
   callbacks: {
     onEquityUpdated?: () => void;
+    onContributionCreated?: (data: ContributionCreatedData) => void;
+    onTeamUpdated?: () => void;
     onMembersChange?: (members: PresenceUser[]) => void;
   } = {}
 ) {
   const pusherRef = useRef<Pusher | null>(null);
+  const teamIdRef = useRef<string | undefined>(undefined);
+  const callbacksRef = useRef(callbacks);
+  const membersRef = useRef<PresenceUser[]>([]);
+
+  // Keep ref in sync after render — lint rule prevents setting ref during render
+  useEffect(() => { callbacksRef.current = callbacks; });
 
   useEffect(() => {
     if (!teamId) return;
+
+    // Reuse existing connection if already on this team
+    if (
+      pusherRef.current &&
+      teamIdRef.current === teamId &&
+      pusherRef.current.connection.state === "connected"
+    ) {
+      return;
+    }
+
+    // Disconnect if team changed
+    if (pusherRef.current && teamIdRef.current !== teamId) {
+      pusherRef.current.disconnect();
+      pusherRef.current = null;
+    }
 
     const token = localStorage.getItem("token");
     if (!token) return;
 
     const appKey = import.meta.env.VITE_PUSHER_APP_KEY;
     const cluster = import.meta.env.VITE_PUSHER_CLUSTER;
-    if (!appKey || !cluster) return;
+    if (!appKey || !cluster) {
+      if (import.meta.env.DEV) console.warn("[usePusher] Missing Pusher env vars");
+      return;
+    }
 
     const pusher = new Pusher(appKey, {
       cluster,
+      forceTLS: true,
       channelAuthorization: {
         endpoint: `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api"}/broadcasting/auth`,
         transport: "ajax",
@@ -49,26 +81,54 @@ export function usePusher(
     });
 
     pusherRef.current = pusher;
+    teamIdRef.current = teamId;
 
+    // Subscribe and bind events
     const channel = pusher.subscribe(`presence-team.${teamId}`);
 
-    // Equity berubah → trigger refetch
-    channel.bind("equity.updated", () => {
-      callbacks.onEquityUpdated?.();
+    channel.bind("pusher:subscription_error", () => {
+      // auth fail — handled by backend logging
     });
 
-    // (Optional) track online members
-    channel.bind("pusher:subscription_succeeded", (members: any) => {
+    channel.bind("equity.updated", () => {
+      callbacksRef.current.onEquityUpdated?.();
+    });
+
+    channel.bind("contribution.created", (data: ContributionCreatedData) => {
+      callbacksRef.current.onContributionCreated?.(data);
+    });
+
+    channel.bind("team.updated", () => {
+      callbacksRef.current.onTeamUpdated?.();
+    });
+
+    // ── Presence tracking ──
+    channel.bind("pusher:subscription_succeeded", (members: { members: Record<string, unknown>; count: number }) => {
       const list: PresenceUser[] = [];
-      members.each((m: any) => list.push(m.info));
-      callbacks.onMembersChange?.(list);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (members as any).each?.((member: any) => {
+        list.push(member.info as PresenceUser);
+      });
+      membersRef.current = list;
+      callbacksRef.current.onMembersChange?.(list);
+    });
+
+    channel.bind("pusher:member_added", (member: { user_id: string; user_info: PresenceUser }) => {
+      membersRef.current = [...membersRef.current, member.user_info];
+      callbacksRef.current.onMembersChange?.(membersRef.current);
+    });
+
+    channel.bind("pusher:member_removed", (member: { user_id: string }) => {
+      membersRef.current = membersRef.current.filter((m) => m.id !== member.user_id);
+      callbacksRef.current.onMembersChange?.(membersRef.current);
     });
 
     return () => {
-      channel.unbind_all();
-      pusher.unsubscribe(`presence-team.${teamId}`);
-      pusher.disconnect();
-      pusherRef.current = null;
+      if (pusherRef.current === pusher) {
+        pusher.disconnect();
+        pusherRef.current = null;
+        teamIdRef.current = undefined;
+      }
     };
   }, [teamId]);
 }

@@ -84,7 +84,7 @@ export default function AuditLogEntry({ log }: AuditLogItemProps) {
   });
 
   return (
-    <div className="flex gap-3 rounded-lg border border-gray-800 bg-gray-900 p-4">
+    <div className="flex gap-3 rounded-lg border border-gray-800 bg-card p-4">
       <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-full", meta.bg)}>
         <Icon className={cn("size-4", meta.color)} />
       </div>

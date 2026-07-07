@@ -31,9 +31,8 @@ export function TeamProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  useEffect(() => {
-    refreshTeams();
-  }, [refreshTeams]);
+   
+  useEffect(() => { refreshTeams(); }, [refreshTeams]);
 
   const setCurrentTeam = useCallback((id: string) => {
     setCurrentTeamId(id);
@@ -52,6 +51,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTeamContext() {
   const ctx = useContext(TeamContext);
   if (!ctx) throw new Error("useTeamContext must be used within TeamProvider");

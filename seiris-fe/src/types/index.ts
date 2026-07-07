@@ -68,10 +68,6 @@ export interface CreateTeamPayload {
   fmr?: number;
 }
 
-export interface JoinTeamPayload {
-  invite_code: string;
-}
-
 export interface FmrProposal {
   id: string;
   proposed_fmr: number;
@@ -80,10 +76,6 @@ export interface FmrProposal {
   reviewer: { id: string; name: string } | null;
   created_at: string;
   reviewed_at: string | null;
-}
-
-export interface UpdateFmrPayload {
-  fmr: number;
 }
 
 // ── Dashboard ──────────────────────────────────────────────
@@ -178,14 +170,6 @@ export interface EquityData {
   calculated_at: string | null;
 }
 
-export interface EquitySnapshotItem {
-  snapshot_id: string;
-  total_slices: number;
-  equity_map: Record<string, { slices: number; equity_pct: number }>;
-  is_frozen: boolean;
-  calculated_at: string | null;
-}
-
 // ── Revenue ─────────────────────────────────────────────────
 export interface RevenueDistribution {
   member: TeamMember;
@@ -200,6 +184,7 @@ export interface Revenue {
   distributable_amount: number;
   proof_url: string | null;
   revenue_date: string;
+  status: 'pending' | 'distribute_requested' | 'distributed';
   is_distributed: boolean;
   distributed_at: string | null;
   recorded_by: TeamMember;

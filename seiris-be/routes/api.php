@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\ContributionController;
@@ -30,7 +31,26 @@ Route::prefix('auth')->group(function () {
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Broadcasting auth (Pusher presence channel)
-    Route::post('broadcasting/auth', fn (Request $request) => Broadcast::auth($request));
+    Route::post('broadcasting/auth', function (Request $request) {
+        $user = $request->user();
+        $channel = $request->get('channel_name');
+        Log::info('[broadcasting/auth] REQUEST', [
+            'channel' => $channel,
+            'user_id' => $user?->id,
+            'user_name' => $user?->name,
+        ]);
+        try {
+            $response = Broadcast::auth($request);
+            Log::info('[broadcasting/auth] SUCCESS', ['channel' => $channel]);
+            return $response;
+        } catch (\Throwable $e) {
+            Log::warning('[broadcasting/auth] FAILED', [
+                'channel' => $channel,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    });
 
     // Auth
     Route::post('auth/logout', [AuthController::class, 'logout']);
@@ -46,7 +66,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Routes without {team} param — member check inline di controller
     Route::post('contributions/{contribution}/vote', [ApprovalController::class, 'vote']);
-    Route::post('revenues/{revenue}/distribute',     [RevenueController::class, 'distribute']);
+    Route::post('revenues/{revenue}/distribute',        [RevenueController::class, 'distribute']);
+    Route::post('revenues/{revenue}/request-distribute',[RevenueController::class, 'requestDistribute']);
     Route::post('fmr-proposals/{proposal}/approve',  [FmrProposalController::class, 'approve']);
     Route::post('fmr-proposals/{proposal}/reject',   [FmrProposalController::class, 'reject']);
 

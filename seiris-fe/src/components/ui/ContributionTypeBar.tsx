@@ -10,17 +10,15 @@ import {
   LabelList,
 } from "recharts";
 import type { Contribution } from "@/types";
-
-const TYPE_META: Record<string, { label: string; color: string }> = {
-  TIME:     { label: "Time",     color: "#60a5fa" },
-  CASH:     { label: "Cash",     color: "#4ade80" },
-  IDEA:     { label: "Idea",     color: "#fbbf24" },
-  NETWORK:  { label: "Network",  color: "#a78bfa" },
-  FACILITY: { label: "Facility", color: "#fb923c" },
-  REVENUE:  { label: "Revenue",  color: "#22d3ee" },
-};
+import { CONTRIBUTION_TYPES } from "@/lib/contribution";
 
 const TYPE_ORDER = ["CASH", "TIME", "IDEA", "NETWORK", "FACILITY", "REVENUE"];
+
+// ponytail: derive from shared CONTRIBUTION_TYPES
+const TYPE_META: Record<string, { label: string; color: string }> =
+  Object.fromEntries(
+    CONTRIBUTION_TYPES.map((t) => [t.value, { label: t.label, color: t.color }])
+  );
 
 interface ContributionTypeBarProps {
   contributions: Contribution[];
@@ -54,14 +52,14 @@ export default function ContributionTypeBar({ contributions }: ContributionTypeB
 
   if (data.length === 0) {
     return (
-      <div className="flex h-full min-h-[200px] items-center justify-center rounded-lg border border-gray-800 bg-gray-900 p-6">
+      <div className="flex h-full min-h-[200px] items-center justify-center rounded-lg border border-gray-800 bg-card p-6">
         <p className="text-sm text-gray-500">Belum ada data kontribusi.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+    <div className="rounded-lg border border-gray-800 bg-card p-4">
       <h3 className="mb-4 text-sm font-semibold text-white">Kontribusi per Tipe</h3>
       <div className="h-[250px]">
         <ResponsiveContainer width="100%" height="100%">

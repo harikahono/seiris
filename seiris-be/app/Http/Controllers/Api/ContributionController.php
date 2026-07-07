@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\ContributionCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contribution\StoreContributionRequest;
 use App\Http\Resources\ContributionResource;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ContributionController extends Controller
 {
-    public function __construct(private SlicingPieService $slicingPie) {}
+
 
     /**
      * GET /api/teams/{team}/contributions
@@ -27,10 +28,16 @@ class ContributionController extends Controller
     {
         // authorizeMember di-handle middleware EnsureTeamMember
 
-        $contributions = Contribution::where('team_id', $team->id)
-            ->with(['member.user'])
-            ->orderByDesc('created_at')
-            ->paginate(20);
+        $query = Contribution::where('team_id', $team->id)
+            ->with(['member.user']);
+
+        // Server-side filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $contributions = $query->orderByDesc('created_at')
+            ->paginate(6);
 
         return response()->json([
             'data' => ContributionResource::collection($contributions),
@@ -120,6 +127,13 @@ class ContributionController extends Controller
 
             return $contribution;
         });
+
+        // Broadcast ke anggota lain biar实时
+        try {
+            broadcast(new ContributionCreated($team, $contribution->load('member.user')))->toOthers();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('[Contribution] Broadcast failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'message' => 'Kontribusi berhasil dicatat. Menunggu approval dari anggota tim.',

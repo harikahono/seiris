@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react";
+import { isAxiosError } from "axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { parseErrors } from "@/lib/parseErrors";
 import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
 import bgImage from "@/assets/bg1.webp";
-import { isAxiosError } from "axios";
 
 interface FieldErrors {
   name?: string;
@@ -56,18 +57,12 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
   };
 
   const parseBackendErrors = (error: unknown) => {
-    if (isAxiosError(error) && error.response?.status === 422) {
-      const data = error.response.data as { errors?: Record<string, string[]> };
-      if (data.errors) {
-        const errs: FieldErrors = {};
-        for (const [field, messages] of Object.entries(data.errors)) {
-          (errs as Record<string, string>)[field] = messages[0];
-        }
-        setErrors(errs);
-        return;
-      }
+    const parsed = parseErrors(error);
+    if (Object.keys(parsed).length > 0) {
+      setErrors(parsed as FieldErrors);
+    } else {
+      setErrors({});
     }
-    setErrors({});
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -303,7 +298,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
           alt=""
           className="size-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent" />
       </div>
     </div>
   );

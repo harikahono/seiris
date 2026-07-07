@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
-import { toast } from "sonner";
 import api from "@/api/axios";
-import { usePusher } from "@/hooks/usePusher";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { Contribution, ContributionStatus, EquityData } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -12,8 +11,10 @@ import EquityPieCard from "@/components/ui/EquityPieCard";
 import ContributionTypeBar from "@/components/ui/ContributionTypeBar";
 import MemberEquityTable from "@/components/ui/MemberEquityTable";
 import ExportPdfButton from "@/components/ui/ExportPdfButton";
-import { Plus, Loader2 } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
+import { Plus, Loader2, ListChecks } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
 
 type Filter = "all" | ContributionStatus;
 type View = "contributions" | "equity";
@@ -28,6 +29,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 export default function ContributionsTab() {
   const { team, fmr } = useOutletContext<TeamContext>();
   const teamId = team.id;
+  const { refreshVersion } = useRealtime();
 
   // ── Toggle view ──
   const [view, setView] = useState<View>("contributions");
@@ -44,54 +46,57 @@ export default function ContributionsTab() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
-  // ── Fetch Equity ──
+  // ── Fetch Equity (no loading state — caller manages it) ──
   const fetchEquity = useCallback(() => {
-    setEquityLoading(true);
-    api
+    return api
       .get<{ data: EquityData }>(`/teams/${teamId}/equity`)
       .then((res) => setEquity(res.data.data))
-      .catch(() => setEquity(null))
-      .finally(() => setEquityLoading(false));
+      .catch(() => setEquity(null));
   }, [teamId]);
 
-  // ── Fetch Contributions ──
+  // ── Fetch Contributions (server-side filter) ──
   const fetchContributions = useCallback(() => {
-    setLoading(true);
-    api
+    const params: Record<string, unknown> = { page };
+    if (filter !== 'all') params.status = filter;
+    return api
       .get<{ data: Contribution[]; meta: { current_page: number; last_page: number } }>(
         `/teams/${teamId}/contributions`,
-        { params: { page } }
+        { params }
       )
       .then((res) => {
-        setContributions((prev) => (page === 1 ? res.data.data : [...prev, ...res.data.data]));
+        setContributions(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [teamId, page]);
+      .catch(console.error);
+  }, [teamId, page, filter]);
 
-  // ── Pusher: realtime equity update ──
-  usePusher(teamId, {
-    onEquityUpdated: () => {
-      fetchEquity();
-      toast("Ekuitas tim telah diperbarui!");
-    },
-  });
-
+  // Initial load + page change → loading=true from initial state
   useEffect(() => {
-    fetchEquity();
-    fetchContributions();
+    Promise.all([fetchEquity(), fetchContributions()])
+      .finally(() => { setLoading(false); setEquityLoading(false); });
   }, [fetchEquity, fetchContributions]);
 
-  const filtered = filter === "all" ? contributions : contributions.filter((c) => c.status === filter);
+  // Background refresh dari Pusher → silent, no skeleton
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    fetchEquity();
+    fetchContributions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
+
   const members = equity?.equity_map ?? [];
   const totalSlices = equity?.total_slices ?? 0;
   const isFrozen = equity?.is_frozen ?? false;
 
+  // Page change → loading supaya spinner muncul
+  const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
+
   return (
     <div className="space-y-6">
       {/* ── Toggle: Kontribusi / Equity ── */}
-      <div className="flex gap-1 rounded-lg border border-gray-800 bg-gray-900/50 p-1 w-fit">
+      <div className="flex gap-1 rounded-lg border border-gray-800 bg-card/50 p-1 w-fit">
         <button
           type="button"
           onClick={() => setView("contributions")}
@@ -123,7 +128,8 @@ export default function ContributionsTab() {
         <>
           <div>
             <div className="mb-4 flex items-center justify-between">
-              <div className="flex gap-1 rounded-lg border border-gray-800 bg-gray-900/50 p-1">
+              <h2 className="text-lg font-semibold text-white">Kontribusi</h2>
+              <div className="flex gap-1 rounded-lg border border-gray-800 bg-card/50 p-1">
                 {FILTERS.map((f) => (
                   <button
                     key={f.key}
@@ -131,6 +137,7 @@ export default function ContributionsTab() {
                     onClick={() => {
                       setFilter(f.key);
                       setPage(1);
+                      setLoading(true);
                     }}
                     className={cn(
                       "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
@@ -162,15 +169,18 @@ export default function ContributionsTab() {
                 </div>
               ) : (
                 <>
-                  {filtered.map((c) => (
+                  {contributions.map((c) => (
                     <ContributionCard key={c.id} contribution={c} teamId={teamId} />
                   ))}
-                  {!loading && filtered.length === 0 && (
-                    <p className="py-8 text-center text-sm text-gray-500">
-                      {filter === "all"
-                        ? "Belum ada kontribusi. Buat kontribusi pertama!"
-                        : "Tidak ada kontribusi dengan status ini."}
-                    </p>
+                  {!loading && contributions.length === 0 && (
+                    <EmptyState
+                      icon={ListChecks}
+                      title={filter === "all" ? "Belum ada kontribusi" : "Tidak ditemukan"}
+                      description={filter === "all"
+                        ? "Buat kontribusi pertama untuk mulai menghitung equity."
+                        : `Tidak ada kontribusi dengan status "${filter}".`}
+                      action={filter === "all" ? { label: "Buat Kontribusi", onClick: () => setShowForm(true) } : undefined}
+                    />
                   )}
                   {loading && (
                     <div className="flex justify-center py-8">
@@ -181,15 +191,9 @@ export default function ContributionsTab() {
               )}
             </div>
 
-            {!loading && page < lastPage && (
-              <div className="mt-4 text-center">
-                <button
-                  type="button"
-                  onClick={() => setPage((p) => p + 1)}
-                  className="text-sm text-accent hover:underline"
-                >
-                  Muat lebih banyak
-                </button>
+            {!loading && (
+              <div className="mt-4 flex justify-center">
+                <Pagination current={page} last={lastPage} onChange={handlePageChange} />
               </div>
             )}
           </div>
@@ -202,6 +206,7 @@ export default function ContributionsTab() {
             onCreated={() => {
               setPage(1);
               setContributions([]);
+              fetchContributions(); // ← fetch immediately after clear
             }}
           />
         </>

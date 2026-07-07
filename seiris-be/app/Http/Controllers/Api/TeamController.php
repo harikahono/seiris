@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\TeamUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\JoinTeamRequest;
 use App\Http\Requests\Team\StoreTeamRequest;
@@ -175,6 +176,8 @@ class TeamController extends Controller
             return $member;
         });
 
+        broadcast(new TeamUpdated($team))->toOthers();
+
         return response()->json([
             'message' => 'Berhasil bergabung ke tim.',
             'data'    => new TeamMemberResource($member->load('user')),
@@ -187,7 +190,7 @@ class TeamController extends Controller
      */
     public function updateFmr(UpdateFmrRequest $request, Team $team, TeamMember $member): JsonResponse
     {
-        Gate::authorize('manageMembers', $team);
+        Gate::authorize('update', $team);
 
         // Pastikan member ini memang ada di tim ini
         if ($member->team_id !== $team->id) {
@@ -210,6 +213,8 @@ class TeamController extends Controller
             payload:     ['old_fmr' => $oldFmr, 'new_fmr' => $request->fmr],
         );
 
+        broadcast(new TeamUpdated($team))->toOthers();
+
         return response()->json([
             'message' => 'FMR berhasil diperbarui.',
             'data'    => new TeamMemberResource($member->fresh()->load('user')),
@@ -222,7 +227,7 @@ class TeamController extends Controller
      */
     public function freeze(Request $request, Team $team): JsonResponse
     {
-        Gate::authorize('freeze', $team);
+        Gate::authorize('update', $team);
 
         if ($team->is_frozen) {
             return response()->json(['message' => 'Tim sudah di-freeze sebelumnya.'], 409);
@@ -243,6 +248,8 @@ class TeamController extends Controller
             payload:     ['snapshot_id' => $snapshot->id],
         );
 
+        broadcast(new TeamUpdated($team))->toOthers();
+
         return response()->json([
             'message' => 'Equity tim berhasil di-freeze.',
             'data'    => new TeamResource($team->fresh()->load(['members.user', 'owner'])),
@@ -255,7 +262,7 @@ class TeamController extends Controller
      */
     public function exitMember(Request $request, Team $team, TeamMember $member): JsonResponse
     {
-        Gate::authorize('manageMembers', $team);
+        Gate::authorize('update', $team);
 
         if ($member->team_id !== $team->id) {
             return response()->json(['message' => 'Anggota tidak ditemukan di tim ini.'], 404);
@@ -307,6 +314,8 @@ class TeamController extends Controller
                 payload:     ['user_id' => $member->user_id],
             );
         });
+
+        broadcast(new TeamUpdated($team))->toOthers();
 
         return response()->json([
             'message' => 'Anggota berhasil dikeluarkan dari tim.',

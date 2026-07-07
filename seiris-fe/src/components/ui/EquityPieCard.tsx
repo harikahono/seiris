@@ -32,14 +32,14 @@ export default function EquityPieCard({ members, totalSlices, isFrozen }: Equity
 
   if (members.length === 0) {
     return (
-      <div className="flex h-full min-h-[300px] items-center justify-center rounded-lg border border-gray-800 bg-gray-900 p-6">
+      <div className="flex h-full min-h-[300px] items-center justify-center rounded-xl border border-gray-800 bg-card p-6">
         <p className="text-sm text-gray-500">Belum ada data equity.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+    <div className="rounded-xl border border-gray-800 bg-card p-5 h-full">
       <h3 className="mb-1 text-sm font-semibold text-white">Equity per Anggota</h3>
       <p className="mb-4 text-xs text-gray-500">
         Total Slices: {totalSlices.toLocaleString("id-ID")}
@@ -47,7 +47,7 @@ export default function EquityPieCard({ members, totalSlices, isFrozen }: Equity
       </p>
       <EvilPieChart
         className="h-[280px] w-full"
-        data={members as unknown as Record<string, unknown>[]}
+        data={members as unknown as Record<string, unknown>[] /* ponytail: no index sig on EquityMemberEntry */}
         dataKey="equity_pct"
         nameKey="member_id"
         config={chartConfig}

@@ -3,27 +3,22 @@
 namespace App\Events;
 
 use App\Models\Team;
-use App\Models\EquitySnapshot;
-use Illuminate\Broadcasting\Channel;
+use App\Models\Contribution;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class EquityUpdated implements ShouldBroadcastNow
+class ContributionCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
         public Team $team,
-        public EquitySnapshot $snapshot
+        public Contribution $contribution
     ) {}
 
-    /**
-     * Broadcast to private team channel.
-     * Only authenticated team members can listen.
-     */
     public function broadcastOn(): array
     {
         return [
@@ -33,17 +28,18 @@ class EquityUpdated implements ShouldBroadcastNow
 
     public function broadcastAs(): string
     {
-        return 'equity.updated';
+        return 'contribution.created';
     }
 
     public function broadcastWith(): array
     {
         return [
-            'snapshot_id'  => $this->snapshot->id,
-            'total_slices' => $this->snapshot->total_slices,
-            'equity_map'   => $this->snapshot->equity_map,
-            'is_frozen'    => $this->snapshot->is_frozen,
-            'updated_at'   => $this->snapshot->created_at->toISOString(),
+            'id'          => $this->contribution->id,
+            'type'        => $this->contribution->type,
+            'description' => $this->contribution->description,
+            'value'       => $this->contribution->value,
+            'member_name' => $this->contribution->member?->user?->name ?? 'Anggota',
+            'status'      => $this->contribution->status,
         ];
     }
 }
