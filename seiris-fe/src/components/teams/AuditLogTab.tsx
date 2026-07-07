@@ -98,7 +98,7 @@ export default function AuditLogTab() {
 
       <div className="space-y-3">
         {logs.map((log) => (
-          <AuditLogEntry key={log.id} log={log} />
+          <AuditLogEntry key={log.id} log={log} teamId={teamId} />
         ))}
         {loading && page === 1 && (
           <div className="space-y-3">

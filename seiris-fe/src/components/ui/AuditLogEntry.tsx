@@ -1,6 +1,8 @@
 import { type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import type { AuditLogItem } from "@/types";
 import { cn } from "@/lib/utils";
+import { formatRp } from "@/lib/constants";
 import {
   ThumbsUp,
   ThumbsDown,
@@ -70,9 +72,12 @@ function getActionMeta(action: string) {
 
 interface AuditLogItemProps {
   log: AuditLogItem;
+  teamId?: string;
 }
 
-export default function AuditLogEntry({ log }: AuditLogItemProps) {
+const ACTION_LINK_PREFIXES = ["contribution.", "vote."];
+
+export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
   const meta = getActionMeta(log.action);
   const Icon = meta.icon;
   const time = new Date(log.created_at).toLocaleString("id-ID", {
@@ -83,7 +88,10 @@ export default function AuditLogEntry({ log }: AuditLogItemProps) {
     minute: "2-digit",
   });
 
-  return (
+  const isClickable = teamId && log.subject_id &&
+    ACTION_LINK_PREFIXES.some(p => log.action.startsWith(p));
+
+  const card = (
     <div className="flex gap-3 rounded-lg border border-gray-800 bg-card p-4">
       <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-full", meta.bg)}>
         <Icon className={cn("size-4", meta.color)} />
@@ -110,6 +118,19 @@ export default function AuditLogEntry({ log }: AuditLogItemProps) {
       </div>
     </div>
   );
+
+  if (isClickable) {
+    return (
+      <Link
+        to={`/teams/${teamId}/contributions/${log.subject_id}`}
+        className="block transition hover:border-gray-700 hover:bg-gray-800/50 cursor-pointer"
+      >
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }
 
 function renderPayload(action: string, payload: Record<string, unknown>): ReactNode {
@@ -117,7 +138,13 @@ function renderPayload(action: string, payload: Record<string, unknown>): ReactN
     case action === "vote.cast":
       return payload.note ? <PayloadRow label="Catatan" value={payload.note as string} /> : null;
     case action === "contribution.created":
-      return <PayloadRow label={payload.type as string} value={payload.description as string} />;
+      return (
+        <>
+          <PayloadRow label="Deskripsi" value={payload.description as string} />
+          <PayloadRow label="Nilai" value={formatRp(payload.value as number)} />
+          <PayloadRow label="Slice" value={Number(payload.total_slices).toLocaleString("id-ID")} />
+        </>
+      );
     case action === "contribution.approved":
       return payload.approve_count
         ? <PayloadRow label="Disetujui" value={`${payload.approve_count} dari ${payload.total_voters} suara`} />

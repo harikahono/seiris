@@ -128,7 +128,7 @@ export default function DashboardLayout() {
   // ── Active feature detection ──
   const activeFeature = features.find((f) => {
     const match = location.pathname.match(/\/teams\/([^/]+)\/(.+)/);
-    return match && match[2] === f.path;
+    return match && match[2]?.startsWith(f.path);
   });
 
   // ── Feature click: langsung navigasi pake currentTeamId ──
