@@ -17,20 +17,37 @@ interface ContributionCreatedData {
   status: string;
 }
 
+interface EquityUpdatedData {
+  snapshot_id: string;
+  total_slices: number;
+  equity_map: Record<string, unknown>;
+  is_frozen: boolean;
+  updated_at: string;
+  approved_by: string | null;
+  contribution_desc: string | null;
+}
+
+interface TeamUpdatedData {
+  team_id: string;
+  timestamp: string;
+  action: string;
+  user_name: string;
+}
+
 /**
  * Subscribe to Pusher presence channel for a team.
  *
  * Usage:
  *   usePusher(teamId, {
- *     onEquityUpdated: () => { fetchEquity(); toast("Equity updated!"); },
+ *     onEquityUpdated: (data) => { fetchEquity(); toast("Equity updated!"); },
  *   });
  */
 export function usePusher(
   teamId: string | undefined,
   callbacks: {
-    onEquityUpdated?: () => void;
+    onEquityUpdated?: (data: EquityUpdatedData) => void;
     onContributionCreated?: (data: ContributionCreatedData) => void;
-    onTeamUpdated?: () => void;
+    onTeamUpdated?: (data: TeamUpdatedData) => void;
     onMembersChange?: (members: PresenceUser[]) => void;
   } = {}
 ) {
@@ -90,16 +107,16 @@ export function usePusher(
       // auth fail — handled by backend logging
     });
 
-    channel.bind("equity.updated", () => {
-      callbacksRef.current.onEquityUpdated?.();
+    channel.bind("equity.updated", (data: EquityUpdatedData) => {
+      callbacksRef.current.onEquityUpdated?.(data);
     });
 
     channel.bind("contribution.created", (data: ContributionCreatedData) => {
       callbacksRef.current.onContributionCreated?.(data);
     });
 
-    channel.bind("team.updated", () => {
-      callbacksRef.current.onTeamUpdated?.();
+    channel.bind("team.updated", (data: TeamUpdatedData) => {
+      callbacksRef.current.onTeamUpdated?.(data);
     });
 
     // ── Presence tracking ──
