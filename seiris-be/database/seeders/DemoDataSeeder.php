@@ -166,22 +166,16 @@ class DemoDataSeeder extends Seeder
 
     public function run(): void
     {
-        DB::statement('SET session_replication_role = replica'); // disable FK checks for speed
+        $this->command?->info('🚀 Seeding demo data...');
 
-        try {
-            $this->command?->info('🚀 Seeding demo data...');
+        $users = $this->createUsers();
+        $teams = $this->createTeamsAndMembers($users);
+        $this->updateFmrs($users);
+        $contribs = $this->createContributions($teams, $users);
+        $this->createSnapshots($teams);
+        $this->createRevenues($teams, $users);
 
-            $users = $this->createUsers();
-            $teams = $this->createTeamsAndMembers($users);
-            $this->updateFmrs($users);
-            $contribs = $this->createContributions($teams, $users);
-            $this->createSnapshots($teams);
-            $this->createRevenues($teams, $users);
-
-            $this->command?->info('✅ Demo data seeding selesai!');
-        } finally {
-            DB::statement('SET session_replication_role = origin');
-        }
+        $this->command?->info('✅ Demo data seeding selesai!');
     }
 
     private function createUsers(): array
