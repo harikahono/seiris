@@ -107,7 +107,7 @@ export type ContributionType =
   | "IDEA"
   | "NETWORK"
   | "FACILITY"
-  | "REVENUE";
+  | "SALES";
 
 export type ContributionStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -128,8 +128,12 @@ export interface Contribution {
   total_slices: number;
   status: ContributionStatus;
   contribution_date: string;
+  // SALES specific
+  deal_value: number | null;
+  estimated_value: number | null;
+  commission_rate: number | null;
+  // Legacy REVENUE (data lama)
   invoice_amount: number | null;
-  actual_amount: number | null;
   invoice_url: string | null;
   member: TeamMember;
   approvals: ContributionApproval[];
@@ -143,9 +147,9 @@ export interface CreateContributionPayload {
   contribution_date: string;
   hours?: number;
   amount?: number;
-  invoice_amount?: number;
-  actual_amount?: number;
-  invoice?: File;
+  deal_value?: number;
+  estimated_value?: number;
+  commission_rate?: number;
 }
 
 export interface VotePayload {

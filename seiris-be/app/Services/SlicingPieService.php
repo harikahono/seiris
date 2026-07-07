@@ -83,7 +83,7 @@ class SlicingPieService
     /**
      * Calculate slices for a given contribution type, value, and FMR.
      *
-     * @param string $type   TIME|CASH|IDEA|NETWORK|FACILITY|REVENUE
+     * @param string $type   TIME|CASH|IDEA|NETWORK|FACILITY|SALES
      * @param int    $value  Contribution value in IDR
      * @return array ['multiplier' => float, 'total_slices' => int]
      */
@@ -92,7 +92,7 @@ class SlicingPieService
         $multiplier = match ($type) {
             'CASH'                              => 4.0,
             'TIME', 'IDEA', 'NETWORK',
-            'FACILITY', 'REVENUE'               => 2.0,
+            'FACILITY', 'SALES'                 => 2.0,
             default => throw new \InvalidArgumentException("Unknown contribution type: {$type}"),
         };
 

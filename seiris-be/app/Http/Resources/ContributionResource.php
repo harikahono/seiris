@@ -21,9 +21,13 @@ class ContributionResource extends JsonResource
             'status'            => $this->status,
             'contribution_date' => $this->contribution_date?->toDateString(),
 
-            // REVENUE specific
+            // SALES specific
+            'deal_value'        => $this->when($this->type === 'SALES', $this->deal_value),
+            'estimated_value'   => $this->when($this->type === 'SALES', $this->estimated_value),
+            'commission_rate'   => $this->when($this->type === 'SALES', $this->commission_rate),
+
+            // Legacy REVENUE fields (data lama)
             'invoice_amount'    => $this->invoice_amount,
-            'actual_amount'     => $this->actual_amount,
             'invoice_url'       => $this->invoice_path
                 ? asset('storage/' . $this->invoice_path)
                 : null,
