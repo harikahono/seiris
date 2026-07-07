@@ -37,6 +37,7 @@ interface TeamUpdatedData {
 
 /**
  * Subscribe to Pusher presence channel for a team.
+ * Uses single Pusher connection — switches channels on team change.
  *
  * Usage:
  *   usePusher(teamId, {
@@ -53,38 +54,20 @@ export function usePusher(
   } = {}
 ) {
   const pusherRef = useRef<Pusher | null>(null);
-  const teamIdRef = useRef<string | undefined>(undefined);
+  const channelNameRef = useRef<string | undefined>(undefined);
   const callbacksRef = useRef(callbacks);
   const membersRef = useRef<PresenceUser[]>([]);
 
-  // Keep ref in sync after render — lint rule prevents setting ref during render
+  // Keep ref in sync after render
   useEffect(() => { callbacksRef.current = callbacks; });
 
+  // Init Pusher ONCE on mount — disconnect on unmount
   useEffect(() => {
-    if (!teamId) return;
-
-    // Reuse existing connection if already on this team
-    if (
-      pusherRef.current &&
-      teamIdRef.current === teamId &&
-      pusherRef.current.connection.state === "connected"
-    ) {
-      return;
-    }
-
-    // Disconnect if team changed
-    if (pusherRef.current && teamIdRef.current !== teamId) {
-      pusherRef.current.disconnect();
-      pusherRef.current = null;
-    }
-
     const token = localStorage.getItem("token");
-    if (!token) return;
-
     const appKey = import.meta.env.VITE_PUSHER_APP_KEY;
     const cluster = import.meta.env.VITE_PUSHER_CLUSTER;
-    if (!appKey || !cluster) {
-      if (import.meta.env.DEV) console.warn("[usePusher] Missing Pusher env vars");
+    if (!token || !appKey || !cluster) {
+      if (import.meta.env.DEV) console.warn("[usePusher] Missing token or Pusher env vars");
       return;
     }
 
@@ -99,10 +82,40 @@ export function usePusher(
     });
 
     pusherRef.current = pusher;
-    teamIdRef.current = teamId;
 
-    // Subscribe and bind events
-    const channel = pusher.subscribe(`presence-team.${teamId}`);
+    return () => {
+      pusher.disconnect();
+      pusherRef.current = null;
+      membersRef.current = [];
+    };
+  }, []);
+
+  // Switch channel when teamId changes — subscribe/unsubscribe without new connection
+  useEffect(() => {
+    const pusher = pusherRef.current;
+    if (!pusher) return;
+
+    const newChannel = teamId ? `presence-team.${teamId}` : undefined;
+
+    // Same channel — skip
+    if (channelNameRef.current === newChannel) return;
+
+    // Unsubscribe old channel
+    if (channelNameRef.current) {
+      const oldChannel = pusher.channel(channelNameRef.current);
+      if (oldChannel) {
+        oldChannel.unbind_all();
+        pusher.unsubscribe(channelNameRef.current);
+      }
+    }
+
+    channelNameRef.current = newChannel;
+    membersRef.current = [];
+
+    if (!newChannel) return;
+
+    // Subscribe new channel
+    const channel = pusher.subscribe(newChannel);
 
     channel.bind("pusher:subscription_error", () => {
       // auth fail — handled by backend logging
@@ -143,14 +156,5 @@ export function usePusher(
       membersRef.current = membersRef.current.filter((m) => m.id !== member.user_id);
       callbacksRef.current.onMembersChange?.(membersRef.current);
     });
-
-    return () => {
-      if (pusherRef.current === pusher) {
-        pusher.disconnect();
-        pusherRef.current = null;
-        teamIdRef.current = undefined;
-        membersRef.current = [];
-      }
-    };
   }, [teamId]);
 }
