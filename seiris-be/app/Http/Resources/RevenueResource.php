@@ -27,7 +27,7 @@ class RevenueResource extends JsonResource
             'distributions'        => $this->whenLoaded('distributions',
                 fn() => $this->distributions->map(fn($d) => [
                     'member'            => new TeamMemberResource($d->member),
-                    'equity_pct'        => $d->equity_pct_snapshot,
+                    'equity_pct'        => (float) $d->equity_pct_snapshot,
                     'amount'            => $d->amount,
                 ])
             ),
