@@ -16,7 +16,7 @@ class Revenue extends Model
 
     protected $fillable = [
         'team_id', 'recorded_by', 'description',
-        'amount', 'distributable_amount', 'proof_path',
+        'amount', 'distributable_amount', 'deductions', 'proof_path',
         'revenue_date', 'is_distributed', 'distributed_at',
         'status',
     ];
@@ -26,6 +26,7 @@ class Revenue extends Model
         return [
             'amount'               => 'integer',
             'distributable_amount' => 'integer',
+            'deductions'           => 'array',
             'revenue_date'         => 'date',
             'is_distributed'       => 'boolean',
             'distributed_at'       => 'datetime',

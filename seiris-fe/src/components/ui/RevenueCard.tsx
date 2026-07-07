@@ -47,7 +47,7 @@ function DistributionTable({ revenue }: { revenue: Revenue }) {
         onClick={() => setShowBreakdown(!showBreakdown)}
         className="text-xs text-accent hover:underline transition"
       >
-        {showBreakdown ? "Sembunyikan" : "Lihat"} rincian distribusi
+        {showBreakdown ? "Sembunyikan" : "Lihat"} rincian pembagian
       </button>
 
       {showBreakdown && (
@@ -214,7 +214,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
           </div>
           <p className="mt-1 text-sm text-gray-300">{revenue.description}</p>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-            <span>Distribusi: {formatRp(revenue.distributable_amount)}</span>
+            <span>Siap dibagi: <span className="text-accent font-medium">{formatRp(revenue.distributable_amount)}</span></span>
             <span className="text-gray-700">·</span>
             <span>{new Date(revenue.revenue_date).toLocaleDateString("id-ID")}</span>
             <span className="text-gray-700">·</span>
@@ -236,6 +236,24 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
           )}
         </div>
       </div>
+
+      {revenue.deductions && revenue.deductions.length > 0 && (
+        <div className="mt-3 rounded-lg border border-gray-800 bg-gray-950/50 px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1">Potongan</p>
+          <div className="space-y-0.5">
+            {revenue.deductions.map((d, i) => (
+              <div key={i} className="flex justify-between text-xs">
+                <span className="text-gray-400">{d.for}</span>
+                <span className="font-mono text-gray-300">-{formatRp(d.amount)}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between border-t border-gray-800 mt-1.5 pt-1.5 text-xs">
+            <span className="text-gray-500 font-medium">Siap Dibagi</span>
+            <span className="font-mono text-accent font-bold">{formatRp(revenue.distributable_amount)}</span>
+          </div>
+        </div>
+      )}
 
       {status === "distributed" ? (
         <DistributionTable revenue={revenue} />
