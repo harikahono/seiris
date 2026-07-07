@@ -15,11 +15,14 @@ class StoreRevenueRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'description'          => ['required', 'string', 'min:5', 'max:500'],
-            'amount'               => ['required', 'integer', 'min:1000'],
-            'distributable_amount' => ['required', 'integer', 'min:0', 'lte:amount'],
-            'revenue_date'         => ['required', 'date', 'before_or_equal:today'],
-            'proof'                => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            'description'                    => ['required', 'string', 'min:5', 'max:500'],
+            'amount'                         => ['required', 'integer', 'min:1000'],
+            'distributable_amount'           => ['sometimes', 'integer', 'min:0', 'lte:amount'],
+            'revenue_date'                   => ['required', 'date', 'before_or_equal:today'],
+            'proof'                          => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            'deductions'                     => ['nullable', 'array'],
+            'deductions.*.for'               => ['required_with:deductions', 'string', 'max:255'],
+            'deductions.*.amount'            => ['required_with:deductions', 'integer', 'min:1'],
         ];
     }
 

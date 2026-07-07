@@ -16,6 +16,7 @@ class RevenueResource extends JsonResource
             'description'          => $this->description,
             'amount'               => $this->amount,
             'distributable_amount' => $this->distributable_amount,
+            'deductions'           => $this->deductions ?? [],
             'proof_url'            => $this->proof_path
                 ? asset('storage/' . $this->proof_path)
                 : null,

@@ -152,11 +152,12 @@ class DemoDataSeeder extends Seeder
     ];
 
     // ── Revenue Definitions ───────────────────────────────────
+    // deductions: [{for: string, amount: int}] — daftar potongan transparan
     private array $revenueDefs = [
-        ['team' => 'GENUI',         'by' => 'kahono@z4foundation.com', 'desc' => 'Pendanaan Awal Angel Investor', 'amount' => 50000000, 'distributable' => 35000000, 'distribute' => true],
-        ['team' => 'GENUI',         'by' => 'kahono@z4foundation.com', 'desc' => 'Freelance Project Klien A',     'amount' => 20000000, 'distributable' => 15000000, 'distribute' => true],
-        ['team' => 'Karya Digital', 'by' => 'adi@example.com',         'desc' => 'Project Website UMKM',          'amount' => 15000000, 'distributable' => 12000000, 'distribute' => true],
-        ['team' => 'StartupA',      'by' => 'dian@example.com',        'desc' => 'Hibah Program Startup',         'amount' => 75000000, 'distributable' => 60000000, 'distribute' => false],
+        ['team' => 'GENUI',         'by' => 'kahono@z4foundation.com', 'desc' => 'Pendanaan Awal Angel Investor', 'amount' => 50000000, 'distributable' => 35000000, 'deductions' => [['for' => 'Notaris & Legal', 'amount' => 10000000], ['for' => 'Platform fee', 'amount' => 5000000]], 'distribute' => true],
+        ['team' => 'GENUI',         'by' => 'kahono@z4foundation.com', 'desc' => 'Freelance Project Klien A',     'amount' => 20000000, 'distributable' => 15000000, 'deductions' => [['for' => 'Server DO 3 bulan', 'amount' => 3000000], ['for' => 'Domain & SSL', 'amount' => 2000000]], 'distribute' => true],
+        ['team' => 'Karya Digital', 'by' => 'adi@example.com',         'desc' => 'Project Website UMKM',          'amount' => 15000000, 'distributable' => 12000000, 'deductions' => [['for' => 'Hosting 1 tahun', 'amount' => 2000000], ['for' => 'Template Premium', 'amount' => 1000000]], 'distribute' => true],
+        ['team' => 'StartupA',      'by' => 'dian@example.com',        'desc' => 'Hibah Program Startup',         'amount' => 75000000, 'distributable' => 60000000, 'deductions' => [['for' => 'Pajak', 'amount' => 10000000], ['for' => 'Administrasi bank', 'amount' => 5000000]], 'distribute' => false],
     ];
 
     public function __construct()
@@ -393,6 +394,7 @@ class DemoDataSeeder extends Seeder
                 'description'          => $def['desc'],
                 'amount'               => $def['amount'],
                 'distributable_amount' => $def['distributable'],
+                'deductions'           => $def['deductions'] ?? [],
                 'revenue_date'         => now()->subDays(rand(5, 15)),
                 'is_distributed'       => false,
             ]);
@@ -413,12 +415,10 @@ class DemoDataSeeder extends Seeder
                     DB::transaction(function () use ($revenue, $snapshot, $team, $member, $def) {
                         foreach ($snapshot->equity_map as $memberId => $data) {
                             $amount = (int) round($def['distributable'] * ($data['equity_pct'] / 100));
-                            ProfitDistribution::create([
-                                'revenue_id'          => $revenue->id,
-                                'member_id'           => $memberId,
-                                'equity_pct_snapshot' => $data['equity_pct'],
-                                'amount'              => $amount,
-                            ]);
+                            ProfitDistribution::firstOrCreate(
+                                ['revenue_id' => $revenue->id, 'member_id' => $memberId],
+                                ['equity_pct_snapshot' => $data['equity_pct'], 'amount' => $amount]
+                            );
                         }
                         $revenue->update([
                             'is_distributed' => true,

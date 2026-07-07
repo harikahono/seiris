@@ -60,12 +60,17 @@ class RevenueController extends Controller
         }
 
         $revenue = DB::transaction(function () use ($request, $team, $member, $proofPath) {
+            $deductions = $request->deductions ?? [];
+            $totalDeductions = collect($deductions)->sum('amount');
+            $distributable = $request->distributable_amount ?? ($request->amount - $totalDeductions);
+
             $revenue = Revenue::create([
                 'team_id'              => $team->id,
                 'recorded_by'          => $member->id,
                 'description'          => $request->description,
                 'amount'               => $request->amount,
-                'distributable_amount' => $request->distributable_amount,
+                'distributable_amount' => max(0, $distributable),
+                'deductions'           => $deductions,
                 'proof_path'           => $proofPath,
                 'revenue_date'         => $request->revenue_date,
                 'is_distributed'       => false,

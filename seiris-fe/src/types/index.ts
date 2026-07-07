@@ -176,6 +176,11 @@ export interface EquityData {
 }
 
 // ── Revenue ─────────────────────────────────────────────────
+export interface RevenueDeduction {
+  for: string;
+  amount: number;
+}
+
 export interface RevenueDistribution {
   member: TeamMember;
   equity_pct: number;
@@ -187,6 +192,7 @@ export interface Revenue {
   description: string;
   amount: number;
   distributable_amount: number;
+  deductions: RevenueDeduction[];
   proof_url: string | null;
   revenue_date: string;
   status: 'pending' | 'distribute_requested' | 'distributed';
@@ -200,7 +206,8 @@ export interface Revenue {
 export interface CreateRevenuePayload {
   description: string;
   amount: number;
-  distributable_amount: number;
+  distributable_amount?: number;
+  deductions?: RevenueDeduction[];
   revenue_date: string;
   proof?: File;
 }
