@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Contribution;
 use App\Models\EquitySnapshot;
 use App\Models\Revenue;
 use App\Models\Team;
@@ -21,6 +22,8 @@ class EquityController extends Controller
     {
         // authorizeMember di-handle middleware EnsureTeamMember
 
+        $slicesByType = $this->getSlicesByType($team);
+
         $snapshot = EquitySnapshot::where('team_id', $team->id)
             ->latest()
             ->first();
@@ -30,16 +33,17 @@ class EquityController extends Controller
 
             return response()->json([
                 'data' => [
-                    'total_slices'  => 0,
-                    'equity_map'    => $members->map(fn($m) => [
+                    'total_slices'   => 0,
+                    'equity_map'     => $members->map(fn($m) => [
                         'member_id'  => $m->id,
                         'name'       => $m->user->name,
                         'role'       => $m->role,
                         'slices'     => 0,
                         'equity_pct' => 0,
                     ])->values()->toArray(),
-                    'is_frozen'     => $team->is_frozen,
-                    'calculated_at' => null,
+                    'slices_by_type' => $slicesByType,
+                    'is_frozen'      => $team->is_frozen,
+                    'calculated_at'  => null,
                 ],
             ]);
         }
@@ -62,13 +66,34 @@ class EquityController extends Controller
 
         return response()->json([
             'data' => [
-                'snapshot_id'   => $snapshot->id,
-                'total_slices'  => $snapshot->total_slices,
-                'equity_map'    => $enriched,
-                'is_frozen'     => $snapshot->is_frozen,
-                'calculated_at' => $snapshot->created_at?->toISOString(),
+                'snapshot_id'    => $snapshot->id,
+                'total_slices'   => $snapshot->total_slices,
+                'equity_map'     => $enriched,
+                'slices_by_type' => $slicesByType,
+                'is_frozen'      => $snapshot->is_frozen,
+                'calculated_at'  => $snapshot->created_at?->toISOString(),
             ],
         ]);
+    }
+
+    /**
+     * Aggregasi approved contributions per tipe untuk equity chart.
+     */
+    private function getSlicesByType(Team $team): array
+    {
+        $breakdown = Contribution::where('team_id', $team->id)
+            ->where('status', 'APPROVED')
+            ->selectRaw('type, SUM(total_slices) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type')
+            ->toArray();
+
+        $allTypes = ['CASH', 'TIME', 'IDEA', 'NETWORK', 'FACILITY', 'REVENUE'];
+        $result = [];
+        foreach ($allTypes as $t) {
+            $result[$t] = (int) ($breakdown[$t] ?? 0);
+        }
+        return $result;
     }
 
     /**

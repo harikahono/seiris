@@ -166,6 +166,7 @@ export interface EquityData {
   snapshot_id: string;
   total_slices: number;
   equity_map: EquityMemberEntry[];
+  slices_by_type: Record<string, number>;
   is_frozen: boolean;
   calculated_at: string | null;
 }
