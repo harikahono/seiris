@@ -5,6 +5,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\EquityUpdated;
+use App\Events\TeamUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Contribution\StoreVoteRequest;
 use App\Http\Resources\ContributionResource;
@@ -119,6 +120,13 @@ class ApprovalController extends Controller
             } catch (\Throwable $e) {
                 Log::warning('[ApprovalController] Broadcast failed: ' . $e->getMessage());
             }
+        } elseif ($result->status === 'REJECTED') {
+            broadcast(new TeamUpdated(
+                $team,
+                'contribution.rejected',
+                $voter->user->name,
+                $contribution->description,
+            ))->toOthers();
         }
 
         return response()->json([
@@ -144,6 +152,13 @@ class ApprovalController extends Controller
             'revenue_date'         => $contribution->contribution_date,
             'is_distributed'       => false,
         ]);
+
+        $contributorName = $contribution->member?->user?->name ?? 'Anggota';
+        broadcast(new TeamUpdated(
+            $contribution->team,
+            'revenue.created',
+            $contributorName,
+        ))->toOthers();
     }
 
     /**
