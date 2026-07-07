@@ -294,17 +294,24 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-300">Komisi Rate (%)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      placeholder="50"
-                      value={commissionRate}
-                      onChange={(e) => setCommissionRate(e.target.value)}
-                      required
-                      className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-                    />
+                    <label className="mb-1 block text-sm font-medium text-gray-300">
+                      Komisi Rate: <span className="text-accent font-bold">{commissionRate}%</span>
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-500 w-6 text-right">0%</span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={commissionRate}
+                        onChange={(e) => setCommissionRate(e.target.value)}
+                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer bg-gray-700 accent-accent
+                          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
+                          [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer"
+                        required
+                      />
+                      <span className="text-xs text-gray-500 w-6">100%</span>
+                    </div>
                     {errors.commission_rate && <p className="mt-1 text-xs text-red-500">{errors.commission_rate}</p>}
                   </div>
                   {dealValue && estimatedValue && commissionRate && (

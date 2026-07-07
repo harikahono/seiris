@@ -126,6 +126,32 @@ export default function ContributionDetailPage() {
             </div>
           )}
         </div>
+
+        {contribution.type === "SALES" && (
+          <div className="mt-5 rounded-xl border border-gray-700/50 bg-gray-900/50 p-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">Rincian Sales</p>
+            <div className="space-y-1.5 text-sm">
+              {(() => {
+                const dl = contribution.deal_value ?? 0;
+                const es = contribution.estimated_value ?? 0;
+                const markup = Math.max(0, dl - es);
+                const markupPct = es > 0 ? ((markup / es) * 100).toFixed(1) : "0.0";
+                const rate = contribution.commission_rate ?? 0;
+                const komisi = Math.round(markup * rate / 100);
+                return (
+                  <>
+                    <div className="flex justify-between"><span className="text-gray-500">Deal Client</span><span className="font-mono text-white">Rp {dl.toLocaleString("id-ID")}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Estimasi Tim</span><span className="font-mono text-white">Rp {es.toLocaleString("id-ID")}</span></div>
+                    <div className="flex justify-between border-b border-gray-800 pb-1.5"><span className="text-gray-500">Markup</span><span className="font-mono text-green-400">Rp {markup.toLocaleString("id-ID")} ({markupPct}%)</span></div>
+                    <div className="flex justify-between pt-0.5"><span className="text-gray-500">Rate Komisi</span><span className="font-mono text-white">{rate}%</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Komisi</span><span className="font-mono text-amber-400">Rp {komisi.toLocaleString("id-ID")}</span></div>
+                    <div className="flex justify-between border-t border-gray-700 pt-1.5"><span className="text-gray-300 font-medium">Slices (komisi ×{contribution.multiplier})</span><span className="font-mono text-accent font-bold">{(komisi * Number(contribution.multiplier)).toLocaleString("id-ID")}</span></div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Voting Section ── */}
