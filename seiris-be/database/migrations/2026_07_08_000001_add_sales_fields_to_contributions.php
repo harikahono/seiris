@@ -9,7 +9,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Drop enum constraint — ganti jadi string biasa biar gampang maintain
+        // Drop enum CHECK constraint (Postgres) — $table->string()->change() gak otomatis drop ini
+        DB::statement('ALTER TABLE contributions DROP CONSTRAINT IF EXISTS contributions_type_check');
+
+        // Ganti jadi string biasa biar gampang maintain
         Schema::table('contributions', function (Blueprint $table) {
             $table->string('type', 20)->change();
         });
