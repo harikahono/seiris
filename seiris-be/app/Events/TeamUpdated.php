@@ -17,6 +17,7 @@ class TeamUpdated implements ShouldBroadcastNow
         public Team $team,
         public string $action = '',
         public string $userName = '',
+        public ?string $contributionDesc = null,
     ) {}
 
     public function broadcastOn(): array
@@ -34,10 +35,11 @@ class TeamUpdated implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'team_id'   => $this->team->id,
-            'timestamp' => now()->toISOString(),
-            'action'    => $this->action,
-            'user_name' => $this->userName,
+            'team_id'           => $this->team->id,
+            'timestamp'         => now()->toISOString(),
+            'action'            => $this->action,
+            'user_name'         => $this->userName,
+            'contribution_desc' => $this->contributionDesc,
         ];
     }
 }

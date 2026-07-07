@@ -115,6 +115,9 @@ export default function DashboardLayout() {
         case 'profit.distributed':
           toast(`✅ ${data.user_name} mendistribusikan profit`);
           break;
+        case 'contribution.rejected':
+          toast(`❌ Kontribusi "${data.contribution_desc}" ditolak oleh ${data.user_name}`);
+          break;
       }
     }, [triggerRefresh, refreshTeams]),
     onMembersChange: useCallback((members) => {

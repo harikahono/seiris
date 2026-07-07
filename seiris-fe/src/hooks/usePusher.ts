@@ -131,8 +131,11 @@ export function usePusher(
     });
 
     channel.bind("pusher:member_added", (member: { user_id: string; user_info: PresenceUser }) => {
-      membersRef.current = [...membersRef.current, member.user_info];
-      callbacksRef.current.onMembersChange?.(membersRef.current);
+      const exists = membersRef.current.some((m) => m.id === member.user_info.id);
+      if (!exists) {
+        membersRef.current = [...membersRef.current, member.user_info];
+        callbacksRef.current.onMembersChange?.(membersRef.current);
+      }
     });
 
     channel.bind("pusher:member_removed", (member: { user_id: string }) => {
@@ -145,6 +148,7 @@ export function usePusher(
         pusher.disconnect();
         pusherRef.current = null;
         teamIdRef.current = undefined;
+        membersRef.current = [];
       }
     };
   }, [teamId]);
