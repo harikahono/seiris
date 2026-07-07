@@ -3,8 +3,9 @@ import api from "@/api/axios";
 import { parseErrors } from "@/lib/parseErrors";
 import { cn } from "@/lib/utils";
 import { CONTRIBUTION_TYPES } from "@/lib/contribution";
+import { formatRp } from "@/lib/constants";
 import { toast } from "sonner";
-import { X, Loader2, ArrowLeft } from "lucide-react";
+import { X, Loader2, ArrowLeft, Upload } from "lucide-react";
 import type { ContributionType } from "@/types";
 
 interface ContributionFormProps {
@@ -263,52 +264,57 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
 
               {isRevenue && (
                 <>
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-300">Nominal Dilaporkan ke Tim</label>
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder="Contoh: 3000000"
-                      value={invoiceAmount}
-                      onChange={(e) => setInvoiceAmount(e.target.value)}
-                      required
-                      className={inputClass("invoice_amount")}
-                    />
-                    {errors.invoice_amount && <p className="mt-1 text-xs text-red-500">{errors.invoice_amount}</p>}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="rev-invoice" className="mb-1 block text-sm font-medium text-gray-300">Biaya / Modal (Rp)</label>
+                      <input
+                        id="rev-invoice"
+                        type="number"
+                        min="0"
+                        placeholder="Invoice amount"
+                        value={invoiceAmount}
+                        onChange={(e) => setInvoiceAmount(e.target.value)}
+                        required
+                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                      />
+                      {errors.invoice_amount && <p className="mt-1 text-xs text-red-500">{errors.invoice_amount}</p>}
+                    </div>
+                    <div>
+                      <label htmlFor="rev-actual" className="mb-1 block text-sm font-medium text-gray-300">Pendapatan (Rp)</label>
+                      <input
+                        id="rev-actual"
+                        type="number"
+                        min="0"
+                        placeholder="Actual amount"
+                        value={actualAmount}
+                        onChange={(e) => setActualAmount(e.target.value)}
+                        required
+                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                      />
+                      {errors.actual_amount && <p className="mt-1 text-xs text-red-500">{errors.actual_amount}</p>}
+                    </div>
                   </div>
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-300">
-                      Nominal Sebenarnya <span className="text-gray-500">(≥ nominal dilaporkan)</span>
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder="Contoh: 5000000"
-                      value={actualAmount}
-                      onChange={(e) => setActualAmount(e.target.value)}
-                      required
-                      className={inputClass("actual_amount")}
-                    />
-                    {errors.actual_amount && <p className="mt-1 text-xs text-red-500">{errors.actual_amount}</p>}
-                  </div>
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-300">Upload Invoice <span className="text-gray-500">(opsional)</span></label>
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => setInvoiceFile(e.target.files?.[0] ?? null)}
-                      className={inputClass("invoice")}
-                    />
-                    {errors.invoice && <p className="mt-1 text-xs text-red-500">{errors.invoice}</p>}
-                  </div>
-                  {invoiceAmount && actualAmount && !errors.invoice_amount && !errors.actual_amount && (
-                    <p className="text-xs text-gray-500">
-                      Revenue: Rp {(Number(actualAmount) - Number(invoiceAmount)).toLocaleString("id-ID")} →{" "}
-                      <span className="text-accent">
-                        Rp {((Number(actualAmount) - Number(invoiceAmount)) * 2).toLocaleString("id-ID")} slices
-                      </span>
+                  {invoiceAmount && actualAmount && (
+                    <p className="-mt-2 text-xs text-gray-500">
+                      Revenue bersih: <span className="text-white font-medium">{formatRp(Number(actualAmount) - Number(invoiceAmount))}</span>
+                      {" · "}Slices: <span className="text-accent font-medium">Rp {((Number(actualAmount) - Number(invoiceAmount)) * 2).toLocaleString("id-ID")}</span>
+                      {" (×2)"}
                     </p>
                   )}
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-300">Upload Invoice <span className="text-gray-500">(opsional)</span></label>
+                    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-700 px-3 py-3 text-sm text-gray-500 transition hover:border-accent hover:text-accent">
+                      <Upload className="size-4" />
+                      {invoiceFile ? invoiceFile.name : "Upload file PDF / JPG / PNG"}
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => setInvoiceFile(e.target.files?.[0] ?? null)}
+                        className="hidden"
+                      />
+                    </label>
+                    {errors.invoice && <p className="mt-1 text-xs text-red-500">{errors.invoice}</p>}
+                  </div>
                 </>
               )}
 
