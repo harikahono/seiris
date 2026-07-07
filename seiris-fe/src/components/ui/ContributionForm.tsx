@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { CONTRIBUTION_TYPES } from "@/lib/contribution";
 import { formatRp } from "@/lib/constants";
 import { toast } from "sonner";
-import { X, Loader2, ArrowLeft, Upload } from "lucide-react";
+import { X, Loader2, ArrowLeft } from "lucide-react";
 import type { ContributionType } from "@/types";
 
 interface ContributionFormProps {
@@ -22,9 +22,9 @@ interface FieldErrors {
   contribution_date?: string;
   hours?: string;
   amount?: string;
-  invoice_amount?: string;
-  actual_amount?: string;
-  invoice?: string;
+  deal_value?: string;
+  estimated_value?: string;
+  commission_rate?: string;
 }
 
 export default function ContributionForm({ teamId, fmr, open, onClose, onCreated }: ContributionFormProps) {
@@ -34,9 +34,9 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
   const [contributionDate, setContributionDate] = useState(new Date().toISOString().split("T")[0]);
   const [hours, setHours] = useState("");
   const [amount, setAmount] = useState("");
-  const [invoiceAmount, setInvoiceAmount] = useState("");
-  const [actualAmount, setActualAmount] = useState("");
-  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const [dealValue, setDealValue] = useState("");
+  const [estimatedValue, setEstimatedValue] = useState("");
+  const [commissionRate, setCommissionRate] = useState("50");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
 
@@ -44,7 +44,7 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
 
   const requiresHours = type && ["TIME", "IDEA", "NETWORK"].includes(type);
   const requiresAmount = type && ["CASH", "FACILITY"].includes(type);
-  const isRevenue = type === "REVENUE";
+  const isSales = type === "SALES";
 
   const canSubmitForm = type && description.trim().length >= 5 && contributionDate;
 
@@ -67,15 +67,16 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
 
     setLoading(true);
     try {
-      if (isRevenue) {
-        const formData = new FormData();
-        formData.append("type", type);
-        formData.append("description", description.trim());
-        formData.append("contribution_date", contributionDate);
-        formData.append("invoice_amount", String(Number(invoiceAmount)));
-        formData.append("actual_amount", String(Number(actualAmount)));
-        if (invoiceFile) formData.append("invoice", invoiceFile);
-        await api.post(`/teams/${teamId}/contributions`, formData);
+      if (isSales) {
+        const payload: Record<string, unknown> = {
+          type,
+          description: description.trim(),
+          contribution_date: contributionDate,
+          deal_value: Number(dealValue),
+          estimated_value: Number(estimatedValue),
+          commission_rate: Number(commissionRate),
+        };
+        await api.post(`/teams/${teamId}/contributions`, payload);
       } else {
         const payload: Record<string, unknown> = {
           type,
@@ -108,9 +109,9 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
     setContributionDate(new Date().toISOString().split("T")[0]);
     setHours("");
     setAmount("");
-    setInvoiceAmount("");
-    setActualAmount("");
-    setInvoiceFile(null);
+    setDealValue("");
+    setEstimatedValue("");
+    setCommissionRate("50");
     setErrors({});
     onClose();
   };
@@ -133,7 +134,7 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
                 <p className="font-medium">⚠️ FMR belum diset</p>
                 <p className="mt-1 text-yellow-400/80">
                   Owner belum mengatur FMR kamu. Kamu hanya bisa membuat kontribusi{" "}
-                  <strong>Cash, Facility, atau Revenue</strong> sampai FMR diatur.
+                   <strong>Cash, Facility, atau Sales</strong> sampai FMR diatur.
                   Minta owner untuk set FMR di halaman <strong>Anggota</strong>.
                 </p>
               </div>
@@ -262,59 +263,64 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
                 </div>
               )}
 
-              {isRevenue && (
+              {isSales && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="rev-invoice" className="mb-1 block text-sm font-medium text-gray-300">Biaya / Modal (Rp)</label>
+                      <label className="mb-1 block text-sm font-medium text-gray-300">Estimasi Tim (Rp)</label>
                       <input
-                        id="rev-invoice"
                         type="number"
                         min="0"
-                        placeholder="Invoice amount"
-                        value={invoiceAmount}
-                        onChange={(e) => setInvoiceAmount(e.target.value)}
+                        placeholder="Estimasi awal"
+                        value={estimatedValue}
+                        onChange={(e) => setEstimatedValue(e.target.value)}
                         required
                         className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                       />
-                      {errors.invoice_amount && <p className="mt-1 text-xs text-red-500">{errors.invoice_amount}</p>}
+                      {errors.estimated_value && <p className="mt-1 text-xs text-red-500">{errors.estimated_value}</p>}
                     </div>
                     <div>
-                      <label htmlFor="rev-actual" className="mb-1 block text-sm font-medium text-gray-300">Pendapatan (Rp)</label>
+                      <label className="mb-1 block text-sm font-medium text-gray-300">Deal Client (Rp)</label>
                       <input
-                        id="rev-actual"
                         type="number"
                         min="0"
-                        placeholder="Actual amount"
-                        value={actualAmount}
-                        onChange={(e) => setActualAmount(e.target.value)}
+                        placeholder="Nilai deal"
+                        value={dealValue}
+                        onChange={(e) => setDealValue(e.target.value)}
                         required
                         className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                       />
-                      {errors.actual_amount && <p className="mt-1 text-xs text-red-500">{errors.actual_amount}</p>}
+                      {errors.deal_value && <p className="mt-1 text-xs text-red-500">{errors.deal_value}</p>}
                     </div>
                   </div>
-                  {invoiceAmount && actualAmount && (
-                    <p className="-mt-2 text-xs text-gray-500">
-                      Revenue bersih: <span className="text-white font-medium">{formatRp(Number(actualAmount) - Number(invoiceAmount))}</span>
-                      {" · "}Slices: <span className="text-accent font-medium">Rp {((Number(actualAmount) - Number(invoiceAmount)) * 2).toLocaleString("id-ID")}</span>
-                      {" (×2)"}
-                    </p>
-                  )}
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-300">Upload Invoice <span className="text-gray-500">(opsional)</span></label>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-700 px-3 py-3 text-sm text-gray-500 transition hover:border-accent hover:text-accent">
-                      <Upload className="size-4" />
-                      {invoiceFile ? invoiceFile.name : "Upload file PDF / JPG / PNG"}
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => setInvoiceFile(e.target.files?.[0] ?? null)}
-                        className="hidden"
-                      />
-                    </label>
-                    {errors.invoice && <p className="mt-1 text-xs text-red-500">{errors.invoice}</p>}
+                    <label className="mb-1 block text-sm font-medium text-gray-300">Komisi Rate (%)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      placeholder="50"
+                      value={commissionRate}
+                      onChange={(e) => setCommissionRate(e.target.value)}
+                      required
+                      className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                    />
+                    {errors.commission_rate && <p className="mt-1 text-xs text-red-500">{errors.commission_rate}</p>}
                   </div>
+                  {dealValue && estimatedValue && commissionRate && (
+                    (() => {
+                      const markup = Math.max(0, Number(dealValue) - Number(estimatedValue));
+                      const commission = Math.round(markup * Number(commissionRate) / 100);
+                      return (
+                        <p className="-mt-2 text-xs text-gray-500">
+                          Markup: <span className="text-white font-medium">{formatRp(markup)}</span>
+                          {" · "}Komisi: <span className="text-white font-medium">{formatRp(commission)}</span>
+                          {" → "}<span className="text-accent font-medium">{(commission * 2).toLocaleString("id-ID")} slices</span>
+                          {" (×2)"}
+                        </p>
+                      );
+                    })()
+                  )}
                 </>
               )}
 

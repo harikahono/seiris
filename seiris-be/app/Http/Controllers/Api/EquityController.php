@@ -88,7 +88,7 @@ class EquityController extends Controller
             ->pluck('total', 'type')
             ->toArray();
 
-        $allTypes = ['CASH', 'TIME', 'IDEA', 'NETWORK', 'FACILITY', 'REVENUE'];
+        $allTypes = ['CASH', 'TIME', 'IDEA', 'NETWORK', 'FACILITY', 'SALES'];
         $result = [];
         foreach ($allTypes as $t) {
             $result[$t] = (int) ($breakdown[$t] ?? 0);

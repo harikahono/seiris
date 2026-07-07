@@ -117,7 +117,7 @@ table.data tfoot td {
 .badge-IDEA     { background: #FEF3C7; color: #92400E; }
 .badge-NETWORK  { background: #F3E8FF; color: #7E22CE; }
 .badge-FACILITY { background: #FFE4E6; color: #9F1239; }
-.badge-REVENUE  { background: #FEE2E2; color: #DC2626; }
+.badge-SALES  { background: #FEE2E2; color: #DC2626; }
 
 /* ── STATUS PILL ── */
 .pill-frozen { background: #DBEAFE; color: #1D4ED8; padding: 2px 8px; border-radius: 10px; font-size: 8px; font-weight: bold; }
@@ -483,10 +483,10 @@ table.mult tbody td { padding: 5px 9px; }
       <td>Aset tidak habis dikonsumsi (beda dengan cash)</td>
     </tr>
     <tr>
-      <td><span class="badge badge-REVENUE">REVENUE</span></td>
+      <td><span class="badge badge-SALES">SALES</span></td>
       <td class="fw-bold">2×</td>
-      <td>(Actual − Invoice dilaporkan) × 2</td>
-      <td>Mendorong transparansi penuh dari PM/Sales</td>
+      <td>(Deal − Estimasi Tim) × Rate × 2</td>
+      <td>Komisi markup untuk pembawa deal</td>
     </tr>
   </tbody>
 </table>
@@ -498,7 +498,7 @@ table.mult tbody td { padding: 5px 9px; }
 
 @php
   $byType = collect($contributions)->groupBy('type');
-  $types  = ['TIME','CASH','IDEA','NETWORK','FACILITY','REVENUE'];
+  $types  = ['TIME','CASH','IDEA','NETWORK','FACILITY','SALES'];
 @endphp
 
 <table class="data">

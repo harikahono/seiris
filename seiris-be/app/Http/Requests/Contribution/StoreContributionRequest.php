@@ -15,7 +15,7 @@ class StoreContributionRequest extends FormRequest
         $type = $this->input('type');
 
         $rules = [
-            'type'              => ['required', 'in:TIME,CASH,IDEA,NETWORK,FACILITY,REVENUE'],
+            'type'              => ['required', 'in:TIME,CASH,IDEA,NETWORK,FACILITY,SALES'],
             'description'       => ['required', 'string', 'min:5', 'max:500'],
             'contribution_date' => ['required', 'date', 'before_or_equal:today'],
         ];
@@ -33,10 +33,10 @@ class StoreContributionRequest extends FormRequest
                 $rules['amount'] = ['required', 'integer', 'min:1000', 'max:999999999'];
                 break;
 
-            case 'REVENUE':
-                $rules['invoice_amount'] = ['required', 'integer', 'min:0'];
-                $rules['actual_amount']  = ['required', 'integer', 'min:0', 'gte:invoice_amount'];
-                $rules['invoice']        = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'];
+            case 'SALES':
+                $rules['deal_value']       = ['required', 'integer', 'min:0', 'max:999999999'];
+                $rules['estimated_value']  = ['required', 'integer', 'min:0', 'max:999999999'];
+                $rules['commission_rate']  = ['required', 'numeric', 'min:0', 'max:100'];
                 break;
         }
 
@@ -57,11 +57,11 @@ class StoreContributionRequest extends FormRequest
             'hours.max'                  => 'Maksimal 744 jam (31 hari).',
             'amount.required'            => 'Nominal wajib diisi.',
             'amount.min'                 => 'Nominal minimal Rp 1.000.',
-            'invoice_amount.required'    => 'Nominal yang dilaporkan wajib diisi.',
-            'actual_amount.required'     => 'Nominal sebenarnya wajib diisi.',
-            'actual_amount.gte'          => 'Nominal sebenarnya tidak boleh kurang dari yang dilaporkan.',
-            'invoice.mimes'              => 'Invoice harus berformat PDF, JPG, atau PNG.',
-            'invoice.max'                => 'Ukuran invoice maksimal 5MB.',
+            'deal_value.required'        => 'Nilai deal wajib diisi.',
+            'estimated_value.required'   => 'Estimasi tim wajib diisi.',
+            'commission_rate.required'   => 'Rate komisi wajib diisi.',
+            'commission_rate.min'        => 'Rate komisi minimal 0%.',
+            'commission_rate.max'        => 'Rate komisi maksimal 100%.',
         ];
     }
 

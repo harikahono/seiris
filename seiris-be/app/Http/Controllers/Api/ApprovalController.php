@@ -136,11 +136,16 @@ class ApprovalController extends Controller
     }
 
     /**
-     * Auto-create Revenue record jika kontribusi type REVENUE disetujui.
+     * Auto-create Revenue record jika kontribusi type SALES disetujui.
+     * ponytail: SALES gak auto-create Revenue — revenue dicatat manual di Revenue page.
+     * Fungsi ini cuma untuk legacy REVENUE data existing sebelum migrasi.
      */
     private function autoCreateRevenue(Contribution $contribution): void
     {
-        if ($contribution->type !== 'REVENUE') return;
+        // ponytail: SALES tidak auto-create Revenue. Hanya data legacy REVENUE.
+        if ($contribution->type !== 'SALES') return;
+        // Hanya jalankan untuk data REVENUE legacy (type udah ke-migrate jadi SALES)
+        if (!$contribution->invoice_amount && !$contribution->actual_amount) return;
 
         Revenue::create([
             'team_id'              => $contribution->team_id,
@@ -222,7 +227,7 @@ class ApprovalController extends Controller
             // Trigger SlicingPie recalculation
             $this->slicingPie->recalculate($team, $contribution->id);
 
-            // Auto-create Revenue record jika type REVENUE
+            // Auto-create Revenue record jika type SALES
             $this->autoCreateRevenue($contribution);
 
         // Cek kondisi REJECTED

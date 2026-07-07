@@ -79,9 +79,9 @@ class ContributionController extends Controller
         // Hitung slices
         $slicesData = SlicingPieService::calculateSlices($request->type, $value);
 
-        // Handle upload invoice untuk REVENUE
+        // ponytail: invoice upload dulu untuk REVENUE, sekarang SALES gak perlu upload
         $invoicePath = null;
-        if ($request->type === 'REVENUE' && $request->hasFile('invoice')) {
+        if ($request->type === 'SALES' && $request->hasFile('invoice')) {
             $invoicePath = $request->file('invoice')->store('invoices', 'public');
         }
 
@@ -107,9 +107,9 @@ class ContributionController extends Controller
                 'total_slices'      => $slicesData['total_slices'],
                 'status'            => 'PENDING',
                 'contribution_date' => $request->contribution_date,
-                'invoice_amount'    => $request->invoice_amount,
-                'actual_amount'     => $request->actual_amount,
-                'invoice_path'      => $invoicePath,
+                'deal_value'        => $request->deal_value,
+                'estimated_value'   => $request->estimated_value,
+                'commission_rate'   => $request->commission_rate,
             ]);
 
             AuditLogService::logFromRequest(
@@ -168,14 +168,17 @@ class ContributionController extends Controller
      * TIME: hours * fmr
      * CASH/FACILITY: langsung dari amount
      * IDEA/NETWORK: hours * fmr (nilai setara jam kerja)
-     * REVENUE: selisih actual_amount - invoice_amount
+     * SALES: (deal - estimasi) × rate%
      */
     private function calculateValue(StoreContributionRequest $request, TeamMember $member): int
     {
         return match ($request->type) {
             'TIME', 'IDEA', 'NETWORK' => (int) round($request->hours * $member->fmr),
             'CASH', 'FACILITY'        => (int) $request->amount,
-            'REVENUE'                 => (int) max(0, $request->actual_amount - $request->invoice_amount),
+            'SALES'                   => (int) round(
+                max(0, $request->deal_value - $request->estimated_value)
+                * $request->commission_rate / 100
+            ),
             default => 0,
         };
     }

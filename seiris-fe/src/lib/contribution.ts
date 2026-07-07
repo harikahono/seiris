@@ -1,4 +1,4 @@
-import { Clock, DollarSign, Lightbulb, Users, Building2, TrendingUp } from "lucide-react";
+import { Clock, DollarSign, Lightbulb, Users, Building2, Handshake } from "lucide-react";
 
 export const CONTRIBUTION_TYPES = [
   { value: "TIME", label: "Time", icon: Clock, desc: "Log jam kerja", color: "#3b82f6" },
@@ -6,7 +6,7 @@ export const CONTRIBUTION_TYPES = [
   { value: "IDEA", label: "Idea", icon: Lightbulb, desc: "Ide atau konsep", color: "#10b981" },
   { value: "NETWORK", label: "Network", icon: Users, desc: "Koneksi atau referral", color: "#8b5cf6" },
   { value: "FACILITY", label: "Facility", icon: Building2, desc: "Fasilitas atau alat", color: "#f59e0b" },
-  { value: "REVENUE", label: "Revenue", icon: TrendingUp, desc: "Pendapatan (invoice)", color: "#ec4899" },
+  { value: "SALES", label: "Sales", icon: Handshake, desc: "Komisi dari deal", color: "#ec4899" },
 ] as const;
 
 export const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {

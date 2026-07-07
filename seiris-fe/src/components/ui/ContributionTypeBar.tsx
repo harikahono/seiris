@@ -11,7 +11,7 @@ import { CONTRIBUTION_TYPES } from "@/lib/contribution";
 import { ChartContainer, type ChartConfig } from "@/components/evilcharts/ui/chart";
 import { ChartTooltip, ChartTooltipContent } from "@/components/evilcharts/ui/tooltip";
 
-const TYPE_ORDER = ["CASH", "TIME", "IDEA", "NETWORK", "FACILITY", "REVENUE"];
+const TYPE_ORDER = ["CASH", "TIME", "IDEA", "NETWORK", "FACILITY", "SALES"];
 
 // ponytail: derive from shared CONTRIBUTION_TYPES
 const TYPE_META: Record<string, { label: string; color: string }> =

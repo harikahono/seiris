@@ -17,7 +17,8 @@ class Contribution extends Model
     protected $fillable = [
         'team_id', 'member_id', 'type', 'description',
         'value', 'multiplier', 'total_slices', 'status',
-        'contribution_date', 'invoice_amount', 'actual_amount', 'invoice_path',
+        'contribution_date',
+        'deal_value', 'estimated_value', 'commission_rate',
     ];
 
     protected function casts(): array
@@ -26,8 +27,9 @@ class Contribution extends Model
             'value'            => 'integer',
             'multiplier'       => 'decimal:1',
             'total_slices'     => 'integer',
-            'invoice_amount'   => 'integer',
-            'actual_amount'    => 'integer',
+            'deal_value'       => 'integer',
+            'estimated_value'  => 'integer',
+            'commission_rate'  => 'decimal:2',
             'contribution_date'=> 'date',
         ];
     }

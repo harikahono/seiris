@@ -12,7 +12,7 @@ const steps = [
   {
     num: '01',
     title: 'Log Contributions',
-    desc: 'Every team member logs their contributions: TIME, CASH, IDEA, NETWORK, FACILITY, or REVENUE. The system tracks everything securely from day one.',
+    desc: 'Every team member logs their contributions: TIME, CASH, IDEA, NETWORK, FACILITY, or SALES. The system tracks everything securely from day one.',
   },
   {
     num: '02',
