@@ -122,6 +122,7 @@ class ContributionController extends Controller
                     'type'         => $contribution->type,
                     'value'        => $contribution->value,
                     'total_slices' => $contribution->total_slices,
+                    'description'  => $contribution->description,
                 ],
             );
 
