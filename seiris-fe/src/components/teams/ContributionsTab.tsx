@@ -245,7 +245,7 @@ export default function ContributionsTab() {
 
               <div className="grid gap-4 lg:grid-cols-2">
                 <EquityPieCard members={members} totalSlices={totalSlices} isFrozen={isFrozen} />
-                <ContributionTypeBar contributions={contributions} />
+                <ContributionTypeBar slices_by_type={equity.slices_by_type} />
               </div>
 
               <MemberEquityTable members={members} />

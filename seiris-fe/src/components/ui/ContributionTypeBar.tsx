@@ -9,7 +9,6 @@ import {
   Cell,
   LabelList,
 } from "recharts";
-import type { Contribution } from "@/types";
 import { CONTRIBUTION_TYPES } from "@/lib/contribution";
 
 const TYPE_ORDER = ["CASH", "TIME", "IDEA", "NETWORK", "FACILITY", "REVENUE"];
@@ -21,34 +20,28 @@ const TYPE_META: Record<string, { label: string; color: string }> =
   );
 
 interface ContributionTypeBarProps {
-  contributions: Contribution[];
+  slices_by_type: Record<string, number>;
 }
 
-export default function ContributionTypeBar({ contributions }: ContributionTypeBarProps) {
+export default function ContributionTypeBar({ slices_by_type }: ContributionTypeBarProps) {
   const data = useMemo(() => {
-    const approved = contributions.filter((c) => c.status === "APPROVED");
-    if (approved.length === 0) return [];
-
-    const grouped: Record<string, { type: string; label: string; color: string; slices: number }> = {};
-
-    for (const c of approved) {
-      const meta = TYPE_META[c.type] ?? { label: c.type, color: "#6b7280" };
-      if (!grouped[c.type]) {
-        grouped[c.type] = { type: c.type, label: meta.label, color: meta.color, slices: 0 };
-      }
-      grouped[c.type].slices += c.total_slices;
-    }
-
-    const total = Object.values(grouped).reduce((sum, g) => sum + g.slices, 0);
+    const total = Object.values(slices_by_type).reduce((s, v) => s + v, 0);
+    if (total === 0) return [];
 
     return TYPE_ORDER
-      .filter((t) => grouped[t])
-      .map((t) => ({
-        ...grouped[t],
-        pct: total > 0 ? Math.round((grouped[t].slices / total) * 100) : 0,
-      }))
+      .filter((t) => (slices_by_type[t] ?? 0) > 0)
+      .map((t) => {
+        const meta = TYPE_META[t] ?? { label: t, color: "#6b7280" };
+        return {
+          type: t,
+          label: meta.label,
+          color: meta.color,
+          slices: slices_by_type[t],
+          pct: Math.round((slices_by_type[t] / total) * 100),
+        };
+      })
       .sort((a, b) => b.slices - a.slices);
-  }, [contributions]);
+  }, [slices_by_type]);
 
   if (data.length === 0) {
     return (
