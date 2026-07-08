@@ -14,6 +14,7 @@ import ContributionsTab from "@/components/teams/ContributionsTab";
 import TeamSettingsTab from "@/components/teams/TeamSettingsTab";
 import ContributionDetailPage from "@/pages/teams/ContributionDetailPage";
 import LandingPage from "@/pages/LandingPage";
+import { CheckCircle2, XCircle, Info, AlertTriangle } from "lucide-react";
 
 export default function App() {
   return (
@@ -40,12 +41,31 @@ export default function App() {
         </Routes>
         <Toaster
           position="top-center"
+          gap={12}
+          visibleToasts={3}
           toastOptions={{
             style: {
-              background: "#1a1a1a",
+              background: "#151515",
               color: "#e5e7eb",
-              border: "1px solid #333",
+              border: "1px solid #2a2a2a",
+              borderRadius: "10px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+              padding: "12px 16px",
+              fontSize: "14px",
+              fontFamily: "var(--font-sans)",
             },
+            classNames: {
+              success: "border-l-2 border-l-green-500/60",
+              error: "border-l-2 border-l-red-500/60",
+              info: "border-l-2 border-l-[#e07820]",
+              warning: "border-l-2 border-l-yellow-500/60",
+            },
+          }}
+          icons={{
+            success: <CheckCircle2 className="size-4 text-green-400 shrink-0" />,
+            error: <XCircle className="size-4 text-red-400 shrink-0" />,
+            info: <Info className="size-4 text-[#e07820] shrink-0" />,
+            warning: <AlertTriangle className="size-4 text-yellow-400 shrink-0" />,
           }}
         />
       </AuthProvider>
