@@ -8,6 +8,7 @@ import {
   SendHorizontal, UserCheck,
 } from "lucide-react";
 import { formatRp } from "@/lib/constants";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 // ── Status badge helper ──────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
@@ -106,11 +107,11 @@ interface RevenueCardProps {
 
 export default function RevenueCard({ revenue, isOwner, onDistributed }: RevenueCardProps) {
   const [distributing, setDistributing] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<"distribute" | "request" | null>(null);
 
   const status = revenue.status ?? (revenue.is_distributed ? "distributed" : "pending");
 
   const handleDistribute = async () => {
-    if (!confirm("Yakin ingin mendistribusikan profit ini?")) return;
     setDistributing(true);
     try {
       await api.post(`/revenues/${revenue.id}/distribute`);
@@ -128,7 +129,6 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
   };
 
   const handleRequestDistribute = async () => {
-    if (!confirm("Ajukan distribusi profit ke owner?")) return;
     setDistributing(true);
     try {
       await api.post(`/revenues/${revenue.id}/request-distribute`);
@@ -151,7 +151,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
       return (
         <button
           type="button"
-          onClick={handleDistribute}
+          onClick={() => setConfirmAction("distribute")}
           disabled={distributing}
           className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
@@ -166,7 +166,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
       return (
         <button
           type="button"
-          onClick={handleDistribute}
+          onClick={() => setConfirmAction("distribute")}
           disabled={distributing}
           className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
@@ -181,7 +181,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
       return (
         <button
           type="button"
-          onClick={handleRequestDistribute}
+          onClick={() => setConfirmAction("request")}
           disabled={distributing}
           className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-300 transition-all duration-200 hover:border-gray-600 hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
@@ -262,6 +262,21 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
           {renderAction()}
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmAction !== null}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={confirmAction === "distribute" ? handleDistribute : handleRequestDistribute}
+        title={confirmAction === "distribute" ? "Distribusikan Profit" : "Ajukan Distribusi"}
+        description={
+          confirmAction === "distribute"
+            ? "Yakin ingin mendistribusikan profit ini ke semua anggota sesuai equity?"
+            : "Ajukan distribusi profit ini ke owner untuk disetujui?"
+        }
+        confirmText={confirmAction === "distribute" ? "Distribusikan" : "Ajukan"}
+        loading={distributing}
+        variant="primary"
+      />
     </div>
   );
 }
