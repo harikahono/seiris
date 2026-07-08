@@ -53,19 +53,18 @@ export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
   const meta = getActionMeta(log.action);
   const Icon = meta.icon;
 
-  const time = new Date(log.created_at).toLocaleString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
+  const dateStr = new Date(log.created_at).toLocaleDateString("id-ID", {
+    day: "numeric", month: "short",
+  });
+  const timeStr = new Date(log.created_at).toLocaleString("id-ID", {
+    hour: "2-digit", minute: "2-digit",
   });
 
   const isClickable = teamId && log.subject_id &&
     ACTION_LINK_PREFIXES.some(p => log.action.startsWith(p));
 
   const row = (
-    <div className="flex gap-4 px-4 py-3 transition hover:bg-gray-800/30">
-      <span className="w-10 shrink-0 pt-0.5 text-xs tabular-nums text-gray-600">
-        {time}
-      </span>
+    <div className="flex gap-3 px-4 py-3 transition hover:bg-gray-800/30">
       <Icon className={`mt-0.5 size-4 shrink-0 ${meta.color}`} />
       <div className="flex-1 min-w-0">
         <p className="text-sm text-gray-300">
@@ -82,6 +81,9 @@ export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
           </div>
         )}
       </div>
+      <span className="shrink-0 pt-0.5 text-[11px] tabular-nums text-gray-600">
+        {dateStr} · {timeStr}
+      </span>
     </div>
   );
 

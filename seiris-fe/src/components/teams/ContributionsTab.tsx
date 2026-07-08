@@ -97,15 +97,15 @@ export default function ContributionsTab() {
   return (
     <div className="space-y-6">
       {/* ── Toggle: Kontribusi / Equity ── */}
-      <div className="flex gap-1 rounded-lg border border-gray-800 bg-card/50 p-1 w-fit">
+      <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-0.5">
         <button
           type="button"
           onClick={() => setView("contributions")}
           className={cn(
-            "rounded-md px-4 py-1.5 text-sm font-medium transition-all",
+            "rounded-md px-4 py-1 text-sm font-medium transition-all",
             view === "contributions"
-              ? "bg-accent text-black"
-              : "text-gray-400 hover:text-white"
+              ? "bg-accent text-black shadow-sm"
+              : "text-gray-500 hover:text-gray-300"
           )}
         >
           Kontribusi
@@ -114,10 +114,10 @@ export default function ContributionsTab() {
           type="button"
           onClick={() => setView("equity")}
           className={cn(
-            "rounded-md px-4 py-1.5 text-sm font-medium transition-all",
+            "rounded-md px-4 py-1 text-sm font-medium transition-all",
             view === "equity"
-              ? "bg-accent text-black"
-              : "text-gray-400 hover:text-white"
+              ? "bg-accent text-black shadow-sm"
+              : "text-gray-500 hover:text-gray-300"
           )}
         >
           Equity
@@ -130,7 +130,7 @@ export default function ContributionsTab() {
           <div>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Kontribusi</h2>
-              <div className="flex gap-1 rounded-lg border border-gray-800 bg-card/50 p-1">
+              <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-0.5">
                 {FILTERS.map((f) => (
                   <button
                     key={f.key}
@@ -141,10 +141,10 @@ export default function ContributionsTab() {
                       setLoading(true);
                     }}
                     className={cn(
-                      "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                      "rounded-md px-2.5 py-1 text-xs font-medium transition-all",
                       filter === f.key
-                        ? "bg-accent text-black"
-                        : "text-gray-400 hover:text-white"
+                        ? "bg-accent text-black shadow-sm"
+                        : "text-gray-500 hover:text-gray-300"
                     )}
                   >
                     {f.label}
