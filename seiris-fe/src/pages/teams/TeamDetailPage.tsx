@@ -44,13 +44,23 @@ export default function TeamDetailPage() {
   if (initialLoading) {
     return (
       <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-4 w-1/4" />
-        <Skeleton className="h-48 w-full" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+        {/* Team header */}
+        <div className="space-y-3">
+          <Skeleton className="h-8 w-1/3" />
+          <Skeleton className="h-4 w-1/4" />
+          <div className="h-px bg-gray-800/50" />
         </div>
-        <Skeleton className="h-64 w-full" />
+        {/* Tab content skeleton */}
+        <div className="animate-pulse space-y-4">
+          <div className="flex gap-1">
+            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-8 w-20 rounded-md" />)}
+          </div>
+          <Skeleton className="h-48 w-full rounded-xl" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
+          </div>
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
       </div>
     );
   }

@@ -126,9 +126,16 @@ export default function AuditLogTab() {
           </div>
         ))}
         {loading && page === 1 && (
-          <div className="space-y-3">
+          <div className="space-y-1">
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full" />
+              <div key={i} className="flex gap-3 px-4 py-3">
+                <Skeleton className="size-4 shrink-0 mt-0.5 rounded-full" />
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <Skeleton className="h-4 w-3/5" />
+                  <Skeleton className="h-3 w-2/5" />
+                </div>
+                <Skeleton className="h-3 w-16 shrink-0 mt-0.5" />
+              </div>
             ))}
           </div>
         )}

@@ -95,7 +95,24 @@ export default function RevenueTab() {
         {loading && page === 1 ? (
           <div className="space-y-4">
             {[...Array(2)].map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full" />
+              <div key={i} className="rounded-xl border border-gray-800/50 bg-card p-5 space-y-3">
+                {/* Amount hero */}
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-36" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                  <div className="space-y-1.5 text-right">
+                    <Skeleton className="h-3 w-16 ml-auto" />
+                    <Skeleton className="h-5 w-28" />
+                  </div>
+                </div>
+                {/* Meta row */}
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+              </div>
             ))}
           </div>
         ) : loading && (

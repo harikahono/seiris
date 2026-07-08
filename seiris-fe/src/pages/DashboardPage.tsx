@@ -408,15 +408,27 @@ function TeamDashboard({ teamId }: { teamId: string }) {
 function TeamDashboardSkeleton() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
-      <Skeleton className="h-28 w-full" />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Skeleton className="h-48 sm:row-span-2" />
-        <Skeleton className="h-28" />
-        <Skeleton className="h-28" />
-        <Skeleton className="h-28 sm:col-span-2" />
+      {/* Team header */}
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-4 w-1/4" />
+        <div className="flex gap-4">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <div className="h-px bg-gray-800/50" />
       </div>
-      <Skeleton className="h-56" />
-      <Skeleton className="h-64" />
+      {/* Stats grid */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Skeleton className="h-48 sm:row-span-2 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 rounded-xl" />
+        <Skeleton className="h-28 sm:col-span-2 rounded-xl" />
+      </div>
+      {/* Bottom sections */}
+      <Skeleton className="h-56 rounded-xl" />
+      <Skeleton className="h-64 rounded-xl" />
     </div>
   );
 }
@@ -424,11 +436,13 @@ function TeamDashboardSkeleton() {
 // ── No Teams State ─────────────────────────────────────────────
 function NoTeamsState() {
   return (
-    <EmptyState
-      icon={Users}
-      title="Belum punya tim"
-      description="Buat tim baru atau gabung tim lewat tombol Gabung / Buat Tim di sidebar."
-    />
+    <div className="mx-auto max-w-7xl px-6 pt-32 pb-8">
+      <EmptyState
+        icon={Users}
+        title="Belum punya tim"
+        description="Buat tim baru atau gabung tim lewat tombol Gabung / Buat Tim di sidebar."
+      />
+    </div>
   );
 }
 

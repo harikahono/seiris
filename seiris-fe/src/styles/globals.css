@@ -75,6 +75,11 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 @layer utilities {
   .text-accent { color: var(--color-accent); }
   .bg-accent { background-color: var(--color-accent); }

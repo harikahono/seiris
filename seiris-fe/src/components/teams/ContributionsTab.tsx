@@ -165,7 +165,23 @@ export default function ContributionsTab() {
               {loading && page === 1 ? (
                 <div className="space-y-3">
                   {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-20 w-full" />
+                    <div key={i} className="relative pl-7 py-2">
+                      {/* Timeline dot skeleton */}
+                      <Skeleton className="absolute left-2 top-[14px] size-[10px] rounded-full" />
+                      {i < 3 && <Skeleton className="absolute left-[11px] top-[26px] bottom-0 w-px h-[calc(100%-14px)]" />}
+                      <div className="flex items-center gap-2 mb-2">
+                        <Skeleton className="size-7 rounded-full shrink-0" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16 rounded-full" />
+                        <Skeleton className="ml-auto h-4 w-24" />
+                      </div>
+                      <Skeleton className="h-3 w-3/4 mb-1.5" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -219,10 +235,10 @@ export default function ContributionsTab() {
           {equityLoading ? (
             <>
               <div className="grid gap-4 lg:grid-cols-2">
-                <Skeleton className="h-48 w-full" />
-                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-48 w-full rounded-xl" />
+                <Skeleton className="h-32 w-full rounded-xl" />
               </div>
-              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-32 w-full rounded-xl" />
             </>
           ) : equity ? (
             <>
