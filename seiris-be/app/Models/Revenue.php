@@ -39,8 +39,13 @@ class Revenue extends Model
      */
     public function getIsDistributedAttribute($value): bool
     {
-        // If DB already has the boolean, use it; otherwise compute from status
-        return $this->attributes['is_distributed'] ?? ($this->status === 'distributed');
+        // PostgreSQL returns 't'/'f' strings — handle them properly
+        if ($value !== null) {
+            // 'f', 'false', '0', 0, false → false; everything truthy → true
+            return !in_array($value, [false, 0, '0', 'f', 'false', 'off', 'no'], true);
+        }
+        // Fallback: compute from status column
+        return $this->status === 'distributed';
     }
 
     public function team(): BelongsTo
