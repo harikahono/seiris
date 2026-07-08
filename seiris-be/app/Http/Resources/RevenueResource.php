@@ -21,7 +21,7 @@ class RevenueResource extends JsonResource
                 ? asset('storage/' . $this->proof_path)
                 : null,
             'revenue_date'         => $this->revenue_date?->toDateString(),
-            'status'               => $this->status ?? ($this->is_distributed ? 'distributed' : 'pending'),
+            'status'               => $this->status ?: ($this->is_distributed ? 'distributed' : 'pending'),
             'is_distributed'       => $this->is_distributed,
             'distributed_at'       => $this->distributed_at?->toISOString(),
             'recorded_by'          => new TeamMemberResource($this->whenLoaded('recordedBy')),
