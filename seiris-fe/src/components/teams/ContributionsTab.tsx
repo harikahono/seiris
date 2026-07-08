@@ -97,12 +97,12 @@ export default function ContributionsTab() {
   return (
     <div className="space-y-6">
       {/* ── Toggle: Kontribusi / Equity ── */}
-      <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-0.5">
+      <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
         <button
           type="button"
           onClick={() => setView("contributions")}
           className={cn(
-            "rounded-md px-4 py-1 text-sm font-medium transition-all",
+            "rounded-md px-5 py-2 text-sm font-medium transition-all",
             view === "contributions"
               ? "bg-accent text-black shadow-sm"
               : "text-gray-500 hover:text-gray-300"
@@ -114,7 +114,7 @@ export default function ContributionsTab() {
           type="button"
           onClick={() => setView("equity")}
           className={cn(
-            "rounded-md px-4 py-1 text-sm font-medium transition-all",
+            "rounded-md px-5 py-2 text-sm font-medium transition-all",
             view === "equity"
               ? "bg-accent text-black shadow-sm"
               : "text-gray-500 hover:text-gray-300"
@@ -130,7 +130,7 @@ export default function ContributionsTab() {
           <div>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Kontribusi</h2>
-              <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-0.5">
+              <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
                 {FILTERS.map((f) => (
                   <button
                     key={f.key}
@@ -141,7 +141,7 @@ export default function ContributionsTab() {
                       setLoading(true);
                     }}
                     className={cn(
-                      "rounded-md px-2.5 py-1 text-xs font-medium transition-all",
+                      "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
                       filter === f.key
                         ? "bg-accent text-black shadow-sm"
                         : "text-gray-500 hover:text-gray-300"
@@ -154,7 +154,7 @@ export default function ContributionsTab() {
               <button
                 type="button"
                 onClick={() => setShowForm(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-accent-hover"
+                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-accent-hover"
               >
                 <Plus className="size-4" />
                 Kontribusi
@@ -165,7 +165,23 @@ export default function ContributionsTab() {
               {loading && page === 1 ? (
                 <div className="space-y-3">
                   {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-20 w-full" />
+                    <div key={i} className="relative pl-7 py-2">
+                      {/* Timeline dot skeleton */}
+                      <Skeleton className="absolute left-2 top-[14px] size-[10px] rounded-full" />
+                      {i < 3 && <Skeleton className="absolute left-[11px] top-[26px] bottom-0 w-px h-[calc(100%-14px)]" />}
+                      <div className="flex items-center gap-2 mb-2">
+                        <Skeleton className="size-7 rounded-full shrink-0" />
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16 rounded-full" />
+                        <Skeleton className="ml-auto h-4 w-24" />
+                      </div>
+                      <Skeleton className="h-3 w-3/4 mb-1.5" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -219,10 +235,10 @@ export default function ContributionsTab() {
           {equityLoading ? (
             <>
               <div className="grid gap-4 lg:grid-cols-2">
-                <Skeleton className="h-48 w-full" />
-                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-48 w-full rounded-xl" />
+                <Skeleton className="h-32 w-full rounded-xl" />
               </div>
-              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-32 w-full rounded-xl" />
             </>
           ) : equity ? (
             <>

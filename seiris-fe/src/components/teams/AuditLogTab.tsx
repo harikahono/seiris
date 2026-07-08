@@ -82,7 +82,7 @@ export default function AuditLogTab() {
         <span className="text-xs text-gray-500">{total} log</span>
       </div>
 
-      <div className="flex flex-wrap gap-0.5 rounded-lg border border-gray-700/20 bg-gray-900/30 p-0.5">
+      <div className="flex flex-wrap gap-1 rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
         {FILTERS.map((f) => {
           const Icon = f.icon;
           return (
@@ -91,13 +91,13 @@ export default function AuditLogTab() {
               type="button"
               onClick={() => { setFilter(f.key); setPage(1); setLogs([]); }}
               className={cn(
-                "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all",
+                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
                 filter === f.key
                   ? "bg-accent text-black shadow-sm"
                   : "text-gray-500 hover:text-gray-300"
               )}
             >
-              <Icon className="size-3" />
+              <Icon className="size-3.5" />
               {f.label}
             </button>
           );
@@ -126,9 +126,16 @@ export default function AuditLogTab() {
           </div>
         ))}
         {loading && page === 1 && (
-          <div className="space-y-3">
+          <div className="space-y-1">
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full" />
+              <div key={i} className="flex gap-3 px-4 py-3">
+                <Skeleton className="size-4 shrink-0 mt-0.5 rounded-full" />
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <Skeleton className="h-4 w-3/5" />
+                  <Skeleton className="h-3 w-2/5" />
+                </div>
+                <Skeleton className="h-3 w-16 shrink-0 mt-0.5" />
+              </div>
             ))}
           </div>
         )}

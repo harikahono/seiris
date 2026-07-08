@@ -40,10 +40,49 @@ export default function ContributionDetailPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
-        <Skeleton className="h-6 w-24" />
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-32 w-full" />
+        {/* Back button */}
+        <Skeleton className="h-4 w-16" />
+        {/* Detail card */}
+        <div className="rounded-xl border border-gray-800/50 bg-card p-6 space-y-5">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <Skeleton className="size-10 rounded-full" />
+              <div className="space-y-1.5">
+                <Skeleton className="h-5 w-28" />
+                <Skeleton className="h-3 w-36" />
+              </div>
+            </div>
+            <Skeleton className="h-5 w-20 rounded-full" />
+          </div>
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <div className="flex gap-4">
+            <Skeleton className="h-16 w-28 rounded-lg" />
+            <Skeleton className="h-16 w-24 rounded-lg" />
+            <Skeleton className="h-16 w-28 rounded-lg" />
+          </div>
+        </div>
+        {/* Voting card */}
+        <div className="rounded-xl border border-gray-800/50 bg-card p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-32" />
+            <div className="flex gap-3">
+              <Skeleton className="h-4 w-12" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+          </div>
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex items-center justify-between rounded-lg border border-gray-800/50 px-3 py-2.5">
+              <div className="flex items-center gap-2.5">
+                <Skeleton className="size-7 rounded-full" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <Skeleton className="h-3 w-20" />
+            </div>
+          ))}
+        </div>
+        {/* Vote panel */}
+        <Skeleton className="h-24 w-full rounded-xl" />
       </div>
     );
   }

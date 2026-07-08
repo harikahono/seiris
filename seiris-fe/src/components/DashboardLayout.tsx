@@ -230,9 +230,12 @@ export default function DashboardLayout() {
               <div className="overflow-hidden">
                 <div className={cn("space-y-1", collapsed ? "" : "px-2 pt-1")}>
                   {teamsLoading ? (
-                    <div className="space-y-1">
+                    <div className="space-y-1 pl-3">
                       {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
+                        <div key={i} className="flex items-center gap-2 py-1.5">
+                          <Skeleton className="size-6 rounded-full" />
+                          <Skeleton className="h-4 flex-1" />
+                        </div>
                       ))}
                     </div>
                   ) : (
