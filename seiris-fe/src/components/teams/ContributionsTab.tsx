@@ -161,17 +161,17 @@ export default function ContributionsTab() {
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="relative">
               {loading && page === 1 ? (
                 <div className="space-y-3">
                   {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-24 w-full" />
+                    <Skeleton key={i} className="h-20 w-full" />
                   ))}
                 </div>
               ) : (
                 <>
-                  {contributions.map((c) => (
-                    <ContributionCard key={c.id} contribution={c} teamId={teamId} />
+                  {contributions.map((c, i) => (
+                    <ContributionCard key={c.id} contribution={c} teamId={teamId} isLast={i === contributions.length - 1} />
                   ))}
                   {!loading && contributions.length === 0 && (
                     <EmptyState
