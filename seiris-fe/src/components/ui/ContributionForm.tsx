@@ -305,9 +305,12 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
                         max="100"
                         value={commissionRate}
                         onChange={(e) => setCommissionRate(e.target.value)}
-                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer bg-gray-700 accent-accent
-                          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
-                          [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer"
+                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer
+                          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#e07820] [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
+                          [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#e07820] [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer"
+                        style={{
+                          background: `linear-gradient(to right, #e07820 ${commissionRate}%, #374151 ${commissionRate}%)`,
+                        }}
                         required
                       />
                       <span className="text-xs text-gray-500 w-6">100%</span>
