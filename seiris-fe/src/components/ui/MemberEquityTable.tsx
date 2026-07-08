@@ -4,6 +4,8 @@ interface MemberEquityTableProps {
   members: EquityMemberEntry[];
 }
 
+const RANK_COLORS = ["text-accent", "text-gray-300", "text-amber-600/80"] as const;
+
 export default function MemberEquityTable({ members }: MemberEquityTableProps) {
   const sorted = [...members].sort((a, b) => b.equity_pct - a.equity_pct);
 
@@ -15,60 +17,54 @@ export default function MemberEquityTable({ members }: MemberEquityTableProps) {
     );
   }
 
+  const topPct = sorted[0]?.equity_pct ?? 1;
+
   return (
-    <div className="rounded-lg border border-gray-800 bg-card">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-800 text-left text-xs text-gray-500">
-              <th className="px-4 py-3 font-medium">Anggota</th>
-              <th className="px-4 py-3 font-medium">Role</th>
-              <th className="px-4 py-3 text-right font-medium">Slices</th>
-              <th className="px-4 py-3 text-right font-medium">Equity %</th>
-              <th className="px-4 py-3 font-medium">Bar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((m) => (
-              <tr key={m.member_id} className="border-b border-gray-800/50 last:border-0">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex size-7 items-center justify-center rounded-full bg-accent/20 text-[10px] font-bold text-accent">
-                      {m.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-white">{m.name}</span>
+    <div className="rounded-xl border border-gray-800/50 bg-card py-1">
+      {sorted.map((m, i) => {
+        const rank = i + 1;
+        const rankColor = RANK_COLORS[i] ?? "text-gray-500";
+        const barPct = Math.max((m.equity_pct / topPct) * 100, 2);
+
+        return (
+          <div key={m.member_id}>
+            <div className="px-5 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className={`w-5 text-sm font-bold tabular-nums ${rankColor}`}>
+                    #{rank}
+                  </span>
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
+                    {m.name.charAt(0).toUpperCase()}
                   </div>
-                </td>
-                <td className="px-4 py-3">
-                  {m.role === "owner" ? (
-                    <span className="rounded-full bg-accent/20 px-2 py-0.5 text-[10px] font-medium text-accent">
-                      Owner
-                    </span>
-                  ) : (
-                    <span className="rounded-full bg-gray-800 px-2 py-0.5 text-[10px] text-gray-400">
-                      Member
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums text-gray-300">
-                  {m.slices.toLocaleString("id-ID")}
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums text-white">
-                  {m.equity_pct.toFixed(1)}%
-                </td>
-                <td className="px-4 py-3">
-                  <div className="h-2 w-24 rounded-full bg-gray-800">
-                    <div
-                      className="h-full rounded-full bg-accent transition-all"
-                      style={{ width: `${Math.max(m.equity_pct, 1)}%` }}
-                    />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-white">{m.name}</p>
+                    <p className="text-[11px] text-gray-500">
+                      {m.role === "owner" ? "Owner" : "Member"}
+                    </p>
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-bold tabular-nums text-white">{m.equity_pct.toFixed(1)}%</p>
+                </div>
+              </div>
+
+              <div className="mt-2 ml-8">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-accent to-accent/40 transition-all"
+                    style={{ width: `${barPct}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs tabular-nums text-gray-500">
+                  {m.slices.toLocaleString("id-ID")} slices
+                </p>
+              </div>
+            </div>
+            {i < sorted.length - 1 && <div className="mx-5 border-t border-gray-800/40" />}
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -50,7 +50,7 @@ export default function VotePanel({ contribution, currentMemberId, onVoted }: Vo
           type="button"
           onClick={() => setVote("APPROVE")}
           className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200",
+            "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98]",
             vote === "APPROVE"
               ? "border-green-500 bg-green-500/10 text-green-400"
               : "border-gray-700 text-gray-400 hover:border-green-500/50 hover:text-green-400 hover:bg-green-500/5"
@@ -63,7 +63,7 @@ export default function VotePanel({ contribution, currentMemberId, onVoted }: Vo
           type="button"
           onClick={() => setVote("REJECT")}
           className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200",
+            "flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98]",
             vote === "REJECT"
               ? "border-red-500 bg-red-500/10 text-red-400"
               : "border-gray-700 text-gray-400 hover:border-red-500/50 hover:text-red-400 hover:bg-red-500/5"

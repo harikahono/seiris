@@ -28,6 +28,19 @@ const FILTERS: FilterDef[] = [
   { key: "team",   label: "Tim",       icon: Settings },
 ];
 
+function groupByDate(logs: AuditLogItem[]): Map<string, AuditLogItem[]> {
+  const map = new Map<string, AuditLogItem[]>();
+  for (const log of logs) {
+    const date = new Date(log.created_at).toLocaleDateString("id-ID", {
+      day: "numeric", month: "long", year: "numeric",
+    });
+    const group = map.get(date);
+    if (group) group.push(log);
+    else map.set(date, [log]);
+  }
+  return map;
+}
+
 export default function AuditLogTab() {
   const { team } = useOutletContext<TeamContext>();
   const teamId = team.id;
@@ -59,6 +72,8 @@ export default function AuditLogTab() {
 
    
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
+
+  const grouped = groupByDate(logs);
 
   return (
     <div className="space-y-4">
@@ -97,14 +112,23 @@ export default function AuditLogTab() {
         />
       )}
 
-      <div className="space-y-3">
-        {logs.map((log) => (
-          <AuditLogEntry key={log.id} log={log} teamId={teamId} />
+      <div className="space-y-6">
+        {Array.from(grouped.entries()).map(([date, dateLogs]) => (
+          <div key={date}>
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-600">
+              {date}
+            </h3>
+            <div className="space-y-1">
+              {dateLogs.map((log) => (
+                <AuditLogEntry key={log.id} log={log} teamId={teamId} />
+              ))}
+            </div>
+          </div>
         ))}
         {loading && page === 1 && (
           <div className="space-y-3">
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-20 w-full" />
+              <Skeleton key={i} className="h-14 w-full" />
             ))}
           </div>
         )}

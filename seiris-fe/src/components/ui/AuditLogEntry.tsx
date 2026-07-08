@@ -1,7 +1,6 @@
 import { type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { AuditLogItem } from "@/types";
-import { cn } from "@/lib/utils";
 import { formatRp } from "@/lib/constants";
 import {
   ThumbsUp,
@@ -19,53 +18,26 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-const ACTION_META: Record<string, { icon: LucideIcon; color: string; bg: string; label: string }> = {
-  "contribution.created": {
-    icon: FileText, color: "text-yellow-400", bg: "bg-yellow-500/10", label: "Membuat kontribusi",
-  },
-  "vote.cast": {
-    icon: ThumbsUp, color: "text-blue-400", bg: "bg-blue-500/10", label: "Memberi vote",
-  },
-  "contribution.approved": {
-    icon: ThumbsUp, color: "text-green-400", bg: "bg-green-500/10", label: "Kontribusi disetujui",
-  },
-  "contribution.rejected": {
-    icon: ThumbsDown, color: "text-red-400", bg: "bg-red-500/10", label: "Kontribusi ditolak",
-  },
-  "equity.recalculated": {
-    icon: PieChart, color: "text-orange-400", bg: "bg-orange-500/10", label: "Memperbarui equity",
-  },
-  "equity.frozen": {
-    icon: Snowflake, color: "text-cyan-400", bg: "bg-cyan-500/10", label: "Freeze equity",
-  },
-  "revenue.created": {
-    icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-500/10", label: "Mencatat revenue",
-  },
-  "profit.distributed": {
-    icon: Gift, color: "text-emerald-400", bg: "bg-emerald-500/10", label: "Mendistribusikan profit",
-  },
-  "team.created": {
-    icon: Settings, color: "text-gray-400", bg: "bg-gray-500/10", label: "Membuat tim",
-  },
-  "team.updated": {
-    icon: Edit, color: "text-gray-400", bg: "bg-gray-500/10", label: "Memperbarui tim",
-  },
-  "member.joined": {
-    icon: LogIn, color: "text-purple-400", bg: "bg-purple-500/10", label: "Bergabung ke tim",
-  },
-  "member.exited": {
-    icon: UserMinus, color: "text-purple-400", bg: "bg-purple-500/10", label: "Keluar dari tim",
-  },
-  "member.fmr_updated": {
-    icon: UserPlus, color: "text-purple-400", bg: "bg-purple-500/10", label: "Memperbarui FMR",
-  },
+const ACTION_META: Record<string, { icon: LucideIcon; color: string; label: string }> = {
+  "contribution.created":     { icon: FileText,   color: "text-yellow-400", label: "Membuat kontribusi" },
+  "vote.cast":                { icon: ThumbsUp,   color: "text-blue-400",  label: "Memberi vote" },
+  "contribution.approved":    { icon: ThumbsUp,   color: "text-green-400", label: "Kontribusi disetujui" },
+  "contribution.rejected":    { icon: ThumbsDown, color: "text-red-400",   label: "Kontribusi ditolak" },
+  "equity.recalculated":      { icon: PieChart,   color: "text-orange-400",label: "Memperbarui equity" },
+  "equity.frozen":            { icon: Snowflake,  color: "text-cyan-400",  label: "Freeze equity" },
+  "revenue.created":          { icon: TrendingUp, color: "text-emerald-400",label: "Mencatat revenue" },
+  "profit.distributed":       { icon: Gift,       color: "text-emerald-400",label: "Mendistribusikan profit" },
+  "team.created":             { icon: Settings,   color: "text-gray-400",  label: "Membuat tim" },
+  "team.updated":             { icon: Edit,       color: "text-gray-400",  label: "Memperbarui tim" },
+  "member.joined":            { icon: LogIn,      color: "text-purple-400",label: "Bergabung ke tim" },
+  "member.exited":            { icon: UserMinus,  color: "text-purple-400",label: "Keluar dari tim" },
+  "member.fmr_updated":       { icon: UserPlus,   color: "text-purple-400",label: "Memperbarui FMR" },
 };
 
 function getActionMeta(action: string) {
   return ACTION_META[action] ?? {
     icon: FileText,
     color: "text-gray-400",
-    bg: "bg-gray-500/10",
     label: action,
   };
 }
@@ -80,10 +52,8 @@ const ACTION_LINK_PREFIXES = ["contribution.", "vote."];
 export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
   const meta = getActionMeta(log.action);
   const Icon = meta.icon;
+
   const time = new Date(log.created_at).toLocaleString("id-ID", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -91,30 +61,26 @@ export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
   const isClickable = teamId && log.subject_id &&
     ACTION_LINK_PREFIXES.some(p => log.action.startsWith(p));
 
-  const card = (
-    <div className="flex gap-3 rounded-lg border border-gray-800 bg-card p-4">
-      <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-full", meta.bg)}>
-        <Icon className={cn("size-4", meta.color)} />
-      </div>
+  const row = (
+    <div className="flex gap-4 px-4 py-3 transition hover:bg-gray-800/30">
+      <span className="w-10 shrink-0 pt-0.5 text-xs tabular-nums text-gray-600">
+        {time}
+      </span>
+      <Icon className={`mt-0.5 size-4 shrink-0 ${meta.color}`} />
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="text-sm text-white">
-              {log.actor ? (
-                <span className="font-medium">{log.actor.name}</span>
-              ) : (
-                <span className="italic text-gray-500">System</span>
-              )}
-              <span className="ml-1 text-gray-400">{meta.label}</span>
-            </p>
-            {log.payload && Object.keys(log.payload).length > 0 && (
-              <div className="mt-1 space-y-0.5">
-                {renderPayload(log.action, log.payload)}
-              </div>
-            )}
+        <p className="text-sm text-gray-300">
+          {log.actor ? (
+            <span className="font-medium text-white">{log.actor.name}</span>
+          ) : (
+            <span className="italic text-gray-500">System</span>
+          )}
+          <span className="ml-1 text-gray-500">{meta.label}</span>
+        </p>
+        {log.payload && Object.keys(log.payload).length > 0 && (
+          <div className="mt-0.5 space-y-0.5">
+            {renderPayload(log.action, log.payload)}
           </div>
-          <span className="shrink-0 text-xs text-gray-600">{time}</span>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -123,14 +89,14 @@ export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
     return (
       <Link
         to={`/teams/${teamId}/contributions/${log.subject_id}`}
-        className="block transition hover:border-gray-700 hover:bg-gray-800/50 cursor-pointer"
+        className="block cursor-pointer"
       >
-        {card}
+        {row}
       </Link>
     );
   }
 
-  return card;
+  return row;
 }
 
 function renderPayload(action: string, payload: Record<string, unknown>): ReactNode {
@@ -192,7 +158,7 @@ function renderPayload(action: string, payload: Record<string, unknown>): ReactN
 
 function PayloadRow({ label, value }: { label: string; value: string }) {
   return (
-    <p className="text-xs text-gray-500">
+    <p className="text-xs text-gray-600">
       <span className="text-gray-600">{label}: </span>
       {value}
     </p>
