@@ -9,6 +9,7 @@ import AuditLogEntry from "@/components/ui/AuditLogEntry";
 import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
+import { toast } from "sonner";
 
 interface FilterDef {
   key: string;
@@ -52,7 +53,7 @@ export default function AuditLogTab() {
         setLastPage(res.data.meta.last_page);
         setTotal(res.data.meta.total);
       })
-      .catch(console.error)
+      .catch(() => toast.error("Gagal memuat audit log"))
       .finally(() => setLoading(false));
   }, [teamId, page, filter]);
 

@@ -10,6 +10,7 @@ import CreateRevenueForm from "@/components/ui/CreateRevenueForm";
 import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
+import { toast } from "sonner";
 
 export default function RevenueTab() {
   const { team, isOwner } = useOutletContext<TeamContext>();
@@ -32,7 +33,7 @@ export default function RevenueTab() {
         setRevenues(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
-      .catch(console.error);
+      .catch(() => toast.error("Gagal memuat revenue"));
   }, [teamId, page]);
 
   // Initial load + page change → loading=true dari initial state
