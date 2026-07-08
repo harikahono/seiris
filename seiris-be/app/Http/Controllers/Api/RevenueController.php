@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class RevenueController extends Controller
 {
@@ -206,7 +207,11 @@ class RevenueController extends Controller
             return $distributions;
         });
 
-        broadcast(new TeamUpdated($team, 'profit.distributed', $request->user()->name))->toOthers();
+        try {
+            broadcast(new TeamUpdated($team, 'profit.distributed', $request->user()->name))->toOthers();
+        } catch (\Throwable $e) {
+            Log::warning('[Distribute] Broadcast failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'message' => 'Profit berhasil didistribusikan.',
