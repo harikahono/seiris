@@ -6,7 +6,8 @@ import { useRealtime } from "@/contexts/RealtimeContext";
 import type { TeamMember, FmrProposal } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { toast } from "sonner";
-import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut } from "lucide-react";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 export default function TeamMembersTab() {
   const { team, currentUserId, fetchTeam } = useOutletContext<TeamContext>();
@@ -147,14 +148,20 @@ export default function TeamMembersTab() {
     setFmrValue("");
   };
 
+  const [exitingMember, setExitingMember] = useState<TeamMember | null>(null);
+  const [exitingLoading, setExitingLoading] = useState(false);
+
   const handleExit = async (member: TeamMember) => {
-    if (!confirm(`Yakin ingin mengeluarkan ${member.user.name} dari tim?`)) return;
+    setExitingLoading(true);
     try {
       await api.post(`/teams/${team.id}/members/${member.id}/exit`);
       toast.success(`${member.user.name} berhasil dikeluarkan`);
+      setExitingMember(null);
       fetchTeam();
     } catch {
       toast.error("Gagal mengeluarkan anggota");
+    } finally {
+      setExitingLoading(false);
     }
   };
 
@@ -324,7 +331,7 @@ export default function TeamMembersTab() {
               {isOwner && member.role !== "owner" && editingFmr !== member.id && (
                 <button
                   type="button"
-                  onClick={() => handleExit(member)}
+                  onClick={() => setExitingMember(member)}
                   className="rounded px-2 py-1 text-xs text-red-400 transition hover:bg-red-500/10"
                 >
                   Keluarkan
@@ -423,6 +430,26 @@ export default function TeamMembersTab() {
           <Loader2 className="size-5 animate-spin text-gray-500" />
         </div>
       )}
+
+      <ConfirmModal
+        open={exitingMember !== null}
+        onClose={() => setExitingMember(null)}
+        onConfirm={() => exitingMember && handleExit(exitingMember)}
+        title="Keluarkan Anggota"
+        description={
+          exitingMember
+            ? `Yakin ingin mengeluarkan ${exitingMember.user.name} dari tim?`
+            : ""
+        }
+        confirmText="Keluarkan"
+        loading={exitingLoading}
+        variant="danger"
+        icon={
+          <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
+            <LogOut className="size-6 text-red-400" />
+          </div>
+        }
+      />
     </div>
   );
 }

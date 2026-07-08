@@ -8,6 +8,7 @@ import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Loader2, Snowflake } from "lucide-react";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface FieldErrors {
   name?: string;
@@ -22,6 +23,7 @@ export default function TeamSettingsTab() {
   const [approvalThreshold, setApprovalThreshold] = useState<ApprovalThreshold>(team.approval_threshold);
   const [saving, setSaving] = useState(false);
   const [freezing, setFreezing] = useState(false);
+  const [freezeConfirmOpen, setFreezeConfirmOpen] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
 
   if (!isOwner) {
@@ -63,7 +65,6 @@ export default function TeamSettingsTab() {
   };
 
   const handleFreeze = async () => {
-    if (!confirm("Yakin ingin freeze equity tim? Aksi ini tidak bisa dibatalkan.")) return;
     setFreezing(true);
     try {
       await api.post(`/teams/${team.id}/freeze`);
@@ -176,7 +177,7 @@ export default function TeamSettingsTab() {
         </p>
         <button
           type="button"
-          onClick={handleFreeze}
+          onClick={() => setFreezeConfirmOpen(true)}
           disabled={freezing || team.is_frozen}
           className="flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
@@ -188,6 +189,17 @@ export default function TeamSettingsTab() {
           {team.is_frozen ? "Sudah di-freeze" : "Freeze Equity"}
         </button>
       </div>
+
+      <ConfirmModal
+        open={freezeConfirmOpen}
+        onClose={() => setFreezeConfirmOpen(false)}
+        onConfirm={handleFreeze}
+        title="Freeze Equity Tim"
+        description="Yakin ingin freeze equity tim? Aksi ini tidak bisa dibatalkan."
+        confirmText="Freeze"
+        variant="danger"
+        loading={freezing}
+      />
     </div>
   );
 }
