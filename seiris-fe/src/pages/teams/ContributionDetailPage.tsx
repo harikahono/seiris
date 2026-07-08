@@ -8,6 +8,7 @@ import VotePanel from "@/components/ui/VotePanel";
 import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Skeleton from "@/components/ui/Skeleton";
+import { toast } from "sonner";
 
 export default function ContributionDetailPage() {
   const { teamId, contributionId } = useParams<{ teamId: string; contributionId: string }>();
@@ -30,7 +31,7 @@ export default function ContributionDetailPage() {
         const myMember = teamRes.data.data.members.find((m) => m.user.id === user!.id);
         setCurrentMemberId(myMember?.id ?? null);
       })
-      .catch(console.error)
+      .catch(() => toast.error("Gagal memuat detail kontribusi"))
       .finally(() => setLoading(false));
   }, [teamId, contributionId, user]);
 

@@ -142,7 +142,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
         setTotalRevenue(revs.reduce((s, r) => s + r.amount, 0));
         setTotalDistributed(revs.reduce((s, r) => s + (r.is_distributed ? r.distributable_amount : 0), 0));
       })
-      .catch(console.error);
+      .catch(() => toast.error("Gagal memuat data dashboard"));
   }, [teamId]);
 
   // Initial load → loading=true

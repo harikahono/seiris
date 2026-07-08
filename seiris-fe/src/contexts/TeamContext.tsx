@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import api from "@/api/axios";
 import type { DashboardTeamItem } from "@/types";
+import { toast } from "sonner";
 
 const STORAGE_KEY = "seiris_current_team_id";
 
@@ -27,7 +28,7 @@ export function TeamProvider({ children }: { children: ReactNode }) {
     api
       .get<{ message: string; data: { teams: DashboardTeamItem[] } }>("/my-dashboard")
       .then((res) => setTeams(res.data.data.teams))
-      .catch(() => setTeams([]))
+      .catch(() => { setTeams([]); toast.error("Gagal memuat data tim"); })
       .finally(() => setIsLoading(false));
   }, []);
 

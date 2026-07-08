@@ -15,6 +15,7 @@ import Pagination from "@/components/ui/Pagination";
 import { Plus, Loader2, ListChecks } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
+import { toast } from "sonner";
 
 type Filter = "all" | ContributionStatus;
 type View = "contributions" | "equity";
@@ -51,7 +52,7 @@ export default function ContributionsTab() {
     return api
       .get<{ data: EquityData }>(`/teams/${teamId}/equity`)
       .then((res) => setEquity(res.data.data))
-      .catch(() => setEquity(null));
+      .catch(() => { setEquity(null); toast.error("Gagal memuat equity"); });
   }, [teamId]);
 
   // ── Fetch Contributions (server-side filter) ──
@@ -67,7 +68,7 @@ export default function ContributionsTab() {
         setContributions(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
-      .catch(console.error);
+      .catch(() => toast.error("Gagal memuat kontribusi"));
   }, [teamId, page, filter]);
 
   // Initial load + page change → loading=true from initial state
