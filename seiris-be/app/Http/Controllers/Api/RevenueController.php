@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // ============================================================
 // app/Http/Controllers/Api/RevenueController.php
 // ============================================================
@@ -45,7 +45,7 @@ class RevenueController extends Controller
 
     /**
      * POST /api/teams/{team}/revenues
-     * Catat revenue baru — hanya owner
+     * Catat revenue baru â€” hanya owner
      */
     public function store(StoreRevenueRequest $request, Team $team): JsonResponse
     {
@@ -103,13 +103,13 @@ class RevenueController extends Controller
 
     /**
      * POST /api/revenues/{revenue}/request-distribute
-     * Ajukan distribusi revenue — semua active member bisa
+     * Ajukan distribusi revenue â€” semua active member bisa
      */
     public function requestDistribute(Request $request, Revenue $revenue): JsonResponse
     {
         $team = $revenue->team;
 
-        if ($revenue->status === 'distributed') {
+        if ($revenue->is_distributed) {
             return response()->json([
                 'message' => 'Revenue ini sudah didistribusikan.',
             ], 409);
@@ -144,14 +144,14 @@ class RevenueController extends Controller
 
     /**
      * POST /api/revenues/{revenue}/distribute
-     * Setujui dan distribusikan profit ke semua anggota aktif — hanya owner
+     * Setujui dan distribusikan profit ke semua anggota aktif â€” hanya owner
      */
     public function distribute(Request $request, Revenue $revenue): JsonResponse
     {
         $team = $revenue->team;
         Gate::authorize('update', $team);
 
-        if ($revenue->status === 'distributed') {
+        if ($revenue->is_distributed) {
             return response()->json([
                 'message' => 'Revenue ini sudah didistribusikan sebelumnya.',
             ], 409);
@@ -223,3 +223,4 @@ class RevenueController extends Controller
     }
 
 }
+
