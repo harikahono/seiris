@@ -42,9 +42,6 @@ export default function ContributionCard({
           <span className="text-sm font-semibold tabular-nums text-accent">
             {contribution.total_slices.toLocaleString("id-ID")} slices
           </span>
-          <span className="text-[11px] text-gray-600">
-            {new Date(contribution.contribution_date).toLocaleDateString("id-ID")}
-          </span>
         </div>
       </div>
 
@@ -65,6 +62,9 @@ export default function ContributionCard({
             <span>{contribution.approvals_count} vote</span>
           </>
         )}
+        <span className="ml-auto text-[11px] text-gray-600">
+          {new Date(contribution.contribution_date).toLocaleDateString("id-ID")}
+        </span>
       </div>
     </Link>
   );
