@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace Database\Seeders;
 
@@ -21,7 +21,7 @@ class DemoDataSeeder extends Seeder
 {
     private SlicingPieService $slicingPie;
 
-    // ── User Definitions ─────────────────────────────────────
+    // â”€â”€ User Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private array $userDefs = [
         ['name' => 'amengFRONTEND', 'email' => 'kahono@z4foundation.com'],
         ['name' => 'Rina Wijaya',   'email' => 'rina@example.com'],
@@ -38,7 +38,7 @@ class DemoDataSeeder extends Seeder
         ['name' => 'Putri Ayu',     'email' => 'putri@example.com'],
     ];
 
-    // ── Team Definitions ──────────────────────────────────────
+    // â”€â”€ Team Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // [name, ownerEmail, threshold, members: [email, role], ...]
     private array $teamDefs = [
         [
@@ -93,7 +93,7 @@ class DemoDataSeeder extends Seeder
         ],
     ];
 
-    // ── FMR Settings ──────────────────────────────────────────
+    // â”€â”€ FMR Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private array $fmrDefs = [
         'kahono@z4foundation.com' => 150000,
         'rina@example.com'       => 120000,
@@ -110,7 +110,7 @@ class DemoDataSeeder extends Seeder
         'putri@example.com'      => 100000,
     ];
 
-    // ── Contribution Definitions ──────────────────────────────
+    // â”€â”€ Contribution Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // [teamName, memberEmail, type, description, value, status, voters: [email=>vote], ...]
     private array $contributionDefs = [
         // GENUI
@@ -119,28 +119,28 @@ class DemoDataSeeder extends Seeder
         ['team' => 'GENUI', 'by' => 'budi@example.com',        'type' => 'CASH',    'desc' => 'Modal Server DO 3 Bulan',                      'value' => 1000000, 'status' => 'APPROVED', 'votes' => ['rina@example.com'=>'APPROVE','sari@example.com'=>'APPROVE']],
         ['team' => 'GENUI', 'by' => 'sari@example.com',        'type' => 'IDEA',    'desc' => 'Riset Model Monetisasi Premium',               'value' => 1100000, 'status' => 'APPROVED', 'votes' => ['rina@example.com'=>'APPROVE','budi@example.com'=>'REJECT']],
         ['team' => 'GENUI', 'by' => 'budi@example.com',        'type' => 'TIME',    'desc' => 'Backend API Modul Payment',                    'value' => 2500000, 'status' => 'REJECTED', 'votes' => ['rina@example.com'=>'REJECT','sari@example.com'=>'APPROVE']],
-        // ── SALES: GENUI — Startup Bootstrap, Angel Investor markup 11% ──
-        ['team' => 'GENUI', 'by' => 'kahono@z4foundation.com', 'type' => 'SALES',   'desc' => 'Closing Angel Investor — estimasi 45jt deal 50jt', 'value' => 2500000, 'deal_value' => 50000000, 'estimated_value' => 45000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['rina@example.com'=>'APPROVE','budi@example.com'=>'APPROVE']],
+        // â”€â”€ SALES: GENUI â€” Startup Bootstrap, Angel Investor markup 11% â”€â”€
+        ['team' => 'GENUI', 'by' => 'kahono@z4foundation.com', 'type' => 'SALES',   'desc' => 'Closing Angel Investor â€” estimasi 45jt deal 50jt', 'value' => 2500000, 'deal_value' => 50000000, 'estimated_value' => 45000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['rina@example.com'=>'APPROVE','budi@example.com'=>'APPROVE']],
         // Karya Digital
         ['team' => 'Karya Digital', 'by' => 'adi@example.com',         'type' => 'TIME',    'desc' => 'Setup Infrastructure & CI/CD',               'value' => 1950000, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE']],
         ['team' => 'Karya Digital', 'by' => 'dian@example.com',        'type' => 'CASH',    'desc' => 'Domain & Hosting 1 Tahun',                   'value' => 800000,  'status' => 'APPROVED', 'votes' => ['adi@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE']],
         ['team' => 'Karya Digital', 'by' => 'fitri@example.com',       'type' => 'TIME',    'desc' => 'Content Writing Landing Page',               'value' => 900000,  'status' => 'APPROVED', 'votes' => ['adi@example.com'=>'APPROVE','dian@example.com'=>'APPROVE']],
         ['team' => 'Karya Digital', 'by' => 'kahono@z4foundation.com', 'type' => 'NETWORK', 'desc' => 'Introduksi ke 3 Calon Klien Potensial',       'value' => 750000,  'status' => 'PENDING',  'votes' => []],
-        // ── SALES: Karya Digital — Freelance, deal markup 80% ──
-        ['team' => 'Karya Digital', 'by' => 'adi@example.com',         'type' => 'SALES',   'desc' => 'Deal Website UMKM — estimasi 10jt deal 18jt',   'value' => 4000000, 'deal_value' => 18000000, 'estimated_value' => 10000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE']],
-        // ── SALES: Karya Digital — deal markup 33%, masi pending ──
-        ['team' => 'Karya Digital', 'by' => 'kahono@z4foundation.com', 'type' => 'SALES',   'desc' => 'Deal Lanjutan — estimasi 9jt deal 12jt',        'value' => 1500000, 'deal_value' => 12000000, 'estimated_value' => 9000000, 'commission_rate' => 50, 'status' => 'PENDING',  'votes' => []],
+        // â”€â”€ SALES: Karya Digital â€” Freelance, deal markup 80% â”€â”€
+        ['team' => 'Karya Digital', 'by' => 'adi@example.com',         'type' => 'SALES',   'desc' => 'Deal Website UMKM â€” estimasi 10jt deal 18jt',   'value' => 4000000, 'deal_value' => 18000000, 'estimated_value' => 10000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE']],
+        // â”€â”€ SALES: Karya Digital â€” deal markup 33%, masi pending â”€â”€
+        ['team' => 'Karya Digital', 'by' => 'kahono@z4foundation.com', 'type' => 'SALES',   'desc' => 'Deal Lanjutan â€” estimasi 9jt deal 12jt',        'value' => 1500000, 'deal_value' => 12000000, 'estimated_value' => 9000000, 'commission_rate' => 50, 'status' => 'PENDING',  'votes' => []],
         // StartupA
         ['team' => 'StartupA', 'by' => 'dian@example.com',  'type' => 'TIME',   'desc' => 'Arsitektur Sistem & Database Design',           'value' => 2500000, 'status' => 'APPROVED', 'votes' => ['budi@example.com'=>'APPROVE','mega@example.com'=>'APPROVE']],
         ['team' => 'StartupA', 'by' => 'budi@example.com',   'type' => 'TIME',   'desc' => 'Backend Auth & Middleware',                     'value' => 2000000, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','andi@example.com'=>'APPROVE']],
         ['team' => 'StartupA', 'by' => 'mega@example.com',   'type' => 'FACILITY','desc' => 'Sewa Co-working Space 2 Bulan',                'value' => 3000000, 'status' => 'APPROVED', 'votes' => ['budi@example.com'=>'APPROVE','rizky@example.com'=>'APPROVE']],
         ['team' => 'StartupA', 'by' => 'rizky@example.com',  'type' => 'IDEA',   'desc' => 'Konsep Fitur AI Chatbot untuk Customer Service', 'value' => 1150000, 'status' => 'REJECTED', 'votes' => ['dian@example.com'=>'REJECT','andi@example.com'=>'APPROVE']],
         ['team' => 'StartupA', 'by' => 'andi@example.com',   'type' => 'TIME',   'desc' => 'Frontend Landing Page & Dashboard',             'value' => 1700000, 'status' => 'PENDING',  'votes' => []],
-        // ── SALES: StartupA — SaaS, deal markup 20% ──
-        ['team' => 'StartupA', 'by' => 'mega@example.com',   'type' => 'SALES',   'desc' => 'Client A Tahunan — estimasi 25jt deal 30jt',     'value' => 2500000, 'deal_value' => 30000000, 'estimated_value' => 25000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','budi@example.com'=>'APPROVE']],
-        // ── SALES: StartupA — deal pas estimasi, markup 0% ──
-        ['team' => 'StartupA', 'by' => 'dian@example.com',   'type' => 'SALES',   'desc' => 'Client B — estimasi 20jt deal 20jt (fix price)', 'value' => 0,       'deal_value' => 20000000, 'estimated_value' => 20000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['mega@example.com'=>'APPROVE','andi@example.com'=>'APPROVE']],
-        // Project X — threshold 100% (harus unanimous)
+        // â”€â”€ SALES: StartupA â€” SaaS, deal markup 20% â”€â”€
+        ['team' => 'StartupA', 'by' => 'mega@example.com',   'type' => 'SALES',   'desc' => 'Client A Tahunan â€” estimasi 25jt deal 30jt',     'value' => 2500000, 'deal_value' => 30000000, 'estimated_value' => 25000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','budi@example.com'=>'APPROVE']],
+        // â”€â”€ SALES: StartupA â€” deal pas estimasi, markup 0% â”€â”€
+        ['team' => 'StartupA', 'by' => 'dian@example.com',   'type' => 'SALES',   'desc' => 'Client B â€” estimasi 20jt deal 20jt (fix price)', 'value' => 0,       'deal_value' => 20000000, 'estimated_value' => 20000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['mega@example.com'=>'APPROVE','andi@example.com'=>'APPROVE']],
+        // Project X â€” threshold 100% (harus unanimous)
         ['team' => 'Project X', 'by' => 'mega@example.com', 'type' => 'TIME',   'desc' => 'Project Planning & Roadmap',                    'value' => 1400000, 'status' => 'APPROVED', 'votes' => ['dewi@example.com'=>'APPROVE','agus@example.com'=>'APPROVE']],
         ['team' => 'Project X', 'by' => 'dewi@example.com', 'type' => 'TIME',   'desc' => 'Research & Competitive Analysis',              'value' => 1900000, 'status' => 'APPROVED', 'votes' => ['mega@example.com'=>'APPROVE','agus@example.com'=>'APPROVE']],
         ['team' => 'Project X', 'by' => 'agus@example.com', 'type' => 'CASH',   'desc' => 'Tools & Software Licenses',                     'value' => 500000,  'status' => 'PENDING',  'votes' => []],
@@ -151,8 +151,8 @@ class DemoDataSeeder extends Seeder
         ['team' => 'Dev Team', 'by' => 'adi@example.com',   'type' => 'CASH',   'desc' => 'API Subscription 6 Bulan',                      'value' => 1500000, 'status' => 'PENDING',  'votes' => []],
     ];
 
-    // ── Revenue Definitions ───────────────────────────────────
-    // deductions: [{for: string, amount: int}] — daftar potongan transparan
+    // â”€â”€ Revenue Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // deductions: [{for: string, amount: int}] â€” daftar potongan transparan
     private array $revenueDefs = [
         ['team' => 'GENUI',         'by' => 'kahono@z4foundation.com', 'desc' => 'Pendanaan Awal Angel Investor', 'amount' => 50000000, 'distributable' => 35000000, 'deductions' => [['for' => 'Notaris & Legal', 'amount' => 10000000], ['for' => 'Platform fee', 'amount' => 5000000]], 'distribute' => true],
         ['team' => 'GENUI',         'by' => 'kahono@z4foundation.com', 'desc' => 'Freelance Project Klien A',     'amount' => 20000000, 'distributable' => 15000000, 'deductions' => [['for' => 'Server DO 3 bulan', 'amount' => 3000000], ['for' => 'Domain & SSL', 'amount' => 2000000]], 'distribute' => true],
@@ -167,7 +167,7 @@ class DemoDataSeeder extends Seeder
 
     public function run(): void
     {
-        $this->command?->info('🚀 Seeding demo data...');
+        $this->command?->info('ðŸš€ Seeding demo data...');
 
         $users = $this->createUsers();
         $teams = $this->createTeamsAndMembers($users);
@@ -176,7 +176,7 @@ class DemoDataSeeder extends Seeder
         $this->createSnapshots($teams);
         $this->createRevenues($teams, $users);
 
-        $this->command?->info('✅ Demo data seeding selesai!');
+        $this->command?->info('âœ… Demo data seeding selesai!');
     }
 
     private function createUsers(): array
@@ -208,7 +208,7 @@ class DemoDataSeeder extends Seeder
                 ['name' => $def['name']],
                 [
                     'owner_id'           => $owner->id,
-                    'description'        => "Tim {$def['name']} — demo SEIRIS",
+                    'description'        => "Tim {$def['name']} â€” demo SEIRIS",
                     'invite_code'        => strtoupper(Str::random(8)),
                     'approval_threshold' => $def['threshold'],
                     'is_frozen'          => false,
@@ -240,7 +240,7 @@ class DemoDataSeeder extends Seeder
                 );
             }
 
-            // ── Audit Logs ──
+            // â”€â”€ Audit Logs â”€â”€
             AuditLogService::log(
                 teamId:      $team->id,
                 action:      'team.created',
@@ -320,7 +320,7 @@ class DemoDataSeeder extends Seeder
                 }
             }
 
-            // ── Audit Logs ──
+            // â”€â”€ Audit Logs â”€â”€
             AuditLogService::log(
                 teamId:      $team->id,
                 action:      'contribution.created',
@@ -399,7 +399,7 @@ class DemoDataSeeder extends Seeder
                 'is_distributed'       => false,
             ]);
 
-            // ── Audit Log: revenue.created ──
+            // â”€â”€ Audit Log: revenue.created â”€â”€
             AuditLogService::log(
                 teamId:      $team->id,
                 action:      'revenue.created',
@@ -422,10 +422,11 @@ class DemoDataSeeder extends Seeder
                         }
                         $revenue->update([
                             'is_distributed' => true,
+                            'status'         => 'distributed',
                             'distributed_at' => now(),
                         ]);
 
-                        // ── Audit Log: profit.distributed ──
+                        // â”€â”€ Audit Log: profit.distributed â”€â”€
                         AuditLogService::log(
                             teamId:      $team->id,
                             action:      'profit.distributed',
@@ -444,3 +445,4 @@ class DemoDataSeeder extends Seeder
         }
     }
 }
+
