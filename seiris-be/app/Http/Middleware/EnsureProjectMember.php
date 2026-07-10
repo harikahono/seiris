@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureProjectMember
@@ -31,6 +32,13 @@ class EnsureProjectMember
             ->first();
 
         abort_if(!$member, 403, 'Kamu bukan anggota tim ini.');
+
+        // C-B: verify user is in this project's roster
+        $inProject = DB::table('project_members')
+            ->where('project_id', $project->id)
+            ->where('team_member_id', $member->id)
+            ->exists();
+        abort_if(!$inProject, 403, 'Kamu bukan anggota project ini.');
 
         $request->merge(['teamMember' => $member]);
 

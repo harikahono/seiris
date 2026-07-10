@@ -97,7 +97,7 @@ export default function RevenueTab() {
         )}
 
         {revenues.map((r) => (
-          <RevenueCard key={r.id} revenue={r} isOwner={isOwner} onDistributed={fetchRevenues} />
+          <RevenueCard key={r.id} revenue={r} isOwner={isOwner} onDistributed={fetchRevenues} basePath={basePath} />
         ))}
 
         {loading && page === 1 ? (

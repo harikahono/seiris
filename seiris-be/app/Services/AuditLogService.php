@@ -34,6 +34,7 @@ class AuditLogService
 
     /**
      * Convenience method using current request context.
+     * H-J: project_id included in payload for project-scoped filtering.
      */
     public static function logFromRequest(
         Request $request,
@@ -42,7 +43,11 @@ class AuditLogService
         ?string $subjectType = null,
         ?string $subjectId = null,
         array $payload = [],
+        ?string $projectId = null,
     ): AuditLog {
+        if ($projectId) {
+            $payload['project_id'] = $projectId;
+        }
         return self::log(
             teamId:      $teamId,
             action:      $action,

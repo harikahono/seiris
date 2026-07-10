@@ -121,6 +121,7 @@ class ApprovalController extends Controller
                 subjectType: Contribution::class,
                 subjectId:   $contribution->id,
                 payload:     ['vote' => $request->vote, 'voter_id' => $voter->id],
+                projectId:   $contribution->project_id,
             );
 
             // Cek apakah threshold terpenuhi (dengan lock internal)
@@ -241,6 +242,7 @@ class ApprovalController extends Controller
                 subjectType: Contribution::class,
                 subjectId:   $contribution->id,
                 payload:     ['approve_count' => $approveCount, 'total_voters' => $totalVoters],
+                projectId:   $contribution->project_id,
             );
 
             // Trigger SlicingPie recalculation (scope: project atau tim)
@@ -257,6 +259,7 @@ class ApprovalController extends Controller
                 subjectType: Contribution::class,
                 subjectId:   $contribution->id,
                 payload:     ['reject_count' => $rejectCount, 'total_voters' => $totalVoters],
+                projectId:   $contribution->project_id,
             );
 
         // Cek kondisi TIE (Seri) - Tie-Breaker Mechanism

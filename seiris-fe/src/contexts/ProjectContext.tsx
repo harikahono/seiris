@@ -57,9 +57,13 @@ export function ProjectProvider({ teamId, children }: { teamId: string | null; c
       .finally(() => setIsLoading(false));
   }, [teamId, storageKey]);
 
+  // Initial fetch + re-fetch when teamId changes
+  useEffect(() => { refreshProjects(); }, [refreshProjects]);
+
+  // H-G: reset project selection when switching teams
   useEffect(() => {
-    refreshProjects();
-  }, [refreshProjects]);
+    setCurrentProjectId(null);
+  }, [teamId]);
 
   // Realtime: proyek baru / freeze dari anggota lain → sync list otomatis.
   useEffect(() => {

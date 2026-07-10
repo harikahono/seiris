@@ -137,12 +137,17 @@ class DemoDataSeeder extends Seeder
     public function run(): void
     {
         $this->command?->info('🚀 Seeding demo data (Slicing Pie Beranak)...');
-        $users = $this->createUsers();
-        $teams = $this->createTeamsAndMembers($users);
-        $this->updateFmrs($users);
-        $this->createContributions($teams, $users);
-        $this->createFrozenSnapshots($teams);
-        $this->createRevenues($teams, $users);
+
+        // H-K: wrap entire seeder in transaction — atomic create or nothing
+        DB::transaction(function () use (&$users, &$teams) {
+            $users = $this->createUsers();
+            $teams = $this->createTeamsAndMembers($users);
+            $this->updateFmrs($users);
+            $this->createContributions($teams, $users);
+            $this->createFrozenSnapshots($teams);
+            $this->createRevenues($teams, $users);
+        });
+
         $this->command?->info('✅ Demo data seeding selesai!');
     }
 

@@ -41,6 +41,9 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request, Team $team): JsonResponse
     {
+        // H-C: project creation is owner-only
+        Gate::authorize('update', $team);
+
         $project = DB::transaction(function () use ($request, $team) {
             $project = Project::create([
                 'team_id'     => $team->id,

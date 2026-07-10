@@ -80,6 +80,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
           estimated_value: Number(estimatedValue),
           commission_rate: Number(commissionRate),
         };
+        if (projectId) payload.project_id = projectId;
         await api.post(`${basePath}/contributions`, payload);
       } else {
         const payload: Record<string, unknown> = {
@@ -89,6 +90,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
         };
         if (requiresHours) payload.hours = Number(hours);
         if (requiresAmount) payload.amount = Number(amount);
+        if (projectId) payload.project_id = projectId;
         await api.post(`${basePath}/contributions`, payload);
       }
       toast.success(`Kontribusi "${description.trim()}" (${type}) berhasil dicatat, menunggu vote`);

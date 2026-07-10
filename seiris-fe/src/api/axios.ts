@@ -37,6 +37,9 @@ api.interceptors.response.use(
             ? `Terlalu banyak permintaan. Coba lagi dalam ${retry} dtk.`
             : "Terlalu banyak permintaan. Coba lagi nanti.",
         );
+      } else if (status === 403) {
+        // H-E: akses ditolak — biasanya frozen atau bukan project member
+        toast.error(err.response?.data?.message ?? "Akses ditolak. Kamu tidak memiliki izin untuk tindakan ini.");
       } else if (status && status >= 500) {
         toast.error("Terjadi gangguan server. Coba lagi nanti.");
       }

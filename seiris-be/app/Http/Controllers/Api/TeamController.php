@@ -218,6 +218,14 @@ class TeamController extends Controller
             return response()->json(['message' => 'Anggota sudah tidak aktif.'], 403);
         }
 
+        // H-B: service-level FMR cap — guards against direct controller call bypass
+        $maxFmr = (int) config('seiris.max_student_fmr');
+        if ($request->fmr > $maxFmr) {
+            return response()->json([
+                'message' => "FMR tidak boleh melebihi batas maksimum mahasiswa (Rp {$maxFmr}/jam).",
+            ], 422);
+        }
+
         $oldFmr = $member->fmr;
         $projectId = $request->project_id;
 

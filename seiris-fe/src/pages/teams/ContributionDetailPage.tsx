@@ -36,8 +36,9 @@ export default function ContributionDetailPage() {
       });
       const myMember = teamRes.data.data.members.find((m) => m.user.id === user!.id);
       setCurrentMemberId(myMember?.id ?? null);
-      // H2: project-scoped → cek roster via project_fmr
-      setIsProjectMember(!c.project_id || (myMember?.project_fmr ?? null) !== null);
+      // H2: project-scoped → cek roster via project_fmr existence (not null/undefined)
+      // Jika project_fmr ada (undefined/null/0/apa pun) artinya member ada di roster
+      setIsProjectMember(!c.project_id || myMember?.project_fmr !== undefined);
     } catch {
       toast.error("Gagal memuat detail kontribusi");
     } finally {

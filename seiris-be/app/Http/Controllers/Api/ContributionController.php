@@ -103,6 +103,14 @@ class ContributionController extends Controller
             ], 422);
         }
 
+        // H-A: service-level FMR cap enforcement — guards against direct DB bypass
+        $maxFmr = (int) config('seiris.max_student_fmr');
+        if ($fmr > $maxFmr) {
+            return response()->json([
+                'message' => "FMR melebihi batas maksimum mahasiswa (Rp {$maxFmr}/jam).",
+            ], 422);
+        }
+
         // Hitung value berdasarkan tipe kontribusi + FMR (per-project atau global)
         $value = $this->calculateValue($request, $member, $fmr);
 
@@ -149,6 +157,7 @@ class ContributionController extends Controller
                     'total_slices' => $contribution->total_slices,
                     'description'  => $contribution->description,
                 ],
+                projectId: $project?->id,
             );
 
             return $contribution;

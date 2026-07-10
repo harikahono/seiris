@@ -46,10 +46,13 @@ class EquitySnapshot extends Model
     {
         parent::boot();
 
-        // M1: snapshot inti immutable — hanya kolom is_frozen (freeze) yg boleh berubah.
+        // M1: snapshot immutable — hanya kolom is_frozen (freeze) yg boleh berubah.
         // Update kolom lain (equity_map, total_slices, dll) otomatis dibatalkan.
         static::updating(function (self $model) {
             return $model->isDirty('is_frozen') ? null : false;
         });
+
+        // C-A: append-only — snapshot tidak boleh dihapus sama sekali
+        static::deleting(fn () => false);
     }
 }
