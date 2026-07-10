@@ -2,13 +2,15 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Outlet } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
+import { ProjectProvider } from "@/contexts/ProjectContext";
+import ProjectSelector from "@/components/teams/ProjectSelector";
 import type { Team } from "@/types";
 import { ArrowLeft } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 
 export interface TeamContext {
   team: Team;
-  fetchTeam: () => void;
+  fetchTeam: (projectId?: string) => void;
   isOwner: boolean;
   currentUserId: string;
   currentMemberId: string;
@@ -23,11 +25,12 @@ export default function TeamDetailPage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchTeam = useCallback(() => {
+  const fetchTeam = useCallback((projectId?: string) => {
     if (!teamId) return;
     setError("");
+    const params = projectId ? { project_id: projectId } : {};
     api
-      .get<{ data: Team }>(`/teams/${teamId}`)
+      .get<{ data: Team }>(`/teams/${teamId}`, { params })
       .then((res) => setTeam(res.data.data))
       .catch((err) => {
         if (err.response?.status === 403) {
@@ -110,8 +113,12 @@ export default function TeamDetailPage() {
         <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
       </div>
 
-      {/* ── Tab Content ── */}
-      <Outlet context={context} />
+      {/* ── Project Scope Selector (Slicing Pie Beranak) ── */}
+      <ProjectProvider teamId={teamId ?? null}>
+        <ProjectSelector />
+        {/* ── Tab Content ── */}
+        <Outlet context={context} />
+      </ProjectProvider>
     </div>
   );
 }

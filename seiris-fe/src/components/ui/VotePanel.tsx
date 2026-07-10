@@ -10,14 +10,16 @@ interface VotePanelProps {
   contribution: Contribution;
   currentMemberId: string;
   onVoted: () => void;
+  isProjectMember?: boolean;
 }
 
-export default function VotePanel({ contribution, currentMemberId, onVoted }: VotePanelProps) {
+export default function VotePanel({ contribution, currentMemberId, onVoted, isProjectMember = true }: VotePanelProps) {
   const [vote, setVote] = useState<"APPROVE" | "REJECT" | null>(null);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (contribution.status !== "PENDING") return null;
+  if (!isProjectMember) return null;
 
   const isCreator = contribution.member.id === currentMemberId;
   const hasVoted = contribution.approvals.some((a) => a.member.id === currentMemberId);
@@ -28,13 +30,15 @@ export default function VotePanel({ contribution, currentMemberId, onVoted }: Vo
     setLoading(true);
     try {
       await api.post(`/contributions/${contribution.id}/vote`, { vote, note: note.trim() || undefined });
-      toast.success(vote === "APPROVE" ? "Vote disetujui" : "Vote ditolak");
+      toast.success(vote === "APPROVE" ? `Vote APPROVE untuk "${contribution.description}" dicatat` : `Vote REJECT untuk "${contribution.description}" dicatat`);
       onVoted();
     } catch (err) {
       if (isAxiosError(err) && err.response) {
-        toast.error(err.response.data?.message ?? "Gagal melakukan vote");
+        const status = err.response.status;
+        const serverMsg = err.response.data?.message as string | undefined;
+        toast.error(serverMsg ?? (status === 403 ? "Tim/project sudah di-freeze atau akses ditolak" : status === 409 ? "Vote sudah tidak valid (sudah vote / kontribusi selesai)" : "Gagal melakukan vote"));
       } else {
-        toast.error("Gagal melakukan vote");
+        toast.error("Gagal melakukan vote — periksa koneksi");
       }
     } finally {
       setLoading(false);

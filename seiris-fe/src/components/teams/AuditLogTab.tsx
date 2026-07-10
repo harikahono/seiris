@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { AuditLogItem } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -70,8 +71,18 @@ export default function AuditLogTab() {
       .finally(() => setLoading(false));
   }, [teamId, page, filter]);
 
-   
+    
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
+
+  // ── Realtime: refresh on Pusher event ──
+  const { refreshVersion } = useRealtime();
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    fetchLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
 
   const grouped = groupByDate(logs);
 

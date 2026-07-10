@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { isAxiosError } from "axios";
 import api from "@/api/axios";
 import { parseErrors } from "@/lib/parseErrors";
 import { formatRp } from "@/lib/constants";
@@ -8,6 +9,7 @@ import type { RevenueDeduction } from "@/types";
 
 interface CreateRevenueFormProps {
   teamId: string;
+  projectId?: string | null;
   open: boolean;
   onClose: () => void;
   onCreated: () => void;
@@ -18,7 +20,11 @@ interface FieldErrors extends Partial<Record<FieldKey, string>> {
   deductions?: string;
 }
 
-export default function CreateRevenueForm({ teamId, open, onClose, onCreated }: CreateRevenueFormProps) {
+export default function CreateRevenueForm({ teamId, projectId, open, onClose, onCreated }: CreateRevenueFormProps) {
+  const basePath = projectId
+    ? `/teams/${teamId}/projects/${projectId}`
+    : `/teams/${teamId}`;
+
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [deductions, setDeductions] = useState<RevenueDeduction[]>([]);
@@ -78,7 +84,7 @@ export default function CreateRevenueForm({ teamId, open, onClose, onCreated }: 
       formData.append("deductions", JSON.stringify(deductions));
       if (proof) formData.append("proof", proof);
 
-      await api.post(`/teams/${teamId}/revenues`, formData);
+      await api.post(`${basePath}/revenues`, formData);
       toast.success("Revenue berhasil dicatat");
       resetForm();
       onCreated();
@@ -89,7 +95,13 @@ export default function CreateRevenueForm({ teamId, open, onClose, onCreated }: 
         setErrors(parsed as FieldErrors);
         return;
       }
-      toast.error("Gagal mencatat revenue");
+      if (isAxiosError(err) && err.response) {
+        const status = err.response.status;
+        const serverMsg = err.response.data?.message as string | undefined;
+        toast.error(serverMsg ?? (status === 403 ? "Tim/project sudah di-freeze, tidak bisa mencatat revenue" : "Gagal mencatat revenue"));
+      } else {
+        toast.error("Gagal mencatat revenue — periksa koneksi");
+      }
     } finally {
       setSaving(false);
     }

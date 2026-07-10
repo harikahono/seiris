@@ -15,7 +15,8 @@ class UpdateFmrRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fmr' => ['required', 'integer', 'min:0', 'max:' . config('seiris.max_student_fmr')],
+            'fmr'        => ['required', 'integer', 'min:0', 'max:' . config('seiris.max_student_fmr')],
+            'project_id' => ['sometimes', 'uuid', 'exists:projects,id'],
         ];
     }
 

@@ -18,6 +18,10 @@ class TeamUpdated implements ShouldBroadcastNow
         public string $action = '',
         public string $userName = '',
         public ?string $contributionDesc = null,
+        public ?string $memberName = null,
+        public ?string $projectName = null,
+        public ?string $approverName = null,
+        public ?string $contributionOwnerName = null,
     ) {}
 
     public function broadcastOn(): array
@@ -35,11 +39,15 @@ class TeamUpdated implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'team_id'           => $this->team->id,
-            'timestamp'         => now()->toISOString(),
-            'action'            => $this->action,
-            'user_name'         => $this->userName,
-            'contribution_desc' => $this->contributionDesc,
+            'team_id'                  => $this->team->id,
+            'timestamp'                => now()->toISOString(),
+            'action'                   => $this->action,
+            'user_name'                => $this->userName,
+            'contribution_desc'        => $this->contributionDesc,
+            'member_name'              => $this->memberName,
+            'project_name'             => $this->projectName,
+            'approver_name'            => $this->approverName,
+            'contribution_owner_name'  => $this->contributionOwnerName,
         ];
     }
 }

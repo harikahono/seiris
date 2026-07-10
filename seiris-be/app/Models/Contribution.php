@@ -19,6 +19,7 @@ class Contribution extends Model
         'value', 'multiplier', 'total_slices', 'status',
         'contribution_date',
         'deal_value', 'estimated_value', 'commission_rate',
+        'project_id',
     ];
 
     protected function casts(): array
@@ -37,6 +38,11 @@ class Contribution extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function member(): BelongsTo

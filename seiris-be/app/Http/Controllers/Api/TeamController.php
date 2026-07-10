@@ -92,8 +92,23 @@ class TeamController extends Controller
     {
         // authorizeMember sudah di-handle oleh middleware EnsureTeamMember
 
+        $team->load(['members.user', 'owner']);
+
+        // Optional: include per-project FMR untuk setiap member
+        if ($request->project_id) {
+            $project = $team->projects()->findOrFail($request->project_id);
+            $projectFmrs = DB::table('project_members')
+                ->where('project_id', $project->id)
+                ->get(['team_member_id', 'fmr'])
+                ->keyBy('team_member_id');
+
+            $team->members->each(function ($member) use ($projectFmrs) {
+                $member->project_fmr = $projectFmrs->get($member->id)?->fmr;
+            });
+        }
+
         return response()->json([
-            'data' => new TeamResource($team->load(['members.user', 'owner'])),
+            'data' => new TeamResource($team),
         ]);
     }
 
@@ -204,7 +219,21 @@ class TeamController extends Controller
         }
 
         $oldFmr = $member->fmr;
-        $member->update(['fmr' => $request->fmr]);
+        $projectId = $request->project_id;
+
+        if ($projectId) {
+            // Per-project FMR: upsert pivot project_members
+            $project = $team->projects()->findOrFail($projectId);
+            if ($project->is_frozen) {
+                return response()->json(['message' => 'Project sudah di-freeze. FMR project tidak bisa diubah.'], 409);
+            }
+            DB::table('project_members')->updateOrInsert(
+                ['project_id' => $project->id, 'team_member_id' => $member->id],
+                ['fmr' => $request->fmr, 'created_at' => now(), 'updated_at' => now()],
+            );
+        } else {
+            $member->update(['fmr' => $request->fmr]);
+        }
 
         AuditLogService::logFromRequest(
             request:     $request,
@@ -212,10 +241,10 @@ class TeamController extends Controller
             action:      'member.fmr_updated',
             subjectType: TeamMember::class,
             subjectId:   $member->id,
-            payload:     ['old_fmr' => $oldFmr, 'new_fmr' => $request->fmr],
+            payload:     ['old_fmr' => $oldFmr, 'new_fmr' => $request->fmr, 'project_id' => $projectId],
         );
 
-        broadcast(new TeamUpdated($team, 'member.fmr_updated', $member->user()->first()->name))->toOthers();
+        broadcast(new TeamUpdated($team, 'member.fmr_updated', $member->user?->name ?? ''))->toOthers();
 
         return response()->json([
             'message' => 'FMR berhasil diperbarui.',
@@ -235,6 +264,16 @@ class TeamController extends Controller
             return response()->json(['message' => 'Tim sudah di-freeze sebelumnya.'], 409);
         }
 
+        // Prinsip 3: freeze tim HANYA boleh kalau SEMUA project sudah di-freeze.
+        // Project aktif punya slices yang belum masuk cap table induk — freeze tim
+        // sebelum itu = slices hilang permanen (melanggar Prinsip 2: zero-loss).
+        $activeProjects = $team->projects()->where('is_frozen', false)->count();
+        if ($activeProjects > 0) {
+            return response()->json([
+                'message' => "Semua project harus di-freeze dulu sebelum freeze tim. Masih ada {$activeProjects} project yang belum di-freeze.",
+            ], 409);
+        }
+
         try {
             $snapshot = $this->slicingPie->freeze($team);
         } catch (\RuntimeException $e) {
@@ -250,7 +289,7 @@ class TeamController extends Controller
             payload:     ['snapshot_id' => $snapshot->id],
         );
 
-        broadcast(new TeamUpdated($team, 'team.frozen'))->toOthers();
+        broadcast(new TeamUpdated($team, 'team.frozen', $request->user()->name))->toOthers();
 
         return response()->json([
             'message' => 'Equity tim berhasil di-freeze.',
@@ -260,11 +299,19 @@ class TeamController extends Controller
 
     /**
      * POST /api/teams/{team}/members/{member}/exit
-     * Keluarkan anggota — hanya owner
+     * Keluarkan anggota — hanya owner.
+     * leaver_type: 'good' (perusahaan salah) -> slices tetap;
+     *               'bad'  (dia salah)        -> slices non-cash hilang.
+     * Recovery dijalankan 2 level: per-project (jika ada) lalu agregasi tim.
      */
     public function exitMember(Request $request, Team $team, TeamMember $member): JsonResponse
     {
         Gate::authorize('update', $team);
+
+        // LOW: validasi input exit
+        $request->validate([
+            'exit_reason' => 'nullable|string|max:500',
+        ]);
 
         if ($member->team_id !== $team->id) {
             return response()->json(['message' => 'Anggota tidak ditemukan di tim ini.'], 404);
@@ -278,13 +325,22 @@ class TeamController extends Controller
             return response()->json(['message' => 'Anggota sudah keluar sebelumnya.'], 409);
         }
 
-        DB::transaction(function () use ($request, $team, $member) {
+        $leaverType = in_array($request->leaver_type, ['good', 'bad']) ? $request->leaver_type : null;
+
+        DB::transaction(function () use ($request, $team, $member, $leaverType) {
             $member->update([
-                'status'    => 'exited',
-                'exited_at' => now(),
+                'status'      => 'exited',
+                'exited_at'   => now(),
+                'leaver_type' => $leaverType,
+                'exit_reason' => $request->exit_reason,
             ]);
 
-            // Bug 3 fix — auto-reject semua kontribusi PENDING milik member yang exit
+            // Hapus semua project_members row (cegah ghost member di roster project)
+            DB::table('project_members')
+                ->where('team_member_id', $member->id)
+                ->delete();
+
+            // Auto-reject semua kontribusi PENDING milik member yang exit
             $pendingCount = $member->contributions()
                 ->where('status', 'PENDING')
                 ->count();
@@ -313,8 +369,20 @@ class TeamController extends Controller
                 action:      'member.exited',
                 subjectType: TeamMember::class,
                 subjectId:   $member->id,
-                payload:     ['user_id' => $member->user_id],
+                payload:     [
+                    'user_id'     => $member->user_id,
+                    'leaver_type' => $leaverType,
+                ],
             );
+
+            // Recovery 2-level: recalc semua project agar bad-leaver penalty
+            // tercermin di tiap Pie anak, lalu agregasi tim ikut ter-update.
+            foreach ($team->projects as $project) {
+                if ($project->contributions()->where('status', 'APPROVED')->exists()) {
+                    $this->slicingPie->recalculate($team, null, $project);
+                }
+            }
+            $this->slicingPie->recalculate($team);
         });
 
         broadcast(new TeamUpdated($team, 'member.exited', $member->user?->name ?? ''))->toOthers();

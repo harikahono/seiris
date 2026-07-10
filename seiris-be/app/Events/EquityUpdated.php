@@ -20,6 +20,7 @@ class EquityUpdated implements ShouldBroadcastNow
         public EquitySnapshot $snapshot,
         public ?string $approvedByName = null,
         public ?string $contributionDescription = null,
+        public ?string $contributionOwnerName = null,
     ) {}
 
     /**
@@ -48,6 +49,7 @@ class EquityUpdated implements ShouldBroadcastNow
             'updated_at'          => $this->snapshot->created_at->toISOString(),
             'approved_by'         => $this->approvedByName,
             'contribution_desc'   => $this->contributionDescription,
+            'contribution_owner'  => $this->contributionOwnerName,
         ];
     }
 }

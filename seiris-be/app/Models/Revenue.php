@@ -15,7 +15,7 @@ class Revenue extends Model
     use HasUuids;
 
     protected $fillable = [
-        'team_id', 'recorded_by', 'description',
+        'team_id', 'project_id', 'recorded_by', 'description',
         'amount', 'distributable_amount', 'deductions', 'proof_path',
         'revenue_date', 'is_distributed', 'distributed_at',
         'status',
@@ -51,6 +51,11 @@ class Revenue extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function recordedBy(): BelongsTo

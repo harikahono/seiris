@@ -10,6 +10,7 @@ import type { ContributionType } from "@/types";
 
 interface ContributionFormProps {
   teamId: string;
+  projectId?: string | null;
   fmr: number;
   open: boolean;
   onClose: () => void;
@@ -27,7 +28,10 @@ interface FieldErrors {
   commission_rate?: string;
 }
 
-export default function ContributionForm({ teamId, fmr, open, onClose, onCreated }: ContributionFormProps) {
+export default function ContributionForm({ teamId, projectId, fmr, open, onClose, onCreated }: ContributionFormProps) {
+  const basePath = projectId
+    ? `/teams/${teamId}/projects/${projectId}`
+    : `/teams/${teamId}`;
   const [step, setStep] = useState<"select" | "form">("select");
   const [type, setType] = useState<ContributionType | null>(null);
   const [description, setDescription] = useState("");
@@ -76,7 +80,7 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
           estimated_value: Number(estimatedValue),
           commission_rate: Number(commissionRate),
         };
-        await api.post(`/teams/${teamId}/contributions`, payload);
+        await api.post(`${basePath}/contributions`, payload);
       } else {
         const payload: Record<string, unknown> = {
           type,
@@ -85,9 +89,9 @@ export default function ContributionForm({ teamId, fmr, open, onClose, onCreated
         };
         if (requiresHours) payload.hours = Number(hours);
         if (requiresAmount) payload.amount = Number(amount);
-        await api.post(`/teams/${teamId}/contributions`, payload);
+        await api.post(`${basePath}/contributions`, payload);
       }
-      toast.success("Kontribusi berhasil dicatat");
+      toast.success(`Kontribusi "${description.trim()}" (${type}) berhasil dicatat, menunggu vote`);
       onCreated();
       handleClose();
     } catch (err) {

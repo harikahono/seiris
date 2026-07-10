@@ -5,21 +5,26 @@ import { Download, Loader2 } from "lucide-react";
 
 interface ExportPdfButtonProps {
   teamId: string;
+  projectId?: string | null;
 }
 
-export default function ExportPdfButton({ teamId }: ExportPdfButtonProps) {
+export default function ExportPdfButton({ teamId, projectId }: ExportPdfButtonProps) {
   const [loading, setLoading] = useState(false);
+  const basePath = projectId
+    ? `/teams/${teamId}/projects/${projectId}`
+    : `/teams/${teamId}`;
 
   const handleExport = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/teams/${teamId}/equity/export`, {
+      const res = await api.get(`${basePath}/equity/export`, {
         responseType: "blob",
       });
       const url = URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const prefix = projectId ? `project-${projectId.slice(0, 8)}` : `tim-${teamId.slice(0, 8)}`;
       const a = document.createElement("a");
       a.href = url;
-      a.download = `equity-${teamId.slice(0, 8)}.pdf`;
+      a.download = `equity-${prefix}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();

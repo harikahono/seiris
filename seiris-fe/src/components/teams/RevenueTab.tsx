@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
+import { useProjectContext } from "@/contexts/ProjectContext";
 import type { Revenue } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { Loader2, Plus, TrendingUp } from "lucide-react";
@@ -15,6 +16,10 @@ import { toast } from "sonner";
 export default function RevenueTab() {
   const { team, isOwner } = useOutletContext<TeamContext>();
   const teamId = team.id;
+  const { currentProjectId } = useProjectContext();
+  const basePath = currentProjectId
+    ? `/teams/${teamId}/projects/${currentProjectId}`
+    : `/teams/${teamId}`;
   const { refreshVersion } = useRealtime();
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +31,7 @@ export default function RevenueTab() {
   const fetchRevenues = useCallback(() => {
     return api
       .get<{ data: Revenue[]; meta: { current_page: number; last_page: number; total: number } }>(
-        `/teams/${teamId}/revenues`,
+        `${basePath}/revenues`,
         { params: { page } }
       )
       .then((res) => {
@@ -34,12 +39,18 @@ export default function RevenueTab() {
         setLastPage(res.data.meta.last_page);
       })
       .catch(() => toast.error("Gagal memuat revenue"));
-  }, [teamId, page]);
+  }, [basePath, page]);
 
-  // Initial load + page change → loading=true dari initial state
+  // Initial load + page/scope change → reset page + loading
   useEffect(() => {
+    setPage(1);
+    setRevenues([]);
     fetchRevenues().finally(() => setLoading(false));
-  }, [fetchRevenues]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basePath]);
+
+  // Page change → loading + fetch with new page
+  const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
 
   // Background refresh dari Pusher → silent, no skeleton
   const prevRefresh = useRef(0);
@@ -51,9 +62,6 @@ export default function RevenueTab() {
   }, [refreshVersion]);
 
   const totalAmount = revenues.reduce((s, r) => s + r.amount, 0);
-
-  // Page change → loading supaya spinner muncul
-  const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
 
   return (
     <div className="space-y-6">
@@ -130,6 +138,7 @@ export default function RevenueTab() {
 
       <CreateRevenueForm
         teamId={teamId}
+        projectId={currentProjectId}
         open={showForm}
         onClose={() => setShowForm(false)}
         onCreated={() => {

@@ -7,6 +7,7 @@ use App\Models\Contribution;
 use App\Models\EquitySnapshot;
 use App\Models\Revenue;
 use App\Models\Team;
+use App\Models\Project;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,18 +16,22 @@ use Illuminate\Http\Response;
 class EquityController extends Controller
 {
     /**
-     * GET /api/teams/{team}/equity
-     * Equity snapshot terbaru tim
+     * GET /api/teams/{team}/equity (atau /projects/{project}/equity)
+     * Equity snapshot terbaru — scope tim atau project
      */
-    public function current(Request $request, Team $team): JsonResponse
+    public function current(Request $request, Team $team, ?Project $project = null): JsonResponse
     {
-        // authorizeMember di-handle middleware EnsureTeamMember
+        // authorizeMember di-handle middleware EnsureTeamMember / EnsureProjectMember
 
-        $slicesByType = $this->getSlicesByType($team);
+        $slicesByType = $this->getSlicesByType($team, $project);
 
-        $snapshot = EquitySnapshot::where('team_id', $team->id)
-            ->latest()
-            ->first();
+        $snapshotQuery = EquitySnapshot::where('team_id', $team->id);
+        if ($project) {
+            $snapshotQuery->where('project_id', $project->id);
+        } else {
+            $snapshotQuery->whereNull('project_id');
+        }
+        $snapshot = $snapshotQuery->latest()->first();
 
         if (!$snapshot) {
             $members = $team->activeMembers()->with('user')->get();
@@ -79,11 +84,14 @@ class EquityController extends Controller
     /**
      * Aggregasi approved contributions per tipe untuk equity chart.
      */
-    private function getSlicesByType(Team $team): array
+    private function getSlicesByType(Team $team, ?Project $project = null): array
     {
-        $breakdown = Contribution::where('team_id', $team->id)
-            ->where('status', 'APPROVED')
-            ->selectRaw('type, SUM(total_slices) as total')
+        $query = Contribution::where('team_id', $team->id)
+            ->where('status', 'APPROVED');
+        if ($project) {
+            $query->where('project_id', $project->id);
+        }
+        $breakdown = $query->selectRaw('type, SUM(total_slices) as total')
             ->groupBy('type')
             ->pluck('total', 'type')
             ->toArray();
@@ -97,16 +105,20 @@ class EquityController extends Controller
     }
 
     /**
-     * GET /api/teams/{team}/equity/history
+     * GET /api/teams/{team}/equity/history (atau /projects/{project}/equity/history)
      * Riwayat semua snapshot equity
      */
-    public function history(Request $request, Team $team): JsonResponse
+    public function history(Request $request, Team $team, ?Project $project = null): JsonResponse
     {
-        // authorizeMember di-handle middleware EnsureTeamMember
+        // authorizeMember di-handle middleware EnsureTeamMember / EnsureProjectMember
 
-        $snapshots = EquitySnapshot::where('team_id', $team->id)
-            ->orderByDesc('created_at')
-            ->paginate(10);
+        $snapshotQuery = EquitySnapshot::where('team_id', $team->id);
+        if ($project) {
+            $snapshotQuery->where('project_id', $project->id);
+        } else {
+            $snapshotQuery->whereNull('project_id');
+        }
+        $snapshots = $snapshotQuery->orderByDesc('created_at')->paginate(10);
 
         return response()->json([
             'data' => $snapshots->map(fn($s) => [
@@ -125,17 +137,21 @@ class EquityController extends Controller
     }
 
     /**
-     * GET /api/teams/{team}/equity/export
+     * GET /api/teams/{team}/equity/export (atau /projects/{project}/equity/export)
      * Export laporan equity + slicing pie sebagai PDF
      */
-    public function export(Request $request, Team $team): Response
+    public function export(Request $request, Team $team, ?Project $project = null): Response
     {
-        // authorizeMember di-handle middleware EnsureTeamMember
+        // authorizeMember di-handle middleware EnsureTeamMember / EnsureProjectMember
 
-        // Ambil snapshot terbaru
-        $snapshot = EquitySnapshot::where('team_id', $team->id)
-            ->latest()
-            ->first();
+        // Ambil snapshot terbaru — scope project atau tim
+        $snapshotQuery = EquitySnapshot::where('team_id', $team->id);
+        if ($project) {
+            $snapshotQuery->where('project_id', $project->id);
+        } else {
+            $snapshotQuery->whereNull('project_id');
+        }
+        $snapshot = $snapshotQuery->latest()->first();
 
         if (!$snapshot) {
             abort(404, 'Belum ada data equity untuk diekspor.');
@@ -143,15 +159,25 @@ class EquityController extends Controller
 
         // Enrich equity_map dengan data user + FMR
         $members = $team->members()->with('user')->get()->keyBy('id');
+
+        // Kalau scope project, prioritaskan per-project FMR dari pivot (GAP 2 fix)
+        $projectFmrs = collect();
+        if ($project) {
+            $projectFmrs = DB::table('project_members')
+                ->where('project_id', $project->id)
+                ->pluck('fmr', 'team_member_id');
+        }
+
         $enrichedMap = [];
 
         foreach ($snapshot->equity_map as $memberId => $data) {
             $member = $members->get($memberId);
+            $fmr = $projectFmrs->get($memberId) ?? $member?->fmr ?? 0;
             $enrichedMap[] = [
                 'member_id'  => $memberId,
                 'name'       => $member?->user?->name ?? 'Unknown',
                 'role'       => $member?->role ?? 'member',
-                'fmr'        => $member?->fmr ?? 0,
+                'fmr'        => $fmr,
                 'slices'     => $data['slices'],
                 'equity_pct' => $data['equity_pct'],
             ];
@@ -159,9 +185,12 @@ class EquityController extends Controller
 
         usort($enrichedMap, fn($a, $b) => $b['equity_pct'] <=> $a['equity_pct']);
 
-        // Ambil semua kontribusi APPROVED dengan data member
-        $contributions = $team->contributions()
-            ->where('status', 'APPROVED')
+        // Ambil semua kontribusi APPROVED dengan data member (scope project/tim)
+        $contribQuery = $team->contributions()->where('status', 'APPROVED');
+        if ($project) {
+            $contribQuery->where('project_id', $project->id);
+        }
+        $contributions = $contribQuery
             ->with('member.user')
             ->orderBy('contribution_date')
             ->get()
@@ -176,9 +205,12 @@ class EquityController extends Controller
             ])
             ->toArray();
 
-        // Ambil revenues yang sudah didistribusikan
-        $revenues = Revenue::where('team_id', $team->id)
-            ->where('is_distributed', true)
+        // Ambil revenues yang sudah didistribusikan (scope project/tim)
+        $revQuery = Revenue::where('team_id', $team->id)->where('is_distributed', true);
+        if ($project) {
+            $revQuery->where('project_id', $project->id);
+        }
+        $revenues = $revQuery
             ->with(['distributions.member.user'])
             ->orderBy('revenue_date')
             ->get()
@@ -195,6 +227,25 @@ class EquityController extends Controller
             ])
             ->toArray();
 
+        // Info project scope untuk cap table clarity
+        $projectInfo = null;
+        if (!$project) {
+            $allProjects = $team->projects()->get(['id', 'name', 'is_frozen', 'frozen_at']);
+            $frozenCount = $allProjects->where('is_frozen', true)->count();
+            $activeCount = $allProjects->where('is_frozen', false)->count();
+            $projectInfo = [
+                'total'       => $allProjects->count(),
+                'frozen'      => $frozenCount,
+                'active'      => $activeCount,
+                'all_frozen'  => $activeCount === 0 && $allProjects->isNotEmpty(),
+                'project_list' => $allProjects->map(fn($p) => [
+                    'name'      => $p->name,
+                    'is_frozen' => $p->is_frozen,
+                    'frozen_at' => $p->frozen_at?->toDateString(),
+                ])->toArray(),
+            ];
+        }
+
         // Build view data
         $data = [
             'team'         => [
@@ -209,6 +260,7 @@ class EquityController extends Controller
             ],
             'contributions' => $contributions,
             'revenues'      => $revenues,
+            'project_info'  => $projectInfo,
             'generated_at'  => now()->setTimezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB',
         ];
 
