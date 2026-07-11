@@ -38,6 +38,11 @@ class Team extends Model
         return $this->hasMany(TeamMember::class);
     }
 
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
     public function activeMembers(): HasMany
     {
         return $this->hasMany(TeamMember::class)->where('status', 'active');

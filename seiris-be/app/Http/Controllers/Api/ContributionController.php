@@ -9,6 +9,7 @@ use App\Http\Resources\ContributionResource;
 use App\Models\Contribution;
 use App\Models\Team;
 use App\Models\TeamMember;
+use App\Models\Project;
 use App\Services\AuditLogService;
 use App\Services\SlicingPieService;
 use Illuminate\Http\JsonResponse;
@@ -21,15 +22,19 @@ class ContributionController extends Controller
 
 
     /**
-     * GET /api/teams/{team}/contributions
-     * List semua kontribusi tim — hanya member aktif
+     * GET /api/teams/{team}/contributions  (atau /projects/{project}/contributions)
+     * List kontribusi — scope tim atau project
      */
-    public function index(Request $request, Team $team): JsonResponse
+    public function index(Request $request, Team $team, ?Project $project = null): JsonResponse
     {
-        // authorizeMember di-handle middleware EnsureTeamMember
+        // authorizeMember di-handle middleware EnsureTeamMember / EnsureProjectMember
 
         $query = Contribution::where('team_id', $team->id)
             ->with(['member.user']);
+
+        if ($project) {
+            $query->where('project_id', $project->id);
+        }
 
         // Server-side filter by status
         if ($request->filled('status')) {
@@ -50,31 +55,64 @@ class ContributionController extends Controller
     }
 
     /**
-     * POST /api/teams/{team}/contributions
+     * POST /api/teams/{team}/contributions  (atau /projects/{project}/contributions)
      * Log kontribusi baru
      */
-    public function store(StoreContributionRequest $request, Team $team): JsonResponse
+    public function store(StoreContributionRequest $request, Team $team, ?Project $project = null): JsonResponse
     {
-        // authorizeMember di-handle middleware EnsureTeamMember
+        // authorizeMember di-handle middleware EnsureTeamMember / EnsureProjectMember
 
-        if ($team->is_frozen) {
+        // Freeze guard: tim ATAU project (jika ada) tidak boleh frozen
+        if ($team->is_frozen || ($project && $project->is_frozen)) {
             return response()->json([
-                'message' => 'Tim sudah di-freeze. Kontribusi baru tidak dapat ditambahkan.',
+                'message' => 'Tim/project sudah di-freeze. Kontribusi baru tidak dapat ditambahkan.',
             ], 403);
         }
 
         // TeamMember sudah di-attach oleh middleware EnsureTeamMember
         $member = $request->teamMember;
 
+        // Gate: hanya project_members yang bisa kontribusi di project
+        if ($project) {
+            $inProject = DB::table('project_members')
+                ->where('project_id', $project->id)
+                ->where('team_member_id', $member->id)->exists();
+            if (!$inProject) {
+                return response()->json([
+                    'message' => 'Kamu bukan member project ini. Minta owner untuk menambahkanmu ke project.',
+                ], 403);
+            }
+        }
+
+        // Resolve FMR: per-project dulu, fallback ke global TeamMember.fmr
+        $fmr = $member->fmr;
+        if ($project) {
+            $pivot = DB::table('project_members')
+                ->where('project_id', $project->id)
+                ->where('team_member_id', $member->id)
+                ->first();
+            if ($pivot) {
+                $fmr = $pivot->fmr;
+            }
+        }
+
         // Bug 1 fix — FMR = 0 tidak boleh log TIME/IDEA/NETWORK
-        if (in_array($request->type, ['TIME', 'IDEA', 'NETWORK']) && $member->fmr === 0) {
+        if (in_array($request->type, ['TIME', 'IDEA', 'NETWORK']) && $fmr === 0) {
             return response()->json([
-                'message' => 'FMR kamu belum diset oleh owner. Minta owner set FMR kamu terlebih dahulu sebelum log kontribusi jenis ' . $request->type . '.',
+                'message' => 'FMR kamu belum diset oleh owner untuk ' . ($project ? 'project ini' : 'tim') . '. Minta owner set FMR kamu terlebih dahulu.',
             ], 422);
         }
 
-        // Hitung value berdasarkan tipe kontribusi
-        $value = $this->calculateValue($request, $member);
+        // H-A: service-level FMR cap enforcement — guards against direct DB bypass
+        $maxFmr = (int) config('seiris.max_student_fmr');
+        if ($fmr > $maxFmr) {
+            return response()->json([
+                'message' => "FMR melebihi batas maksimum mahasiswa (Rp {$maxFmr}/jam).",
+            ], 422);
+        }
+
+        // Hitung value berdasarkan tipe kontribusi + FMR (per-project atau global)
+        $value = $this->calculateValue($request, $member, $fmr);
 
         // Hitung slices
         $slicesData = SlicingPieService::calculateSlices($request->type, $value);
@@ -93,6 +131,7 @@ class ContributionController extends Controller
 
             $contribution = Contribution::create([
                 'team_id'           => $team->id,
+                'project_id'        => $project?->id,
                 'member_id'         => $member->id,
                 'type'              => $request->type,
                 'description'       => $request->description,
@@ -118,6 +157,7 @@ class ContributionController extends Controller
                     'total_slices' => $contribution->total_slices,
                     'description'  => $contribution->description,
                 ],
+                projectId: $project?->id,
             );
 
             return $contribution;
@@ -138,14 +178,19 @@ class ContributionController extends Controller
 
     /**
      * GET /api/teams/{team}/contributions/{contribution}
+     * (atau /projects/{project}/contributions/{contribution})
      * Detail satu kontribusi
      */
-    public function show(Request $request, Team $team, Contribution $contribution): JsonResponse
+    public function show(Request $request, Team $team, Contribution $contribution, ?Project $project = null): JsonResponse
     {
-        // authorizeMember di-handle middleware EnsureTeamMember
+        // authorizeMember di-handle middleware EnsureTeamMember / EnsureProjectMember
 
         if ($contribution->team_id !== $team->id) {
             return response()->json(['message' => 'Kontribusi tidak ditemukan.'], 404);
+        }
+
+        if ($project && $contribution->project_id !== $project->id) {
+            return response()->json(['message' => 'Kontribusi tidak ditemukan di project ini.'], 404);
         }
 
         return response()->json([
@@ -164,10 +209,11 @@ class ContributionController extends Controller
      * IDEA/NETWORK: hours * fmr (nilai setara jam kerja)
      * SALES: (deal - estimasi) × rate%
      */
-    private function calculateValue(StoreContributionRequest $request, TeamMember $member): int
+    private function calculateValue(StoreContributionRequest $request, TeamMember $member, ?int $fmrOverride = null): int
     {
+        $fmr = $fmrOverride ?? $member->fmr;
         return match ($request->type) {
-            'TIME', 'IDEA', 'NETWORK' => (int) round($request->hours * $member->fmr),
+            'TIME', 'IDEA', 'NETWORK' => (int) round($request->hours * $fmr),
             'CASH', 'FACILITY'        => (int) $request->amount,
             'SALES'                   => (int) round(
                 max(0, $request->deal_value - $request->estimated_value)

@@ -11,6 +11,7 @@ use App\Models\Revenue;
 use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
+use App\Models\Project;
 use App\Services\AuditLogService;
 use App\Services\SlicingPieService;
 use Illuminate\Database\Seeder;
@@ -21,7 +22,6 @@ class DemoDataSeeder extends Seeder
 {
     private SlicingPieService $slicingPie;
 
-    // â”€â”€ User Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private array $userDefs = [
         ['name' => 'amengFRONTEND', 'email' => 'kahono@z4foundation.com'],
         ['name' => 'Rina Wijaya',   'email' => 'rina@example.com'],
@@ -38,126 +38,95 @@ class DemoDataSeeder extends Seeder
         ['name' => 'Putri Ayu',     'email' => 'putri@example.com'],
     ];
 
-    // â”€â”€ Team Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // [name, ownerEmail, threshold, members: [email, role], ...]
     private array $teamDefs = [
         [
             'name'      => 'GENUI',
             'owner'     => 'kahono@z4foundation.com',
             'threshold' => '75',
-            'members'   => [
-                'rina@example.com'  => 'member',
-                'budi@example.com'  => 'member',
-                'sari@example.com'  => 'member',
-            ],
+            'members'   => ['rina@example.com' => 'member', 'budi@example.com' => 'member', 'sari@example.com' => 'member'],
+            'projects'  => ['Web Platform', 'Mobile App'],
         ],
         [
             'name'      => 'Karya Digital',
             'owner'     => 'adi@example.com',
             'threshold' => '75',
-            'members'   => [
-                'kahono@z4foundation.com' => 'member',
-                'dian@example.com'        => 'member',
-                'fitri@example.com'       => 'member',
-            ],
+            'members'   => ['kahono@z4foundation.com' => 'member', 'dian@example.com' => 'member', 'fitri@example.com' => 'member'],
+            'projects'  => ['Website UMKM', 'Branding Klien'],
         ],
         [
             'name'      => 'StartupA',
             'owner'     => 'dian@example.com',
             'threshold' => '50',
-            'members'   => [
-                'budi@example.com'  => 'member',
-                'mega@example.com'  => 'member',
-                'rizky@example.com' => 'member',
-                'andi@example.com'  => 'member',
-            ],
+            'members'   => ['budi@example.com' => 'member', 'mega@example.com' => 'member', 'rizky@example.com' => 'member', 'andi@example.com' => 'member'],
+            'projects'  => ['SaaS Core', 'AI Chatbot'],
         ],
         [
             'name'      => 'Project X',
             'owner'     => 'mega@example.com',
             'threshold' => '100',
-            'members'   => [
-                'dewi@example.com' => 'member',
-                'agus@example.com' => 'member',
-            ],
+            'members'   => ['dewi@example.com' => 'member', 'agus@example.com' => 'member'],
+            'projects'  => ['Riset Pasar'],
         ],
         [
             'name'      => 'Dev Team',
             'owner'     => 'rizky@example.com',
             'threshold' => '75',
-            'members'   => [
-                'putri@example.com' => 'member',
-                'sari@example.com'  => 'member',
-                'adi@example.com'   => 'member',
-            ],
+            'members'   => ['putri@example.com' => 'member', 'sari@example.com' => 'member', 'adi@example.com' => 'member'],
+            'projects'  => ['Internal Tools'],
         ],
     ];
 
-    // â”€â”€ FMR Settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private array $fmrDefs = [
-        'kahono@z4foundation.com' => 150000,
-        'rina@example.com'       => 120000,
-        'budi@example.com'       => 100000,
-        'sari@example.com'       => 110000,
-        'adi@example.com'        => 130000,
-        'dian@example.com'       => 125000,
-        'fitri@example.com'      =>  90000,
-        'andi@example.com'       =>  85000,
-        'mega@example.com'       => 140000,
-        'rizky@example.com'      => 115000,
-        'dewi@example.com'       =>  95000,
-        'agus@example.com'       =>  80000,
-        'putri@example.com'      => 100000,
+        'kahono@z4foundation.com' => 150000, 'rina@example.com' => 120000, 'budi@example.com' => 100000,
+        'sari@example.com' => 110000, 'adi@example.com' => 130000, 'dian@example.com' => 125000,
+        'fitri@example.com' => 90000, 'andi@example.com' => 85000, 'mega@example.com' => 140000,
+        'rizky@example.com' => 115000, 'dewi@example.com' => 95000, 'agus@example.com' => 80000,
+        'putri@example.com' => 100000,
     ];
 
-    // â”€â”€ Contribution Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // [teamName, memberEmail, type, description, value, status, voters: [email=>vote], ...]
+    // [teamName, projectName, memberEmail, type, desc, value, status, votes, deal?, estimated?]
     private array $contributionDefs = [
-        // GENUI
-        ['team' => 'GENUI', 'by' => 'kahono@z4foundation.com', 'type' => 'TIME',    'desc' => 'Fitur Login & Registrasi',                     'value' => 1050000, 'status' => 'APPROVED', 'votes' => ['rina@example.com'=>'APPROVE','budi@example.com'=>'APPROVE']],
-        ['team' => 'GENUI', 'by' => 'rina@example.com',       'type' => 'TIME',    'desc' => 'UI/UX Design Dashboard',                       'value' => 1800000, 'status' => 'APPROVED', 'votes' => ['budi@example.com'=>'APPROVE','sari@example.com'=>'APPROVE']],
-        ['team' => 'GENUI', 'by' => 'budi@example.com',        'type' => 'CASH',    'desc' => 'Modal Server DO 3 Bulan',                      'value' => 1000000, 'status' => 'APPROVED', 'votes' => ['rina@example.com'=>'APPROVE','sari@example.com'=>'APPROVE']],
-        ['team' => 'GENUI', 'by' => 'sari@example.com',        'type' => 'IDEA',    'desc' => 'Riset Model Monetisasi Premium',               'value' => 1100000, 'status' => 'APPROVED', 'votes' => ['rina@example.com'=>'APPROVE','budi@example.com'=>'REJECT']],
-        ['team' => 'GENUI', 'by' => 'budi@example.com',        'type' => 'TIME',    'desc' => 'Backend API Modul Payment',                    'value' => 2500000, 'status' => 'REJECTED', 'votes' => ['rina@example.com'=>'REJECT','sari@example.com'=>'APPROVE']],
-        // â”€â”€ SALES: GENUI â€” Startup Bootstrap, Angel Investor markup 11% â”€â”€
-        ['team' => 'GENUI', 'by' => 'kahono@z4foundation.com', 'type' => 'SALES',   'desc' => 'Closing Angel Investor â€” estimasi 45jt deal 50jt', 'value' => 2500000, 'deal_value' => 50000000, 'estimated_value' => 45000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['rina@example.com'=>'APPROVE','budi@example.com'=>'APPROVE']],
-        // Karya Digital
-        ['team' => 'Karya Digital', 'by' => 'adi@example.com',         'type' => 'TIME',    'desc' => 'Setup Infrastructure & CI/CD',               'value' => 1950000, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE']],
-        ['team' => 'Karya Digital', 'by' => 'dian@example.com',        'type' => 'CASH',    'desc' => 'Domain & Hosting 1 Tahun',                   'value' => 800000,  'status' => 'APPROVED', 'votes' => ['adi@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE']],
-        ['team' => 'Karya Digital', 'by' => 'fitri@example.com',       'type' => 'TIME',    'desc' => 'Content Writing Landing Page',               'value' => 900000,  'status' => 'APPROVED', 'votes' => ['adi@example.com'=>'APPROVE','dian@example.com'=>'APPROVE']],
-        ['team' => 'Karya Digital', 'by' => 'kahono@z4foundation.com', 'type' => 'NETWORK', 'desc' => 'Introduksi ke 3 Calon Klien Potensial',       'value' => 750000,  'status' => 'PENDING',  'votes' => []],
-        // â”€â”€ SALES: Karya Digital â€” Freelance, deal markup 80% â”€â”€
-        ['team' => 'Karya Digital', 'by' => 'adi@example.com',         'type' => 'SALES',   'desc' => 'Deal Website UMKM â€” estimasi 10jt deal 18jt',   'value' => 4000000, 'deal_value' => 18000000, 'estimated_value' => 10000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE']],
-        // â”€â”€ SALES: Karya Digital â€” deal markup 33%, masi pending â”€â”€
-        ['team' => 'Karya Digital', 'by' => 'kahono@z4foundation.com', 'type' => 'SALES',   'desc' => 'Deal Lanjutan â€” estimasi 9jt deal 12jt',        'value' => 1500000, 'deal_value' => 12000000, 'estimated_value' => 9000000, 'commission_rate' => 50, 'status' => 'PENDING',  'votes' => []],
-        // StartupA
-        ['team' => 'StartupA', 'by' => 'dian@example.com',  'type' => 'TIME',   'desc' => 'Arsitektur Sistem & Database Design',           'value' => 2500000, 'status' => 'APPROVED', 'votes' => ['budi@example.com'=>'APPROVE','mega@example.com'=>'APPROVE']],
-        ['team' => 'StartupA', 'by' => 'budi@example.com',   'type' => 'TIME',   'desc' => 'Backend Auth & Middleware',                     'value' => 2000000, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','andi@example.com'=>'APPROVE']],
-        ['team' => 'StartupA', 'by' => 'mega@example.com',   'type' => 'FACILITY','desc' => 'Sewa Co-working Space 2 Bulan',                'value' => 3000000, 'status' => 'APPROVED', 'votes' => ['budi@example.com'=>'APPROVE','rizky@example.com'=>'APPROVE']],
-        ['team' => 'StartupA', 'by' => 'rizky@example.com',  'type' => 'IDEA',   'desc' => 'Konsep Fitur AI Chatbot untuk Customer Service', 'value' => 1150000, 'status' => 'REJECTED', 'votes' => ['dian@example.com'=>'REJECT','andi@example.com'=>'APPROVE']],
-        ['team' => 'StartupA', 'by' => 'andi@example.com',   'type' => 'TIME',   'desc' => 'Frontend Landing Page & Dashboard',             'value' => 1700000, 'status' => 'PENDING',  'votes' => []],
-        // â”€â”€ SALES: StartupA â€” SaaS, deal markup 20% â”€â”€
-        ['team' => 'StartupA', 'by' => 'mega@example.com',   'type' => 'SALES',   'desc' => 'Client A Tahunan â€” estimasi 25jt deal 30jt',     'value' => 2500000, 'deal_value' => 30000000, 'estimated_value' => 25000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['dian@example.com'=>'APPROVE','budi@example.com'=>'APPROVE']],
-        // â”€â”€ SALES: StartupA â€” deal pas estimasi, markup 0% â”€â”€
-        ['team' => 'StartupA', 'by' => 'dian@example.com',   'type' => 'SALES',   'desc' => 'Client B â€” estimasi 20jt deal 20jt (fix price)', 'value' => 0,       'deal_value' => 20000000, 'estimated_value' => 20000000, 'commission_rate' => 50, 'status' => 'APPROVED', 'votes' => ['mega@example.com'=>'APPROVE','andi@example.com'=>'APPROVE']],
-        // Project X â€” threshold 100% (harus unanimous)
-        ['team' => 'Project X', 'by' => 'mega@example.com', 'type' => 'TIME',   'desc' => 'Project Planning & Roadmap',                    'value' => 1400000, 'status' => 'APPROVED', 'votes' => ['dewi@example.com'=>'APPROVE','agus@example.com'=>'APPROVE']],
-        ['team' => 'Project X', 'by' => 'dewi@example.com', 'type' => 'TIME',   'desc' => 'Research & Competitive Analysis',              'value' => 1900000, 'status' => 'APPROVED', 'votes' => ['mega@example.com'=>'APPROVE','agus@example.com'=>'APPROVE']],
-        ['team' => 'Project X', 'by' => 'agus@example.com', 'type' => 'CASH',   'desc' => 'Tools & Software Licenses',                     'value' => 500000,  'status' => 'PENDING',  'votes' => []],
-        // Dev Team
-        ['team' => 'Dev Team', 'by' => 'rizky@example.com', 'type' => 'TIME',   'desc' => 'Sprint Planning & Code Review Setup',           'value' => 1150000, 'status' => 'APPROVED', 'votes' => ['putri@example.com'=>'APPROVE','sari@example.com'=>'APPROVE']],
-        ['team' => 'Dev Team', 'by' => 'putri@example.com', 'type' => 'TIME',   'desc' => 'Component Library Development',                'value' => 2000000, 'status' => 'APPROVED', 'votes' => ['rizky@example.com'=>'APPROVE','adi@example.com'=>'APPROVE']],
-        ['team' => 'Dev Team', 'by' => 'sari@example.com',  'type' => 'IDEA',   'desc' => 'Design System & Style Guide',                  'value' => 1100000, 'status' => 'APPROVED', 'votes' => ['rizky@example.com'=>'APPROVE','putri@example.com'=>'APPROVE']],
-        ['team' => 'Dev Team', 'by' => 'adi@example.com',   'type' => 'CASH',   'desc' => 'API Subscription 6 Bulan',                      'value' => 1500000, 'status' => 'PENDING',  'votes' => []],
+        // GENUI / Web Platform
+        ['GENUI', 'Web Platform', 'kahono@z4foundation.com', 'TIME', 'Fitur Login & Registrasi', 1050000, 'APPROVED', ['rina@example.com'=>'APPROVE','budi@example.com'=>'APPROVE']],
+        ['GENUI', 'Web Platform', 'rina@example.com', 'TIME', 'UI/UX Design Dashboard', 1800000, 'APPROVED', ['budi@example.com'=>'APPROVE','sari@example.com'=>'APPROVE']],
+        ['GENUI', 'Web Platform', 'budi@example.com', 'CASH', 'Modal Server DO 3 Bulan', 1000000, 'APPROVED', ['rina@example.com'=>'APPROVE','sari@example.com'=>'APPROVE']],
+        ['GENUI', 'Web Platform', 'budi@example.com', 'TIME', 'Backend API Modul Payment', 2500000, 'REJECTED', ['rina@example.com'=>'REJECT','sari@example.com'=>'APPROVE']],
+        // GENUI / Mobile App
+        ['GENUI', 'Mobile App', 'sari@example.com', 'IDEA', 'Riset Model Monetisasi Premium', 1100000, 'APPROVED', ['rina@example.com'=>'APPROVE','budi@example.com'=>'REJECT']],
+        ['GENUI', 'Mobile App', 'kahono@z4foundation.com', 'SALES', 'Closing Angel Investor — estimasi 45jt deal 50jt', 2500000, 'APPROVED', ['rina@example.com'=>'APPROVE','budi@example.com'=>'APPROVE'], 50000000, 45000000, 50],
+        // Karya Digital / Website UMKM
+        ['Karya Digital', 'Website UMKM', 'adi@example.com', 'TIME', 'Setup Infrastructure & CI/CD', 1950000, 'APPROVED', ['dian@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE']],
+        ['Karya Digital', 'Website UMKM', 'dian@example.com', 'CASH', 'Domain & Hosting 1 Tahun', 800000, 'APPROVED', ['adi@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE']],
+        ['Karya Digital', 'Website UMKM', 'adi@example.com', 'SALES', 'Deal Website UMKM — estimasi 10jt deal 18jt', 4000000, 'APPROVED', ['dian@example.com'=>'APPROVE','fitri@example.com'=>'APPROVE'], 18000000, 10000000, 50],
+        // Karya Digital / Branding Klien
+        ['Karya Digital', 'Branding Klien', 'fitri@example.com', 'TIME', 'Content Writing Landing Page', 900000, 'APPROVED', ['adi@example.com'=>'APPROVE','dian@example.com'=>'APPROVE']],
+        ['Karya Digital', 'Branding Klien', 'kahono@z4foundation.com', 'NETWORK', 'Introduksi ke 3 Calon Klien', 750000, 'PENDING', []],
+        ['Karya Digital', 'Branding Klien', 'kahono@z4foundation.com', 'SALES', 'Deal Lanjutan — estimasi 9jt deal 12jt', 1500000, 'PENDING', [], 12000000, 9000000, 50],
+        // StartupA / SaaS Core
+        ['StartupA', 'SaaS Core', 'dian@example.com', 'TIME', 'Arsitektur Sistem & Database', 2500000, 'APPROVED', ['budi@example.com'=>'APPROVE','mega@example.com'=>'APPROVE']],
+        ['StartupA', 'SaaS Core', 'budi@example.com', 'TIME', 'Backend Auth & Middleware', 2000000, 'APPROVED', ['dian@example.com'=>'APPROVE','andi@example.com'=>'APPROVE']],
+        ['StartupA', 'SaaS Core', 'mega@example.com', 'FACILITY', 'Sewa Co-working Space 2 Bulan', 3000000, 'APPROVED', ['budi@example.com'=>'APPROVE','rizky@example.com'=>'APPROVE']],
+        ['StartupA', 'SaaS Core', 'mega@example.com', 'SALES', 'Client A Tahunan — estimasi 25jt deal 30jt', 2500000, 'APPROVED', ['dian@example.com'=>'APPROVE','budi@example.com'=>'APPROVE'], 30000000, 25000000, 50],
+        // StartupA / AI Chatbot
+        ['StartupA', 'AI Chatbot', 'rizky@example.com', 'IDEA', 'Konsep AI Chatbot CS', 1150000, 'REJECTED', ['dian@example.com'=>'REJECT','andi@example.com'=>'APPROVE']],
+        ['StartupA', 'AI Chatbot', 'andi@example.com', 'TIME', 'Frontend Landing Page', 1700000, 'PENDING', []],
+        ['StartupA', 'AI Chatbot', 'dian@example.com', 'SALES', 'Client B — estimasi 20jt deal 20jt (fix)', 0, 'APPROVED', ['mega@example.com'=>'APPROVE','andi@example.com'=>'APPROVE'], 20000000, 20000000, 50],
+        // Project X / Riset Pasar
+        ['Project X', 'Riset Pasar', 'mega@example.com', 'TIME', 'Project Planning & Roadmap', 1400000, 'APPROVED', ['dewi@example.com'=>'APPROVE','agus@example.com'=>'APPROVE']],
+        ['Project X', 'Riset Pasar', 'dewi@example.com', 'TIME', 'Research & Competitive Analysis', 1900000, 'APPROVED', ['mega@example.com'=>'APPROVE','agus@example.com'=>'APPROVE']],
+        ['Project X', 'Riset Pasar', 'agus@example.com', 'CASH', 'Tools & Software Licenses', 500000, 'PENDING', []],
+        // Dev Team / Internal Tools
+        ['Dev Team', 'Internal Tools', 'rizky@example.com', 'TIME', 'Sprint Planning & Code Review', 1150000, 'APPROVED', ['putri@example.com'=>'APPROVE','sari@example.com'=>'APPROVE']],
+        ['Dev Team', 'Internal Tools', 'putri@example.com', 'TIME', 'Component Library', 2000000, 'APPROVED', ['rizky@example.com'=>'APPROVE','adi@example.com'=>'APPROVE']],
+        ['Dev Team', 'Internal Tools', 'sari@example.com', 'IDEA', 'Design System & Style Guide', 1100000, 'APPROVED', ['rizky@example.com'=>'APPROVE','putri@example.com'=>'APPROVE']],
+        ['Dev Team', 'Internal Tools', 'adi@example.com', 'CASH', 'API Subscription 6 Bulan', 1500000, 'PENDING', []],
     ];
 
-    // â”€â”€ Revenue Definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // deductions: [{for: string, amount: int}] â€” daftar potongan transparan
     private array $revenueDefs = [
-        ['team' => 'GENUI',         'by' => 'kahono@z4foundation.com', 'desc' => 'Pendanaan Awal Angel Investor', 'amount' => 50000000, 'distributable' => 35000000, 'deductions' => [['for' => 'Notaris & Legal', 'amount' => 10000000], ['for' => 'Platform fee', 'amount' => 5000000]], 'distribute' => true],
-        ['team' => 'GENUI',         'by' => 'kahono@z4foundation.com', 'desc' => 'Freelance Project Klien A',     'amount' => 20000000, 'distributable' => 15000000, 'deductions' => [['for' => 'Server DO 3 bulan', 'amount' => 3000000], ['for' => 'Domain & SSL', 'amount' => 2000000]], 'distribute' => true],
-        ['team' => 'Karya Digital', 'by' => 'adi@example.com',         'desc' => 'Project Website UMKM',          'amount' => 15000000, 'distributable' => 12000000, 'deductions' => [['for' => 'Hosting 1 tahun', 'amount' => 2000000], ['for' => 'Template Premium', 'amount' => 1000000]], 'distribute' => true],
-        ['team' => 'StartupA',      'by' => 'dian@example.com',        'desc' => 'Hibah Program Startup',         'amount' => 75000000, 'distributable' => 60000000, 'deductions' => [['for' => 'Pajak', 'amount' => 10000000], ['for' => 'Administrasi bank', 'amount' => 5000000]], 'distribute' => false],
+        ['GENUI', 'Web Platform', 'kahono@z4foundation.com', 'Pendanaan Awal Angel Investor', 50000000, 35000000, [['for'=>'Notaris & Legal','amount'=>10000000],['for'=>'Platform fee','amount'=>5000000]], true],
+        ['GENUI', 'Mobile App', 'kahono@z4foundation.com', 'Freelance Project Klien A', 20000000, 15000000, [['for'=>'Server DO','amount'=>3000000],['for'=>'Domain & SSL','amount'=>2000000]], true],
+        ['Karya Digital', 'Website UMKM', 'adi@example.com', 'Project Website UMKM', 15000000, 12000000, [['for'=>'Hosting 1 tahun','amount'=>2000000],['for'=>'Template Premium','amount'=>1000000]], true],
+        ['StartupA', 'SaaS Core', 'dian@example.com', 'Hibah Program Startup', 75000000, 60000000, [['for'=>'Pajak','amount'=>10000000],['for'=>'Administrasi bank','amount'=>5000000]], false],
     ];
 
     public function __construct()
@@ -167,282 +136,207 @@ class DemoDataSeeder extends Seeder
 
     public function run(): void
     {
-        $this->command?->info('ðŸš€ Seeding demo data...');
+        $this->command?->info('🚀 Seeding demo data (Slicing Pie Beranak)...');
 
-        $users = $this->createUsers();
-        $teams = $this->createTeamsAndMembers($users);
-        $this->updateFmrs($users);
-        $contribs = $this->createContributions($teams, $users);
-        $this->createSnapshots($teams);
-        $this->createRevenues($teams, $users);
+        // H-K: wrap entire seeder in transaction — atomic create or nothing
+        DB::transaction(function () use (&$users, &$teams) {
+            $users = $this->createUsers();
+            $teams = $this->createTeamsAndMembers($users);
+            $this->updateFmrs($users);
+            $this->createContributions($teams, $users);
+            $this->createFrozenSnapshots($teams);
+            $this->createRevenues($teams, $users);
+        });
 
-        $this->command?->info('âœ… Demo data seeding selesai!');
+        $this->command?->info('✅ Demo data seeding selesai!');
     }
 
     private function createUsers(): array
     {
-        $this->command?->info('Creating users...');
         $users = [];
         foreach ($this->userDefs as $def) {
-            $user = User::firstOrCreate(
+            $users[$def['email']] = User::firstOrCreate(
                 ['email' => $def['email']],
-                [
-                    'name'     => $def['name'],
-                    'password' => bcrypt('password'),
-                ]
+                ['name' => $def['name'], 'password' => bcrypt('password')]
             );
-            $users[$def['email']] = $user;
         }
         return $users;
     }
 
     private function createTeamsAndMembers(array $users): array
     {
-        $this->command?->info('Creating teams & members...');
         $teams = [];
-
         foreach ($this->teamDefs as $def) {
             $owner = $users[$def['owner']];
-
-            $team = Team::firstOrCreate(
-                ['name' => $def['name']],
-                [
-                    'owner_id'           => $owner->id,
-                    'description'        => "Tim {$def['name']} â€” demo SEIRIS",
-                    'invite_code'        => strtoupper(Str::random(8)),
-                    'approval_threshold' => $def['threshold'],
-                    'is_frozen'          => false,
-                ]
-            );
+            $team = Team::firstOrCreate(['name' => $def['name']], [
+                'owner_id' => $owner->id,
+                'description' => "Tim {$def['name']} — demo SEIRIS",
+                'invite_code' => strtoupper(Str::random(8)),
+                'approval_threshold' => $def['threshold'],
+                'is_frozen' => false,
+            ]);
             $teams[$def['name']] = $team;
 
-            // Owner member
             TeamMember::firstOrCreate(
                 ['team_id' => $team->id, 'user_id' => $owner->id],
                 ['role' => 'owner', 'fmr' => $this->fmrDefs[$def['owner']], 'status' => 'active']
             );
-
-            AuditLogService::log(
-                teamId:      $team->id,
-                action:      'member.joined',
-                actorId:     $owner->id,
-                subjectType: 'team_member',
-                subjectId:   TeamMember::where('team_id', $team->id)->where('user_id', $owner->id)->first()?->id,
-                payload:     ['member_name' => $owner->name, 'role' => 'owner'],
-            );
-
-            // Other members
             foreach ($def['members'] as $email => $role) {
-                $user = $users[$email];
                 TeamMember::firstOrCreate(
-                    ['team_id' => $team->id, 'user_id' => $user->id],
+                    ['team_id' => $team->id, 'user_id' => $users[$email]->id],
                     ['role' => $role, 'fmr' => $this->fmrDefs[$email], 'status' => 'active']
                 );
             }
 
-            // â”€â”€ Audit Logs â”€â”€
-            AuditLogService::log(
-                teamId:      $team->id,
-                action:      'team.created',
-                actorId:     $owner->id,
-                subjectType: 'team',
-                subjectId:   $team->id,
-                payload:     ['name' => $team->name],
-            );
-
-            foreach ($def['members'] as $email => $role) {
-                $user = $users[$email];
-                $member = TeamMember::where('team_id', $team->id)->where('user_id', $user->id)->first();
-                AuditLogService::log(
-                    teamId:      $team->id,
-                    action:      'member.joined',
-                    actorId:     $user->id,
-                    subjectType: 'team_member',
-                    subjectId:   $member?->id,
-                    payload:     ['member_name' => $user->name, 'role' => $role],
+            // Buat projects (anak)
+            foreach ($def['projects'] as $pname) {
+                Project::firstOrCreate(
+                    ['team_id' => $team->id, 'name' => $pname],
+                    ['is_frozen' => false]
                 );
             }
         }
-
         return $teams;
     }
 
     private function updateFmrs(array $users): void
     {
-        $this->command?->info('Setting FMRs...');
         foreach ($this->fmrDefs as $email => $fmr) {
             TeamMember::where('user_id', $users[$email]->id)->update(['fmr' => $fmr]);
         }
     }
 
-    private function createContributions(array $teams, array $users): array
+    private function createContributions(array $teams, array $users): void
     {
-        $this->command?->info('Creating contributions & votes...');
-        $contribs = [];
-
         foreach ($this->contributionDefs as $def) {
-            $team = $teams[$def['team']];
-            $member = TeamMember::where('team_id', $team->id)
-                ->where('user_id', $users[$def['by']]->id)
-                ->first();
+            $team = $teams[$def[0]];
+            $project = Project::where('team_id', $team->id)->where('name', $def[1])->first();
+            $member = TeamMember::where('team_id', $team->id)->where('user_id', $users[$def[2]]->id)->first();
+            if (!$member || !$project) continue;
 
-            if (!$member) continue;
+            $type = $def[3];
+            $value = $def[5];
+            $status = $def[6];
+            $votes = $def[7];
+            $deal = $def[8] ?? null;
+            $est = $def[9] ?? null;
+            $rate = $def[10] ?? null;
 
-            // Calculate slices
-            $slices = app(SlicingPieService::class)::calculateSlices($def['type'], $def['value']);
+            $slices = app(SlicingPieService::class)::calculateSlices($type, $value);
 
             $contribution = Contribution::create([
                 'team_id'           => $team->id,
+                'project_id'        => $project->id,
                 'member_id'         => $member->id,
-                'type'              => $def['type'],
-                'description'       => $def['desc'],
-                'value'             => $def['value'],
+                'type'              => $type,
+                'description'       => $def[4],
+                'value'             => $value,
                 'multiplier'        => $slices['multiplier'],
                 'total_slices'      => $slices['total_slices'],
-                'status'            => $def['status'],
+                'status'            => $status,
                 'contribution_date' => now()->subDays(rand(1, 30)),
-                'deal_value'        => $def['deal_value'] ?? null,
-                'estimated_value'   => $def['estimated_value'] ?? null,
-                'commission_rate'   => $def['commission_rate'] ?? null,
+                'deal_value'        => $deal,
+                'estimated_value'   => $est,
+                'commission_rate'   => $rate,
             ]);
 
-            // Create votes
-            foreach ($def['votes'] as $voterEmail => $vote) {
-                $voterMember = TeamMember::where('team_id', $team->id)
-                    ->where('user_id', $users[$voterEmail]->id)
-                    ->first();
+            foreach ($votes as $voterEmail => $vote) {
+                $voterMember = TeamMember::where('team_id', $team->id)->where('user_id', $users[$voterEmail]->id)->first();
                 if ($voterMember) {
                     ContributionApproval::create([
                         'contribution_id' => $contribution->id,
-                        'member_id'       => $voterMember->id,
-                        'vote'            => $vote,
+                        'member_id' => $voterMember->id,
+                        'vote' => $vote,
                     ]);
                 }
             }
+        }
 
-            // â”€â”€ Audit Logs â”€â”€
-            AuditLogService::log(
-                teamId:      $team->id,
-                action:      'contribution.created',
-                actorId:     $member->user_id,
-                subjectType: 'contribution',
-                subjectId:   $contribution->id,
-                payload:     ['type' => $def['type'], 'value' => $def['value'], 'description' => $def['desc']],
-            );
-
-            foreach ($def['votes'] as $voterEmail => $vote) {
-                $voterMember = TeamMember::where('team_id', $team->id)
-                    ->where('user_id', $users[$voterEmail]->id)
-                    ->first();
-                if ($voterMember) {
-                    AuditLogService::log(
-                        teamId:      $team->id,
-                        action:      'vote.cast',
-                        actorId:     $users[$voterEmail]->id,
-                        subjectType: 'contribution',
-                        subjectId:   $contribution->id,
-                        payload:     ['vote' => $vote],
-                    );
+        // Populate project_members roster untuk demo (biar voting live bisa jalan)
+        foreach ($teams as $name => $team) {
+            foreach ($team->projects as $project) {
+                $contributions = Contribution::where('team_id', $team->id)
+                    ->where('project_id', $project->id)->get();
+                $memberIds = collect();
+                foreach ($contributions as $c) {
+                    $memberIds->push($c->member_id); // contributor
+                    $voterIds = ContributionApproval::where('contribution_id', $c->id)
+                        ->pluck('member_id');
+                    $memberIds = $memberIds->merge($voterIds); // voters
+                }
+                $memberIds = $memberIds->unique();
+                foreach ($memberIds as $pmId) {
+                    $pm = TeamMember::find($pmId);
+                    if ($pm) {
+                        DB::table('project_members')->updateOrInsert(
+                            ['project_id' => $project->id, 'team_member_id' => $pmId],
+                            ['fmr' => $pm->fmr, 'created_at' => now(), 'updated_at' => now()],
+                        );
+                    }
                 }
             }
-
-            if (in_array($def['status'], ['APPROVED', 'REJECTED'])) {
-                $lastVoterEmail = array_key_last($def['votes']);
-                AuditLogService::log(
-                    teamId:      $team->id,
-                    action:      'contribution.' . strtolower($def['status']),
-                    actorId:     $lastVoterEmail ? $users[$lastVoterEmail]->id : $member->user_id,
-                    subjectType: 'contribution',
-                    subjectId:   $contribution->id,
-                    payload:     ['final_status' => $def['status']],
-                );
-            }
-
-            $contribs[] = $contribution;
         }
-
-        return $contribs;
     }
 
-    private function createSnapshots(array $teams): void
+    /**
+     * Setiap project di-freeze (Pie anak) lalu agregasi ke tim.
+     */
+    private function createFrozenSnapshots(array $teams): void
     {
-        $this->command?->info('Creating equity snapshots...');
-        foreach ($teams as $name => $team) {
-            $approvedCount = $team->contributions()->where('status', 'APPROVED')->count();
-            if ($approvedCount > 0) {
+        // M4: recalculate()/freeze() pakai lockForUpdate → wajib dalam transaction.
+        // Di PostgreSQL, lock di luar transaction throw error.
+        DB::transaction(function () use ($teams) {
+            foreach ($teams as $name => $team) {
+                foreach ($team->projects as $project) {
+                    if ($project->contributions()->where('status', 'APPROVED')->exists()) {
+                        $this->slicingPie->recalculate($team, null, $project);
+                        $this->slicingPie->freeze($team, $project);
+                    }
+                }
+                // agregasi tim (induk)
                 $this->slicingPie->recalculate($team);
-                $this->command?->info("  {$name}: snapshot created ({$approvedCount} contributions)");
-            } else {
-                $this->command?->info("  {$name}: no approved contributions, skipping snapshot");
             }
-        }
+        });
     }
 
     private function createRevenues(array $teams, array $users): void
     {
-        $this->command?->info('Creating revenues & distributions...');
         foreach ($this->revenueDefs as $def) {
-            $team = $teams[$def['team']];
-            $member = TeamMember::where('team_id', $team->id)
-                ->where('user_id', $users[$def['by']]->id)
-                ->first();
-            if (!$member) continue;
+            $team = $teams[$def[0]];
+            $project = Project::where('team_id', $team->id)->where('name', $def[1])->first();
+            $member = TeamMember::where('team_id', $team->id)->where('user_id', $users[$def[2]]->id)->first();
+            if (!$member || !$project) continue;
 
             $revenue = Revenue::create([
-                'team_id'              => $team->id,
-                'recorded_by'          => $member->id,
-                'description'          => $def['desc'],
-                'amount'               => $def['amount'],
-                'distributable_amount' => $def['distributable'],
-                'deductions'           => $def['deductions'] ?? [],
-                'revenue_date'         => now()->subDays(rand(5, 15)),
-                'is_distributed'       => false,
+                'team_id' => $team->id,
+                'project_id' => $project->id,
+                'recorded_by' => $member->id,
+                'description' => $def[3],
+                'amount' => $def[4],
+                'distributable_amount' => $def[5],
+                'deductions' => $def[6] ?? [],
+                'revenue_date' => now()->subDays(rand(5, 15)),
+                'is_distributed' => false,
             ]);
 
-            // â”€â”€ Audit Log: revenue.created â”€â”€
-            AuditLogService::log(
-                teamId:      $team->id,
-                action:      'revenue.created',
-                actorId:     $member->user_id,
-                subjectType: 'revenue',
-                subjectId:   $revenue->id,
-                payload:     ['amount' => $def['amount'], 'distributable_amount' => $def['distributable']],
-            );
-
-            if ($def['distribute']) {
-                $snapshot = $team->equitySnapshots()->first();
+            if ($def[7]) {
+                // snapshot project scope
+                $snapshot = EquitySnapshot::where('team_id', $team->id)
+                    ->where('project_id', $project->id)
+                    ->where('is_frozen', true)
+                    ->latest()->first();
                 if ($snapshot && !empty($snapshot->equity_map)) {
-                    DB::transaction(function () use ($revenue, $snapshot, $team, $member, $def) {
+                    DB::transaction(function () use ($revenue, $snapshot, $def) {
                         foreach ($snapshot->equity_map as $memberId => $data) {
-                            $amount = (int) round($def['distributable'] * ($data['equity_pct'] / 100));
                             ProfitDistribution::firstOrCreate(
                                 ['revenue_id' => $revenue->id, 'member_id' => $memberId],
-                                ['equity_pct_snapshot' => $data['equity_pct'], 'amount' => $amount]
+                                ['equity_pct_snapshot' => $data['equity_pct'], 'amount' => (int) round($def[5] * ($data['equity_pct'] / 100))]
                             );
                         }
-                        $revenue->update([
-                            'is_distributed' => true,
-                            'status'         => 'distributed',
-                            'distributed_at' => now(),
-                        ]);
-
-                        // â”€â”€ Audit Log: profit.distributed â”€â”€
-                        AuditLogService::log(
-                            teamId:      $team->id,
-                            action:      'profit.distributed',
-                            actorId:     $member->user_id,
-                            subjectType: 'revenue',
-                            subjectId:   $revenue->id,
-                            payload:     [
-                                'distributable_amount' => $def['distributable'],
-                                'distributions_count'  => count($snapshot->equity_map),
-                            ],
-                        );
+                        $revenue->update(['is_distributed' => true, 'status' => 'distributed', 'distributed_at' => now()]);
                     });
-                    $this->command?->info("  {$def['team']}: revenue distributed");
                 }
             }
         }
     }
 }
-

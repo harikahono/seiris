@@ -32,8 +32,22 @@ export function TeamProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-   
   useEffect(() => { refreshTeams(); }, [refreshTeams]);
+
+  // H-H: clear teams on logout signal from AuthContext
+  useEffect(() => {
+    let lastVersion = localStorage.getItem('seiris_teams_version') ?? '';
+    const id = setInterval(() => {
+      const current = localStorage.getItem('seiris_teams_version') ?? '';
+      if (current !== lastVersion) {
+        lastVersion = current;
+        setTeams([]);
+        setCurrentTeamId(null);
+        localStorage.removeItem('seiris_teams_version');
+      }
+    }, 500);
+    return () => clearInterval(id);
+  }, []);
 
   const setCurrentTeam = useCallback((id: string) => {
     setCurrentTeamId(id);

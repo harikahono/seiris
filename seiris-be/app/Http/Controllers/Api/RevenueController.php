@@ -11,6 +11,8 @@ use App\Http\Resources\RevenueResource;
 use App\Models\ProfitDistribution;
 use App\Models\Revenue;
 use App\Models\Team;
+use App\Models\Project;
+use App\Models\TeamMember;
 use App\Services\AuditLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,17 +23,21 @@ use Illuminate\Support\Facades\Log;
 class RevenueController extends Controller
 {
     /**
-     * GET /api/teams/{team}/revenues
-     * List semua revenue tim
+     * GET /api/teams/{team}/revenues (atau /projects/{project}/revenues)
+     * List revenue — scope tim atau project
      */
-    public function index(Request $request, Team $team): JsonResponse
+    public function index(Request $request, Team $team, ?Project $project = null): JsonResponse
     {
-        // authorizeMember di-handle middleware EnsureTeamMember
+        // authorizeMember di-handle middleware EnsureTeamMember / EnsureProjectMember
 
-        $revenues = Revenue::where('team_id', $team->id)
-            ->with(['recordedBy.user', 'distributions.member.user'])
-            ->orderByDesc('revenue_date')
-            ->paginate(6);
+        $query = Revenue::where('team_id', $team->id)
+            ->with(['recordedBy.user', 'distributions.member.user']);
+
+        if ($project) {
+            $query->where('project_id', $project->id);
+        }
+
+        $revenues = $query->orderByDesc('revenue_date')->paginate(6);
 
         return response()->json([
             'data' => RevenueResource::collection($revenues),
@@ -44,14 +50,14 @@ class RevenueController extends Controller
     }
 
     /**
-     * POST /api/teams/{team}/revenues
-     * Catat revenue baru â€” hanya owner
+     * POST /api/teams/{team}/revenues (atau /projects/{project}/revenues)
+     * Catat revenue baru — hanya owner
      */
-    public function store(StoreRevenueRequest $request, Team $team): JsonResponse
+    public function store(StoreRevenueRequest $request, Team $team, ?Project $project = null): JsonResponse
     {
         Gate::authorize('update', $team);
 
-        // TeamMember sudah di-attach oleh middleware EnsureTeamMember
+        // TeamMember sudah di-attach oleh middleware EnsureTeamMember / EnsureProjectMember
         $member = $request->teamMember;
 
         // Handle upload bukti pembayaran
@@ -60,13 +66,14 @@ class RevenueController extends Controller
             $proofPath = $request->file('proof')->store('revenues', 'public');
         }
 
-        $revenue = DB::transaction(function () use ($request, $team, $member, $proofPath) {
+        $revenue = DB::transaction(function () use ($request, $team, $member, $proofPath, $project) {
             $deductions = $request->deductions ?? [];
             $totalDeductions = collect($deductions)->sum('amount');
             $distributable = $request->distributable_amount ?? ($request->amount - $totalDeductions);
 
             $revenue = Revenue::create([
                 'team_id'              => $team->id,
+                'project_id'           => $project?->id,
                 'recorded_by'          => $member->id,
                 'description'          => $request->description,
                 'amount'               => $request->amount,
@@ -108,6 +115,25 @@ class RevenueController extends Controller
     public function requestDistribute(Request $request, Revenue $revenue): JsonResponse
     {
         $team = $revenue->team;
+
+        // H1: route ini di luar middleware team.member → cek membership manual
+        $member = TeamMember::where('team_id', $team->id)
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'active')
+            ->first();
+        if (!$member) {
+            return response()->json(['message' => 'Kamu bukan anggota tim ini.'], 403);
+        }
+        // Kalau revenue punya project → wajib roster project
+        if ($revenue->project_id) {
+            $inProject = DB::table('project_members')
+                ->where('project_id', $revenue->project_id)
+                ->where('team_member_id', $member->id)
+                ->exists();
+            if (!$inProject) {
+                return response()->json(['message' => 'Kamu bukan member project ini.'], 403);
+            }
+        }
 
         if ($revenue->is_distributed) {
             return response()->json([
@@ -157,8 +183,21 @@ class RevenueController extends Controller
             ], 409);
         }
 
-        // Ambil snapshot equity terbaru
-        $snapshot = $team->equitySnapshots()->first();
+        // M2: owner hanya boleh distribute SETELAH ada ajuan member
+        if ($revenue->status !== 'distribute_requested') {
+            return response()->json([
+                'message' => 'Distribusi belum diajukan. Mintalah salah satu member mengajukan distribusi dulu.',
+            ], 409);
+        }
+
+        // Ambil snapshot equity terbaru — scope project kalau revenue punya project_id
+        $snapshotQuery = $team->equitySnapshots();
+        if ($revenue->project_id) {
+            $snapshotQuery->where('project_id', $revenue->project_id);
+        } else {
+            $snapshotQuery->whereNull('project_id');
+        }
+        $snapshot = $snapshotQuery->first();
 
         if (!$snapshot || empty($snapshot->equity_map)) {
             return response()->json([
@@ -167,6 +206,12 @@ class RevenueController extends Controller
         }
 
         $distributions = DB::transaction(function () use ($request, $revenue, $team, $snapshot) {
+            // M2: lock row supaya concurrent distribute aman (hindari 500 dari unique constraint)
+            $locked = Revenue::where('id', $revenue->id)->lockForUpdate()->first();
+            if ($locked->is_distributed) {
+                throw new \RuntimeException('Revenue sudah didistribusikan oleh proses lain.');
+            }
+
             $distributions = [];
 
             foreach ($snapshot->equity_map as $memberId => $data) {
@@ -223,4 +268,3 @@ class RevenueController extends Controller
     }
 
 }
-

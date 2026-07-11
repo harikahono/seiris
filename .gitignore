@@ -1,4 +1,5 @@
 # Docs - local documentation (do not push)
+# Exception: CLAIMS_V2.md and VERSION_NOTES.md stay in root (version markers)
 docs/
 
 # Environment files
@@ -9,6 +10,9 @@ docs/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Roam research
+.roam/
 
 # IDE
 .idea/

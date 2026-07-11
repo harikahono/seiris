@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
+import { useProjectContext } from "@/contexts/ProjectContext";
 import type { Contribution, ContributionStatus, EquityData } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,13 @@ const FILTERS: { key: Filter; label: string }[] = [
 export default function ContributionsTab() {
   const { team, fmr } = useOutletContext<TeamContext>();
   const teamId = team.id;
+  const { currentProjectId } = useProjectContext();
   const { refreshVersion } = useRealtime();
+
+  // basePath: kalau ada project -> scoped, kalau null -> tim (induk)
+  const basePath = currentProjectId
+    ? `/teams/${teamId}/projects/${currentProjectId}`
+    : `/teams/${teamId}`;
 
   // ── Toggle view ──
   const [view, setView] = useState<View>("contributions");
@@ -50,10 +57,10 @@ export default function ContributionsTab() {
   // ── Fetch Equity (no loading state — caller manages it) ──
   const fetchEquity = useCallback(() => {
     return api
-      .get<{ data: EquityData }>(`/teams/${teamId}/equity`)
+      .get<{ data: EquityData }>(`${basePath}/equity`)
       .then((res) => setEquity(res.data.data))
       .catch(() => { setEquity(null); toast.error("Gagal memuat equity"); });
-  }, [teamId]);
+  }, [basePath]);
 
   // ── Fetch Contributions (server-side filter) ──
   const fetchContributions = useCallback(() => {
@@ -61,7 +68,7 @@ export default function ContributionsTab() {
     if (filter !== 'all') params.status = filter;
     return api
       .get<{ data: Contribution[]; meta: { current_page: number; last_page: number } }>(
-        `/teams/${teamId}/contributions`,
+        `${basePath}/contributions`,
         { params }
       )
       .then((res) => {
@@ -69,10 +76,11 @@ export default function ContributionsTab() {
         setLastPage(res.data.meta.last_page);
       })
       .catch(() => toast.error("Gagal memuat kontribusi"));
-  }, [teamId, page, filter]);
+  }, [basePath, page, filter]);
 
   // Initial load + page change → loading=true from initial state
   useEffect(() => {
+    setPage(1);
     Promise.all([fetchEquity(), fetchContributions()])
       .finally(() => { setLoading(false); setEquityLoading(false); });
   }, [fetchEquity, fetchContributions]);
@@ -217,6 +225,7 @@ export default function ContributionsTab() {
 
           <ContributionForm
             teamId={teamId}
+            projectId={currentProjectId}
             fmr={fmr}
             open={showForm}
             onClose={() => setShowForm(false)}
@@ -257,7 +266,7 @@ export default function ContributionsTab() {
                     </span>
                   )}
                 </p>
-                <ExportPdfButton teamId={teamId} />
+                <ExportPdfButton teamId={teamId} projectId={currentProjectId} />
               </div>
 
               <div className="grid gap-4 lg:grid-cols-2">

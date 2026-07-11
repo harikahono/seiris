@@ -31,6 +31,18 @@ export interface RegisterPayload {
   password_confirmation: string;
 }
 
+// ── Project (Slicing Pie Beranak) ──────────────────────────
+export interface ProjectItem {
+  id: string;
+  team_id: string;
+  name: string;
+  description: string | null;
+  is_frozen: boolean;
+  frozen_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ── Team ────────────────────────────────────────────────────
 export type TeamRole = "owner" | "member";
 export type MemberStatus = "active" | "exited";
@@ -39,6 +51,7 @@ export interface TeamMember {
   id: string;
   role: TeamRole;
   fmr: number;
+  project_fmr: number | null; // per-project FMR, null = pakai global
   status: MemberStatus;
   exited_at: string | null;
   user: User;
@@ -121,6 +134,7 @@ export interface ContributionApproval {
 
 export interface Contribution {
   id: string;
+  project_id: string | null;
   type: ContributionType;
   description: string;
   value: number;
@@ -168,6 +182,7 @@ export interface EquityMemberEntry {
 
 export interface EquityData {
   snapshot_id: string;
+  project_id: string | null;
   total_slices: number;
   equity_map: EquityMemberEntry[];
   slices_by_type: Record<string, number>;
@@ -189,6 +204,7 @@ export interface RevenueDistribution {
 
 export interface Revenue {
   id: string;
+  project_id: string | null;
   description: string;
   amount: number;
   distributable_amount: number;

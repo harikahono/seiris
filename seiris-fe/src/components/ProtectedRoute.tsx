@@ -1,6 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { TeamProvider } from "@/contexts/TeamContext";
 
 export default function ProtectedRoute() {
   const { user, isLoading } = useAuth();
@@ -15,9 +14,5 @@ export default function ProtectedRoute() {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  return (
-    <TeamProvider>
-      <Outlet />
-    </TeamProvider>
-  );
+  return <Outlet />;
 }

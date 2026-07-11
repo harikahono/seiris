@@ -3,11 +3,11 @@ import { useOutletContext } from "react-router-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
+import { useProjectContext } from "@/contexts/ProjectContext";
 import type { TeamMember, FmrProposal } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { toast } from "sonner";
-import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut } from "lucide-react";
-import ConfirmModal from "@/components/ui/ConfirmModal";
+import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut, Info, ShieldAlert } from "lucide-react";
 
 export default function TeamMembersTab() {
   const { team, currentUserId, fetchTeam } = useOutletContext<TeamContext>();
@@ -24,9 +24,17 @@ export default function TeamMembersTab() {
   const [proposalsOpen, setProposalsOpen] = useState(true);
 
   const { refreshVersion } = useRealtime();
+  const { currentProjectId } = useProjectContext();
   const isOwner = team.owner.id === currentUserId;
   const activeMembers = team.members.filter((m) => m.status === "active");
   const currentMember = activeMembers.find((m) => m.user.id === currentUserId);
+  const hasProjectScope = !!currentProjectId;
+
+  // Re-fetch team dengan project scope saat project berubah
+  useEffect(() => {
+    fetchTeam(currentProjectId ?? undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentProjectId]);
 
   // ── Fetch Pending Proposals ──
   const fetchProposals = useCallback(async () => {
@@ -54,8 +62,8 @@ export default function TeamMembersTab() {
 
   // Re-fetch team data when realtime event arrives
   useEffect(() => {
-    if (refreshVersion > 0) fetchTeam();
-  }, [refreshVersion, fetchTeam]);
+    if (refreshVersion > 0) fetchTeam(currentProjectId ?? undefined);
+  }, [refreshVersion, fetchTeam, currentProjectId]);
 
   // ── Submit FMR Proposal (non-owner) ──
   const handleProposeFmr = async () => {
@@ -119,18 +127,23 @@ export default function TeamMembersTab() {
   // ── Existing FMR direct edit (owner only) ──
   const startEditFmr = (member: TeamMember) => {
     setEditingFmr(member.id);
-    setFmrValue(String(member.fmr));
+    const currentFmr = hasProjectScope && member.project_fmr != null ? member.project_fmr : member.fmr;
+    setFmrValue(String(currentFmr));
+  };
+
+  const displayFmr = (member: TeamMember) => {
+    return hasProjectScope && member.project_fmr != null ? member.project_fmr : member.fmr;
   };
 
   const saveFmr = async (member: TeamMember) => {
     setSavingFmr(true);
     try {
-      await api.put(`/teams/${team.id}/members/${member.id}/fmr`, {
-        fmr: Number(fmrValue),
-      });
-      toast.success("FMR berhasil diperbarui");
+      const payload: Record<string, number | string> = { fmr: Number(fmrValue) };
+      if (currentProjectId) payload.project_id = currentProjectId;
+      await api.put(`/teams/${team.id}/members/${member.id}/fmr`, payload);
+      toast.success(`FMR ${currentProjectId ? 'project' : ''} berhasil diperbarui`);
       setEditingFmr(null);
-      fetchTeam();
+      fetchTeam(currentProjectId ?? undefined);
     } catch (err) {
       if (isAxiosError(err) && err.response?.status === 422) {
         const data = err.response.data as { errors?: Record<string, string[]> };
@@ -148,15 +161,56 @@ export default function TeamMembersTab() {
     setFmrValue("");
   };
 
+  // ── Project Roster Management ──
+  const [managingProject, setManagingProject] = useState<string | null>(null);
+
+  const handleAddToProject = async (member: TeamMember) => {
+    if (!currentProjectId) return;
+    setManagingProject(member.id);
+    try {
+      await api.post(`/teams/${team.id}/projects/${currentProjectId}/members`, {
+        member_id: member.id,
+      });
+      toast.success(`${member.user.name} ditambahkan ke project`);
+      fetchTeam(currentProjectId ?? undefined);
+    } catch {
+      toast.error("Gagal menambahkan anggota ke project");
+    } finally {
+      setManagingProject(null);
+    }
+  };
+
+  const handleRemoveFromProject = async (member: TeamMember) => {
+    if (!currentProjectId) return;
+    setManagingProject(member.id);
+    try {
+      await api.delete(`/teams/${team.id}/projects/${currentProjectId}/members/${member.id}`);
+      toast.success(`${member.user.name} dikeluarkan dari project`);
+      fetchTeam(currentProjectId ?? undefined);
+    } catch {
+      toast.error("Gagal mengeluarkan anggota dari project");
+    } finally {
+      setManagingProject(null);
+    }
+  };
+
+  // ── Exit Member with Leaver Type ──
   const [exitingMember, setExitingMember] = useState<TeamMember | null>(null);
+  const [leaverType, setLeaverType] = useState<"good" | "bad">("bad");
+  const [exitReason, setExitReason] = useState("");
   const [exitingLoading, setExitingLoading] = useState(false);
 
-  const handleExit = async (member: TeamMember) => {
+  const handleExit = async () => {
+    if (!exitingMember) return;
     setExitingLoading(true);
     try {
-      await api.post(`/teams/${team.id}/members/${member.id}/exit`);
-      toast.success(`${member.user.name} berhasil dikeluarkan`);
+      await api.post(`/teams/${team.id}/members/${exitingMember.id}/exit`, {
+        leaver_type: leaverType,
+        exit_reason: exitReason.trim() || null,
+      });
+      toast.success(`${exitingMember.user.name} berhasil dikeluarkan`);
       setExitingMember(null);
+      setExitReason("");
       fetchTeam();
     } catch {
       toast.error("Gagal mengeluarkan anggota");
@@ -173,11 +227,14 @@ export default function TeamMembersTab() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-sm text-white">
-                FMR Kamu:{" "}
+                {hasProjectScope ? "FMR Project Kamu" : "FMR Kamu"}:{" "}
                 <span className="font-semibold text-accent">
-                  Rp {currentMember.fmr.toLocaleString("id-ID")}
+                  Rp {displayFmr(currentMember).toLocaleString("id-ID")}
                 </span>
-                {currentMember.fmr === 0 && (
+                {hasProjectScope && currentMember.project_fmr == null && (
+                  <span className="ml-1 text-[10px] text-gray-500">(global)</span>
+                )}
+                {displayFmr(currentMember) === 0 && (
                   <span className="ml-2 text-[10px] text-yellow-500">
                     (Belum diset — tidak bisa log TIME / IDEA / NETWORK)
                   </span>
@@ -302,10 +359,13 @@ export default function TeamMembersTab() {
                     ) : (
                       <>
                         <div className="text-right">
-                          <p className="text-[11px] text-gray-600">FMR</p>
+                          <p className="text-[11px] text-gray-600">{hasProjectScope ? "FMR Project" : "FMR"}</p>
                           <p className="text-sm font-semibold tabular-nums text-white">
-                            Rp {member.fmr.toLocaleString("id-ID")}
+                            Rp {displayFmr(member).toLocaleString("id-ID")}
                           </p>
+                          {hasProjectScope && member.project_fmr == null && (
+                            <p className="text-[10px] text-gray-600">(global)</p>
+                          )}
                         </div>
                         <button
                           type="button"
@@ -319,10 +379,13 @@ export default function TeamMembersTab() {
                   </div>
                 ) : (
                   <div className="text-right">
-                    <p className="text-[11px] text-gray-600">FMR</p>
+                    <p className="text-[11px] text-gray-600">{hasProjectScope ? "FMR Project" : "FMR"}</p>
                     <p className="text-sm font-semibold tabular-nums text-white">
-                      Rp {member.fmr.toLocaleString("id-ID")}
+                      Rp {displayFmr(member).toLocaleString("id-ID")}
                     </p>
+                    {hasProjectScope && member.project_fmr == null && (
+                      <p className="text-[10px] text-gray-600">(global)</p>
+                    )}
                   </div>
                 )}
 
@@ -334,6 +397,32 @@ export default function TeamMembersTab() {
                   >
                     Keluarkan
                   </button>
+                )}
+
+                {hasProjectScope && isOwner && member.role !== "owner" && editingFmr !== member.id && (
+                  member.project_fmr != null ? (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFromProject(member)}
+                      disabled={managingProject === member.id}
+                      className="rounded px-2 py-1 text-xs text-yellow-400 transition hover:bg-yellow-500/10 disabled:opacity-50"
+                    >
+                      {managingProject === member.id ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : 'Keluar'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleAddToProject(member)}
+                      disabled={managingProject === member.id}
+                      className="rounded px-2 py-1 text-xs text-green-400 transition hover:bg-green-500/10 disabled:opacity-50"
+                    >
+                      {managingProject === member.id ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : 'Masuk'}
+                    </button>
+                  )
                 )}
               </div>
             </div>
@@ -431,25 +520,79 @@ export default function TeamMembersTab() {
         </div>
       )}
 
-      <ConfirmModal
-        open={exitingMember !== null}
-        onClose={() => setExitingMember(null)}
-        onConfirm={() => exitingMember && handleExit(exitingMember)}
-        title="Keluarkan Anggota"
-        description={
-          exitingMember
-            ? `Yakin ingin mengeluarkan ${exitingMember.user.name} dari tim?`
-            : ""
-        }
-        confirmText="Keluarkan"
-        loading={exitingLoading}
-        variant="danger"
-        icon={
-          <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
-            <LogOut className="size-6 text-red-400" />
+      {/* ── Exit Member Modal with Leaver Type ── */}
+      {exitingMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/60" onClick={() => { setExitingMember(null); setExitReason(""); }} />
+          <div className="relative w-full max-w-md rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
+                <LogOut className="size-6 text-red-400" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-white">Keluarkan Anggota</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Yakin ingin mengeluarkan <strong className="text-gray-300">{exitingMember.user.name}</strong>?
+              </p>
+            </div>
+
+            {/* ── Leaver Type ── */}
+            <div className="mt-5 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Tipe Keluar</p>
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${leaverType === "bad" ? "border-red-500/40 bg-red-500/5" : "border-gray-700 hover:border-gray-600"}`}>
+                <input type="radio" name="leaver_type" value="bad" checked={leaverType === "bad"} onChange={() => setLeaverType("bad")} className="mt-0.5 accent-red-500" />
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <ShieldAlert className="size-3.5 text-red-400" />
+                    <p className="text-sm font-medium text-red-300">Bad Leaver</p>
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-500">Anggota melanggar/mengundurkan diri — slices non-cash hangus. Equity project & tim dihitung ulang.</p>
+                </div>
+              </label>
+              <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${leaverType === "good" ? "border-green-500/40 bg-green-500/5" : "border-gray-700 hover:border-gray-600"}`}>
+                <input type="radio" name="leaver_type" value="good" checked={leaverType === "good"} onChange={() => setLeaverType("good")} className="mt-0.5 accent-green-500" />
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <Info className="size-3.5 text-green-400" />
+                    <p className="text-sm font-medium text-green-300">Good Leaver</p>
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-500">Tim yg salah/force majeure — semua slices tetap. Equity tetap utuh.</p>
+                </div>
+              </label>
+            </div>
+
+            {/* ── Exit Reason (opsional) ── */}
+            <div className="mt-4">
+              <label className="mb-1 block text-xs text-gray-500">Alasan keluar (opsional)</label>
+              <textarea
+                rows={2}
+                value={exitReason}
+                onChange={(e) => setExitReason(e.target.value)}
+                placeholder="Contoh: Pindah project lain, tidak aktif 30 hari..."
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              />
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => { setExitingMember(null); setExitReason(""); }}
+                disabled={exitingLoading}
+                className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition hover:bg-gray-800 hover:text-white disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleExit}
+                disabled={exitingLoading}
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {exitingLoading ? <Loader2 className="mx-auto size-4 animate-spin" /> : "Keluarkan"}
+              </button>
+            </div>
           </div>
-        }
-      />
+        </div>
+      )}
     </div>
   );
 }

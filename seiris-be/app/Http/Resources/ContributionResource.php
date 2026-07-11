@@ -26,12 +26,6 @@ class ContributionResource extends JsonResource
             'estimated_value'   => $this->when($this->type === 'SALES', $this->estimated_value),
             'commission_rate'   => $this->when($this->type === 'SALES', $this->commission_rate),
 
-            // Legacy REVENUE fields (data lama)
-            'invoice_amount'    => $this->invoice_amount,
-            'invoice_url'       => $this->invoice_path
-                ? asset('storage/' . $this->invoice_path)
-                : null,
-
             // Relations
             'member'            => new TeamMemberResource($this->whenLoaded('member')),
             'approvals'         => ContributionApprovalResource::collection(

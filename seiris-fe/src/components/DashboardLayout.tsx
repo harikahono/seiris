@@ -71,7 +71,8 @@ export default function DashboardLayout() {
     onEquityUpdated: useCallback((data) => {
       triggerRefresh();
       if (data?.approved_by) {
-        toast(`✅ "${data.contribution_desc}" disetujui oleh ${data.approved_by}`);
+        const owner = data.contribution_owner ? ` (${data.contribution_owner})` : '';
+        toast(`✅ "${data.contribution_desc}"${owner} disetujui oleh ${data.approved_by}`);
       }
     }, [triggerRefresh]),
     onContributionCreated: useCallback((data) => {
@@ -88,11 +89,20 @@ export default function DashboardLayout() {
         case 'member.exited':
           toast(`🚪 ${data.user_name} keluar dari tim`);
           break;
+        case 'vote.cast':
+          toast(`🗳️ ${data.user_name} memberikan vote`);
+          break;
         case 'team.updated':
           toast(`⚙️ ${data.user_name} mengubah pengaturan tim`);
           break;
         case 'team.frozen':
-          toast(`❄️ Equity tim di-freeze`);
+          toast(`❄️ ${data.user_name} freeze equity tim`);
+          break;
+        case 'project.created':
+          toast(`📁 ${data.user_name} membuat project "${data.project_name}"`);
+          break;
+        case 'project.frozen':
+          toast(`🔒 ${data.user_name} freeze project "${data.project_name}"`);
           break;
         case 'member.fmr_updated':
           toast(`💰 FMR ${data.user_name} diperbarui`);
@@ -101,10 +111,10 @@ export default function DashboardLayout() {
           toast(`📊 ${data.user_name} mengusulkan perubahan FMR`);
           break;
         case 'fmr.approved':
-          toast(`✅ Usulan FMR disetujui`);
+          toast(`✅ Usulan FMR ${data.member_name} disetujui oleh ${data.approver_name}`);
           break;
         case 'fmr.rejected':
-          toast(`❌ Usulan FMR ditolak`);
+          toast(`❌ Usulan FMR ${data.member_name} ditolak oleh ${data.approver_name}`);
           break;
         case 'revenue.created':
           toast(`💰 ${data.user_name} mencatat revenue baru`);
@@ -116,7 +126,13 @@ export default function DashboardLayout() {
           toast(`✅ ${data.user_name} mendistribusikan profit`);
           break;
         case 'contribution.rejected':
-          toast(`❌ Kontribusi "${data.contribution_desc}" ditolak oleh ${data.user_name}`);
+          toast(`❌ Kontribusi "${data.contribution_desc}" (${data.contribution_owner_name}) ditolak oleh ${data.user_name}`);
+          break;
+        case 'member.added_to_project':
+          toast(`➕ ${data.user_name} menambahkan ${data.member_name} ke project`);
+          break;
+        case 'member.removed_from_project':
+          toast(`➖ ${data.user_name} mengeluarkan ${data.member_name} dari project`);
           break;
       }
     }, [triggerRefresh, refreshTeams]),

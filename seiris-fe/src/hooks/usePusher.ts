@@ -25,6 +25,7 @@ interface EquityUpdatedData {
   updated_at: string;
   approved_by: string | null;
   contribution_desc: string | null;
+  contribution_owner: string | null;
 }
 
 interface TeamUpdatedData {
@@ -33,6 +34,10 @@ interface TeamUpdatedData {
   action: string;
   user_name: string;
   contribution_desc: string | null;
+  member_name: string | null;
+  project_name: string | null;
+  approver_name: string | null;
+  contribution_owner_name: string | null;
 }
 
 /**
@@ -144,16 +149,16 @@ export function usePusher(
       callbacksRef.current.onMembersChange?.(list);
     });
 
-    channel.bind("pusher:member_added", (member: { user_id: string; user_info: PresenceUser }) => {
-      const exists = membersRef.current.some((m) => m.id === member.user_info.id);
+    channel.bind("pusher:member_added", (member: { id: string; info: PresenceUser }) => {
+      const exists = membersRef.current.some((m) => m.id === member.id);
       if (!exists) {
-        membersRef.current = [...membersRef.current, member.user_info];
+        membersRef.current = [...membersRef.current, member.info];
         callbacksRef.current.onMembersChange?.(membersRef.current);
       }
     });
 
-    channel.bind("pusher:member_removed", (member: { user_id: string }) => {
-      membersRef.current = membersRef.current.filter((m) => m.id !== member.user_id);
+    channel.bind("pusher:member_removed", (member: { id: string }) => {
+      membersRef.current = membersRef.current.filter((m) => m.id !== member.id);
       callbacksRef.current.onMembersChange?.(membersRef.current);
     });
   }, [teamId]);

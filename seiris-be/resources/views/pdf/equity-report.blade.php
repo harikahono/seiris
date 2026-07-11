@@ -205,6 +205,10 @@ table.mult tbody td { padding: 5px 9px; }
       Dibuat: {{ $generated_at }}<br>
       Snapshot: {{ substr($snapshot['snapshot_id'], 0, 8) }}...<br>
       Status: @if($snapshot['is_frozen'])<span class="pill-frozen">FROZEN</span>@else<span class="pill-active">AKTIF</span>@endif
+      @if($project_info)
+        <br>Mencakup {{ $project_info['total'] }} project
+        ({{ $project_info['frozen'] }} frozen, {{ $project_info['active'] }} aktif)
+      @endif
     </td>
   </tr>
 </table>
@@ -547,6 +551,17 @@ table.mult tbody td { padding: 5px 9px; }
   melalui mekanisme approval voting. Seluruh data tersimpan di audit log yang bersifat immutable
   (tidak dapat diubah atau dihapus). Laporan ini dapat digunakan sebagai dasar pembuatan cap table
   resmi bersama notaris setelah proses <em>Freeze Equity</em> dilakukan.
+  @if($project_info)
+    <br><br>
+    <strong>Cap Table {{ $project_info['all_frozen'] ? 'FINAL' : 'Sementara' }} per {{ $generated_at }}.</strong>
+    Cap table ini mencakup <strong>{{ $project_info['total'] }} project</strong>
+    ({{ $project_info['frozen'] }} frozen,
+    {{ $project_info['active'] }} aktif{!! $project_info['active'] ? ' &mdash; masih berjalan, equity dapat berubah' : '' !!}).
+    @if(!$project_info['all_frozen'])
+      <br>Catatan: Masih ada project aktif. Freeze <strong>semua</strong> project terlebih dahulu
+      untuk cap table final yang tidak berubah.
+    @endif
+  @endif
 </div>
 
 </body>

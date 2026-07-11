@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Project;
 use App\Models\Team;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,6 +23,11 @@ class AuditLogController extends Controller
         // authorizeMember di-handle middleware EnsureTeamMember
 
         $query = AuditLog::where('team_id', $team->id);
+
+        // H-I: filter by project_id — for project-scoped audit views
+        if ($request->filled('project_id')) {
+            $query->where('payload', 'like', '%"project_id":"' . $request->project_id . '"%');
+        }
 
         if ($request->filled('filter')) {
             $query->where('action', 'like', $request->filter . '.%');

@@ -16,7 +16,7 @@ class TeamMember extends Model
 
     protected $fillable = [
         'team_id', 'user_id', 'role',
-        'fmr', 'status', 'exited_at',
+        'fmr', 'status', 'exited_at', 'leaver_type', 'exit_reason',
     ];
 
     protected function casts(): array
@@ -25,6 +25,21 @@ class TeamMember extends Model
             'fmr'       => 'integer',
             'exited_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Good leaver = perusahaan yang salah (fired no cause / resign good cause).
+     * Slices tetap (perusahaan harus buyback). Bad leaver = dia salah,
+     * slices non-cash hilang.
+     */
+    public function isGoodLeaver(): bool
+    {
+        return $this->leaver_type === 'good';
+    }
+
+    public function isBadLeaver(): bool
+    {
+        return $this->leaver_type === 'bad';
     }
 
     public function team(): BelongsTo

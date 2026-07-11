@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { Contribution as ContributionType, Team } from "@/types";
 import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
@@ -17,25 +18,45 @@ export default function ContributionDetailPage() {
   const [contribution, setContribution] = useState<ContributionType | null>(null);
   const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isProjectMember, setIsProjectMember] = useState(true);
 
-  const fetchData = useCallback(() => {
+  const fetchData = useCallback(async () => {
     if (!teamId || !contributionId) return;
     setLoading(true);
 
-    Promise.all([
-      api.get<{ data: ContributionType }>(`/teams/${teamId}/contributions/${contributionId}`),
-      api.get<{ data: Team }>(`/teams/${teamId}`),
-    ])
-      .then(([contribRes, teamRes]) => {
-        setContribution(contribRes.data.data);
-        const myMember = teamRes.data.data.members.find((m) => m.user.id === user!.id);
-        setCurrentMemberId(myMember?.id ?? null);
-      })
-      .catch(() => toast.error("Gagal memuat detail kontribusi"))
-      .finally(() => setLoading(false));
+    try {
+      const contribRes = await api.get<{ data: ContributionType }>(`/teams/${teamId}/contributions/${contributionId}`);
+      const c = contribRes.data.data;
+      setContribution(c);
+
+      // C3: fetch team DENGAN project_id biar project_fmr ke-populate
+      // (wajib buat project-scoped voting — tanpa ini VotePanel ke-lock)
+      const teamRes = await api.get<{ data: Team }>(`/teams/${teamId}`, {
+        params: c.project_id ? { project_id: c.project_id } : {},
+      });
+      const myMember = teamRes.data.data.members.find((m) => m.user.id === user!.id);
+      setCurrentMemberId(myMember?.id ?? null);
+      // H2: project-scoped → cek roster via project_fmr existence (not null/undefined)
+      // Jika project_fmr ada (undefined/null/0/apa pun) artinya member ada di roster
+      setIsProjectMember(!c.project_id || myMember?.project_fmr !== undefined);
+    } catch {
+      toast.error("Gagal memuat detail kontribusi");
+    } finally {
+      setLoading(false);
+    }
   }, [teamId, contributionId, user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // ── Realtime: refresh on Pusher event ──
+  const { refreshVersion } = useRealtime();
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
 
   if (loading) {
     return (
@@ -247,7 +268,7 @@ export default function ContributionDetailPage() {
       {/* ── Vote Panel ── */}
       {currentMemberId && (
         <div className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
-          <VotePanel contribution={contribution} currentMemberId={currentMemberId} onVoted={fetchData} />
+          <VotePanel contribution={contribution} currentMemberId={currentMemberId} onVoted={fetchData} isProjectMember={isProjectMember} />
         </div>
       )}
     </div>

@@ -1,13 +1,15 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useOutletContext } from "react-router-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
 import { parseErrors } from "@/lib/parseErrors";
+import { useProjectContext } from "@/contexts/ProjectContext";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import type { ApprovalThreshold } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Loader2, Snowflake } from "lucide-react";
+import { Loader2, Snowflake, FolderKanban } from "lucide-react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface FieldErrors {
@@ -24,7 +26,20 @@ export default function TeamSettingsTab() {
   const [saving, setSaving] = useState(false);
   const [freezing, setFreezing] = useState(false);
   const [freezeConfirmOpen, setFreezeConfirmOpen] = useState(false);
+  const [projectFreezing, setProjectFreezing] = useState<string | null>(null); // project id being frozen
+  const { projects, refreshProjects } = useProjectContext();
+  const activeProjectsCount = projects.filter((p) => !p.is_frozen).length;
   const [errors, setErrors] = useState<FieldErrors>({});
+
+  // ── Realtime: refresh team data on Pusher event ──
+  const { refreshVersion } = useRealtime();
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    fetchTeam();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
 
   if (!isOwner) {
     return (
@@ -72,7 +87,7 @@ export default function TeamSettingsTab() {
       fetchTeam();
     } catch (err) {
       if (isAxiosError(err) && err.response?.status === 409) {
-        toast.error("Tim sudah di-freeze sebelumnya");
+        toast.error(err.response.data?.message ?? "Tim sudah di-freeze sebelumnya");
       } else {
         toast.error("Gagal freeze equity");
       }
@@ -175,10 +190,18 @@ export default function TeamSettingsTab() {
         <p className="text-xs text-gray-500">
           Ketika tim di-freeze, semua perubahan equity akan dihentikan. Aksi ini tidak bisa dibatalkan.
         </p>
+
+        {activeProjectsCount > 0 && (
+          <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-300">
+            ⚠️ Masih ada {activeProjectsCount} project yang belum di-freeze. Freeze semua project dulu
+            sebelum freeze tim (supaya cap table tidak kehilangan slices project aktif).
+          </div>
+        )}
+
         <button
           type="button"
           onClick={() => setFreezeConfirmOpen(true)}
-          disabled={freezing || team.is_frozen}
+          disabled={freezing || team.is_frozen || activeProjectsCount > 0}
           className="flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {freezing ? (
@@ -200,6 +223,59 @@ export default function TeamSettingsTab() {
         variant="danger"
         loading={freezing}
       />
+
+      {/* ── Freeze Project ── */}
+      {projects.length > 0 && (
+        <div className="space-y-4 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-5">
+          <div className="flex items-center gap-2">
+            <FolderKanban className="size-4 text-yellow-400" />
+            <h2 className="text-lg font-semibold text-white">Freeze Project</h2>
+          </div>
+          <p className="text-xs text-gray-500">
+            Ketika project selesai, freeze Pie-nya. Equity project akan disimpan dan diagregasi ke tim induk.
+          </p>
+          <div className="space-y-2">
+            {projects.map((p) => (
+              <div key={p.id} className="flex items-center justify-between rounded-lg border border-gray-700 bg-gray-900/50 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-white">{p.name}</p>
+                  {p.description && <p className="text-xs text-gray-500 truncate">{p.description}</p>}
+                </div>
+                <button
+                  type="button"
+                  disabled={p.is_frozen || projectFreezing === p.id}
+                  onClick={async () => {
+                    setProjectFreezing(p.id);
+                    try {
+                      await api.post(`/teams/${team.id}/projects/${p.id}/freeze`);
+                      toast.success(`Project "${p.name}" berhasil di-freeze`);
+                      refreshProjects();
+                    } catch (err) {
+                      if (isAxiosError(err) && err.response?.status === 409) {
+                        toast.error(`Project "${p.name}" sudah di-freeze`);
+                      } else if (isAxiosError(err) && err.response?.status === 422) {
+                        toast.error(err.response.data?.message || "Gagal freeze project");
+                      } else {
+                        toast.error("Gagal freeze project");
+                      }
+                    } finally {
+                      setProjectFreezing(null);
+                    }
+                  }}
+                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-yellow-500/30 px-3 py-1.5 text-xs text-yellow-400 transition hover:bg-yellow-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {projectFreezing === p.id ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Snowflake className="size-3.5" />
+                  )}
+                  {p.is_frozen ? "Sudah di-freeze" : "Freeze"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

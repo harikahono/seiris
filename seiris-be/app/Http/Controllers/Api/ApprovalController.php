@@ -12,7 +12,7 @@ use App\Http\Resources\ContributionResource;
 use App\Models\Contribution;
 use App\Models\ContributionApproval;
 use App\Models\EquitySnapshot;
-use App\Models\Revenue;
+use App\Models\Project;
 use App\Models\TeamMember;
 use App\Services\AuditLogService;
 use App\Services\SlicingPieService;
@@ -51,11 +51,38 @@ class ApprovalController extends Controller
             ], 403);
         }
 
+        // Gate: hanya project_members yang bisa vote kontribusi di project
+        if ($contribution->project_id) {
+            $inProject = DB::table('project_members')
+                ->where('project_id', $contribution->project_id)
+                ->where('team_member_id', $voter->id)->exists();
+            if (!$inProject) {
+                return response()->json([
+                    'message' => 'Kamu bukan member project ini. Hanya anggota project yang bisa vote kontribusi di project ini.',
+                ], 403);
+            }
+        }
+
         // Hanya kontribusi PENDING yang bisa di-vote
         if (!$contribution->isPending()) {
             return response()->json([
                 'message' => 'Kontribusi ini sudah ' . strtolower($contribution->status) . '.',
             ], 409);
+        }
+
+        // C2: pie beku (tim atau project) gak bisa di-vote lagi
+        if ($team->is_frozen) {
+            return response()->json([
+                'message' => 'Equity tim sudah dibekukan (frozen), tidak bisa vote.',
+            ], 409);
+        }
+        if ($contribution->project_id) {
+            $project = Project::find($contribution->project_id);
+            if ($project && $project->is_frozen) {
+                return response()->json([
+                    'message' => 'Equity project sudah dibekukan (frozen), tidak bisa vote.',
+                ], 409);
+            }
         }
 
         // Cek sudah vote atau belum
@@ -94,6 +121,7 @@ class ApprovalController extends Controller
                 subjectType: Contribution::class,
                 subjectId:   $contribution->id,
                 payload:     ['vote' => $request->vote, 'voter_id' => $voter->id],
+                projectId:   $contribution->project_id,
             );
 
             // Cek apakah threshold terpenuhi (dengan lock internal)
@@ -101,6 +129,20 @@ class ApprovalController extends Controller
 
             return $contribution->fresh()->load(['member.user', 'approvals.member.user']);
         });
+
+        // Broadcast per-vote (real-time vote count update di detail page)
+        // Fire-and-forget: kalau Pusher down, API tetep return sukses
+        try {
+            broadcast(new TeamUpdated(
+                team: $team,
+                action: 'vote.cast',
+                userName: $request->user()->name,
+                contributionDesc: $result->description,
+                contributionOwnerName: $result->member->user->name ?? '',
+            ))->toOthers();
+        } catch (\Throwable $e) {
+            Log::warning('[ApprovalController] Per-vote broadcast failed: ' . $e->getMessage());
+        }
 
         // Broadcast equity update SETELAH transaksi commit — data udah aman di DB
         if ($result->status === 'APPROVED') {
@@ -115,6 +157,7 @@ class ApprovalController extends Controller
                         $snapshot,
                         approvedByName: $voter->user->name,
                         contributionDescription: $contribution->description,
+                        contributionOwnerName: $contribution->member->user->name,
                     ))->toOthers();
                 }
             } catch (\Throwable $e) {
@@ -126,6 +169,7 @@ class ApprovalController extends Controller
                 'contribution.rejected',
                 $voter->user->name,
                 $contribution->description,
+                contributionOwnerName: $contribution->member->user->name,
             ))->toOthers();
         }
 
@@ -133,37 +177,6 @@ class ApprovalController extends Controller
             'message' => 'Vote berhasil dicatat.',
             'data'    => new ContributionResource($result),
         ]);
-    }
-
-    /**
-     * Auto-create Revenue record jika kontribusi type SALES disetujui.
-     * ponytail: SALES gak auto-create Revenue — revenue dicatat manual di Revenue page.
-     * Fungsi ini cuma untuk legacy REVENUE data existing sebelum migrasi.
-     */
-    private function autoCreateRevenue(Contribution $contribution): void
-    {
-        // ponytail: SALES tidak auto-create Revenue. Hanya data legacy REVENUE.
-        if ($contribution->type !== 'SALES') return;
-        // Hanya jalankan untuk data REVENUE legacy (type udah ke-migrate jadi SALES)
-        if (!$contribution->invoice_amount && !$contribution->actual_amount) return;
-
-        Revenue::create([
-            'team_id'              => $contribution->team_id,
-            'recorded_by'          => $contribution->member_id,
-            'description'          => $contribution->description,
-            'amount'               => $contribution->actual_amount ?? 0,
-            'distributable_amount' => $contribution->value,
-            'proof_path'           => $contribution->invoice_path,
-            'revenue_date'         => $contribution->contribution_date,
-            'is_distributed'       => false,
-        ]);
-
-        $contributorName = $contribution->member?->user?->name ?? 'Anggota';
-        broadcast(new TeamUpdated(
-            $contribution->team,
-            'revenue.created',
-            $contributorName,
-        ))->toOthers();
     }
 
     /**
@@ -190,16 +203,23 @@ class ApprovalController extends Controller
             return;
         }
 
-        // Total member aktif selain pembuat kontribusi
-        $totalVoters = $team->activeMembers()
-            ->where('id', '!=', $contribution->member_id)
-            ->count();
+        // Tentukan scope: project atau tim (untuk recalculate)
+        $project = $contribution->project_id ? Project::find($contribution->project_id) : null;
+
+        // Total voter: project-scoped (project_members) atau team-wide (activeMembers)
+        $totalVoters = $project
+            ? DB::table('project_members')
+                ->where('project_id', $project->id)
+                ->where('team_member_id', '!=', $contribution->member_id)
+                ->count()
+            : $team->activeMembers()
+                ->where('id', '!=', $contribution->member_id)
+                ->count();
 
         if ($totalVoters === 0) {
             // Hanya ada 1 anggota di tim — auto approve
             $contribution->update(['status' => 'APPROVED']);
-            $this->slicingPie->recalculate($team, $contribution->id);
-            $this->autoCreateRevenue($contribution);
+            $this->slicingPie->recalculate($team, $contribution->id, $project);
             return;
         }
 
@@ -222,13 +242,11 @@ class ApprovalController extends Controller
                 subjectType: Contribution::class,
                 subjectId:   $contribution->id,
                 payload:     ['approve_count' => $approveCount, 'total_voters' => $totalVoters],
+                projectId:   $contribution->project_id,
             );
 
-            // Trigger SlicingPie recalculation
-            $this->slicingPie->recalculate($team, $contribution->id);
-
-            // Auto-create Revenue record jika type SALES
-            $this->autoCreateRevenue($contribution);
+            // Trigger SlicingPie recalculation (scope: project atau tim)
+            $this->slicingPie->recalculate($team, $contribution->id, $project);
 
         // Cek kondisi REJECTED
         } elseif ($rejectPct > (100 - $threshold)) {
@@ -241,11 +259,15 @@ class ApprovalController extends Controller
                 subjectType: Contribution::class,
                 subjectId:   $contribution->id,
                 payload:     ['reject_count' => $rejectCount, 'total_voters' => $totalVoters],
+                projectId:   $contribution->project_id,
             );
 
         // Cek kondisi TIE (Seri) - Tie-Breaker Mechanism
-        } elseif ($approveCount === $rejectCount && $approveCount > 0) {
-            $this->handleTieBreaker($contribution, $team, $request, $approveCount, $rejectCount);
+        // H2: hanya selesaikan seri kalau SUDAH SEMUA eligible voter vote,
+        //     biar voter tersisa gak ke-lock dari break tie-nya.
+        } elseif ($approveCount === $rejectCount && $approveCount > 0
+            && ($approveCount + $rejectCount) === $totalVoters) {
+            $this->handleTieBreaker($contribution, $team, $request, $approveCount, $rejectCount, $project);
         }
     }
 
@@ -262,19 +284,27 @@ class ApprovalController extends Controller
      * @param int $rejectCount
      * @return void
      */
-    private function handleTieBreaker(Contribution $contribution, $team, Request $request, int $approveCount, int $rejectCount): void
+    private function handleTieBreaker(Contribution $contribution, $team, Request $request, int $approveCount, int $rejectCount, $project = null): void
     {
-        // Cari team owner
+        // Scope tie-breaker: project-scoped → cuma dari project_members
+        $scope = $project
+            ? DB::table('project_members')->where('project_id', $project->id)->pluck('team_member_id')
+            : null;
+        $pmIds = $scope ? $scope->toArray() : null;
+
+        // Cari team owner (dalam scope kalau project-scoped)
         $ownerMember = TeamMember::where('team_id', $team->id)
             ->where('user_id', $team->owner_id)
+            ->when($pmIds, fn($q) => $q->whereIn('id', $pmIds))
             ->first();
 
         // Jika owner adalah pembuat kontribusi, cari member dengan tenure terlama
         if (!$ownerMember || $ownerMember->id === $contribution->member_id) {
-            // Fallback: member dengan created_at paling awal (tenure terlama)
+            // Fallback: member dengan created_at paling awal (tenure terlama) — dalam scope
             $tieBreaker = TeamMember::where('team_id', $team->id)
                 ->where('id', '!=', $contribution->member_id)
                 ->where('status', 'active')
+                ->when($pmIds, fn($q) => $q->whereIn('id', $pmIds))
                 ->orderBy('created_at', 'asc')
                 ->first();
             
@@ -316,10 +346,9 @@ class ApprovalController extends Controller
                 ],
             );
 
-            // Jika approved, trigger recalculation dengan lock
+            // Jika approved, trigger recalculation dengan lock (scope: project atau tim)
             if ($finalStatus === 'APPROVED') {
-                $this->slicingPie->recalculate($team, $contribution->id);
-                $this->autoCreateRevenue($contribution);
+                $this->slicingPie->recalculate($team, $contribution->id, $project);
             }
         } else {
             // Tie-breaker belum vote, catat dalam audit bahwa perlu tie-breaker
