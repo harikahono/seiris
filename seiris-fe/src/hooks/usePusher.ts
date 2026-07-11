@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Pusher from "pusher-js";
+import { API_BASE_URL } from "@/lib/constants";
 
 interface PresenceUser {
   id: string;
@@ -80,7 +81,7 @@ export function usePusher(
       cluster,
       forceTLS: true,
       channelAuthorization: {
-        endpoint: `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api"}/broadcasting/auth`,
+        endpoint: `${API_BASE_URL}/broadcasting/auth`,
         transport: "ajax",
         headers: { Authorization: `Bearer ${token}` },
       },

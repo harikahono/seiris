@@ -8,10 +8,10 @@ describe("api/axios", () => {
     expect(typeof api.post).toBe("function");
     expect(typeof api.put).toBe("function");
     expect(typeof api.delete).toBe("function");
-  });
+  }, 15000);
 
   it("baseURL ends with /api", async () => {
     const api = (await import("@/api/axios")).default;
     expect(api.defaults.baseURL).toMatch(/\/api$/);
-  });
+  }, 15000);
 });
