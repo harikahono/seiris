@@ -12,6 +12,7 @@ use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\User;
 use App\Models\Project;
+use App\Models\ProjectMember;
 use App\Services\AuditLogService;
 use App\Services\SlicingPieService;
 use Illuminate\Database\Seeder;
@@ -268,9 +269,9 @@ class DemoDataSeeder extends Seeder
                 foreach ($memberIds as $pmId) {
                     $pm = TeamMember::find($pmId);
                     if ($pm) {
-                        DB::table('project_members')->updateOrInsert(
+                        ProjectMember::updateOrCreate(
                             ['project_id' => $project->id, 'team_member_id' => $pmId],
-                            ['fmr' => $pm->fmr, 'created_at' => now(), 'updated_at' => now()],
+                            ['fmr' => $pm->fmr],
                         );
                     }
                 }
