@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('fmr_proposals', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->foreignUuid('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignUuid('member_id')->constrained('team_members')->cascadeOnDelete();
             $table->unsignedInteger('proposed_fmr');
@@ -28,3 +28,4 @@ return new class extends Migration
         Schema::dropIfExists('fmr_proposals');
     }
 };
+

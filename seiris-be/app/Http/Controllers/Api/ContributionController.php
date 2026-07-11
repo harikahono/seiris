@@ -117,7 +117,7 @@ class ContributionController extends Controller
         // Hitung slices
         $slicesData = SlicingPieService::calculateSlices($request->type, $value);
 
-        $contribution = DB::transaction(function () use ($request, $team, $member, $value, $slicesData) {
+            $contribution = DB::transaction(function () use ($request, $team, $member, $value, $slicesData, $project) {
             // LOCK: Ambil data tim dengan row-level lock untuk mencegah race condition
             // saat multiple kontribusi dibuat/diproses bersamaan untuk tim yang sama
             $lockedTeam = DB::table('teams')

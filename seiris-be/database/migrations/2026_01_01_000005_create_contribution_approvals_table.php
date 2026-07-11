@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('contribution_approvals', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->foreignUuid('contribution_id')->constrained('contributions')->cascadeOnDelete();
             $table->foreignUuid('member_id')->constrained('team_members')->cascadeOnDelete();
             $table->enum('vote', ['APPROVE', 'REJECT']);
@@ -27,3 +27,4 @@ return new class extends Migration
         Schema::dropIfExists('contribution_approvals');
     }
 };
+

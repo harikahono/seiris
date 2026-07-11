@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('team_members', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->foreignUuid('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
             $table->enum('role', ['owner', 'member'])->default('member');
@@ -28,3 +28,4 @@ return new class extends Migration
         Schema::dropIfExists('team_members');
     }
 };
+

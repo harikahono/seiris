@@ -1,0 +1,30 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Project;
+use App\Models\Team;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<Project>
+ */
+class ProjectFactory extends Factory
+{
+    protected $model = Project::class;
+
+    public function definition(): array
+    {
+        return [
+            'team_id' => Team::factory(),
+            'name' => fake()->words(2, true),
+            'description' => fake()->sentence(),
+            'is_frozen' => false,
+        ];
+    }
+
+    public function frozen(): static
+    {
+        return $this->state(fn () => ['is_frozen' => true, 'frozen_at' => now()]);
+    }
+}
