@@ -11,6 +11,7 @@ use App\Models\Project;
 use App\Models\Team;
 use App\Models\TeamMember;
 use App\Models\EquitySnapshot;
+use App\Models\ProjectMember;
 use App\Services\AuditLogService;
 use App\Services\SlicingPieService;
 use Illuminate\Support\Facades\Log;
@@ -55,9 +56,9 @@ class ProjectController extends Controller
             // Auto-add team owner ke roster project (owner perlu bisa vote/oversight)
             $ownerMember = $team->members()->where('user_id', $team->owner_id)->first();
             if ($ownerMember) {
-                DB::table('project_members')->updateOrInsert(
+                ProjectMember::updateOrCreate(
                     ['project_id' => $project->id, 'team_member_id' => $ownerMember->id],
-                    ['fmr' => $ownerMember->fmr, 'created_at' => now(), 'updated_at' => now()],
+                    ['fmr' => $ownerMember->fmr],
                 );
             }
 
@@ -122,9 +123,9 @@ class ProjectController extends Controller
             return response()->json(['message' => 'Anggota sudah tidak aktif.'], 403);
         }
 
-        DB::table('project_members')->updateOrInsert(
+        ProjectMember::updateOrCreate(
             ['project_id' => $project->id, 'team_member_id' => $member->id],
-            ['fmr' => $member->fmr, 'created_at' => now(), 'updated_at' => now()],
+            ['fmr' => $member->fmr],
         );
 
         AuditLogService::logFromRequest(

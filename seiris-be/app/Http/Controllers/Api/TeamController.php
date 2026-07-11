@@ -11,6 +11,7 @@ use App\Http\Resources\TeamMemberResource;
 use App\Http\Resources\TeamResource;
 use App\Models\Team;
 use App\Models\TeamMember;
+use App\Models\ProjectMember;
 use App\Services\AuditLogService;
 use App\Services\SlicingPieService;
 use Illuminate\Http\JsonResponse;
@@ -235,9 +236,9 @@ class TeamController extends Controller
             if ($project->is_frozen) {
                 return response()->json(['message' => 'Project sudah di-freeze. FMR project tidak bisa diubah.'], 409);
             }
-            DB::table('project_members')->updateOrInsert(
+            ProjectMember::updateOrCreate(
                 ['project_id' => $project->id, 'team_member_id' => $member->id],
-                ['fmr' => $request->fmr, 'created_at' => now(), 'updated_at' => now()],
+                ['fmr' => $request->fmr],
             );
         } else {
             $member->update(['fmr' => $request->fmr]);
