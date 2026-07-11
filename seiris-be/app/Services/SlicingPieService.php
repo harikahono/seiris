@@ -148,6 +148,10 @@ class SlicingPieService
      */
     public static function calculateSlices(string $type, int $value): array
     {
+        if ($value < 0) {
+            throw new \InvalidArgumentException("Contribution value must be non-negative: {$value}");
+        }
+
         $multiplier = match ($type) {
             'CASH'                       => 4.0,
             'TIME', 'IDEA', 'NETWORK',

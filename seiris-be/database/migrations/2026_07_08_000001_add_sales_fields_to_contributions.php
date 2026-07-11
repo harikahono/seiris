@@ -9,8 +9,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Drop enum CHECK constraint (Postgres) — $table->string()->change() gak otomatis drop ini
-        DB::statement('ALTER TABLE contributions DROP CONSTRAINT IF EXISTS contributions_type_check');
+        // Drop enum CHECK constraint (Postgres) — $table->string()->change() gak otomatis drop ini.
+        // SQLite doesn't support DROP CONSTRAINT; the type check is enforced by app validation, so skip on sqlite.
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE contributions DROP CONSTRAINT IF EXISTS contributions_type_check');
+        }
 
         // Ganti jadi string biasa biar gampang maintain
         Schema::table('contributions', function (Blueprint $table) {
@@ -36,3 +39,4 @@ return new class extends Migration
         });
     }
 };
+

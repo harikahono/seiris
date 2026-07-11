@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('profit_distributions', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->foreignUuid('revenue_id')->constrained('revenues')->cascadeOnDelete();
             $table->foreignUuid('member_id')->constrained('team_members')->cascadeOnDelete();
             $table->decimal('equity_pct_snapshot', 8, 4)->comment('Equity % at the time of distribution');
@@ -27,3 +27,4 @@ return new class extends Migration
         Schema::dropIfExists('profit_distributions');
     }
 };
+

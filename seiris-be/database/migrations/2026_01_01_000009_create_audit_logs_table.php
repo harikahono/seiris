@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('audit_logs', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->foreignUuid('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignUuid('actor_id')->nullable()
                 ->constrained('users')
@@ -34,3 +34,4 @@ return new class extends Migration
         Schema::dropIfExists('audit_logs');
     }
 };
+

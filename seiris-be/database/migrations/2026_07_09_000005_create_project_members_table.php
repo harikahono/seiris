@@ -16,7 +16,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('project_members', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->foreignUuid('project_id')->constrained('projects')->cascadeOnDelete();
             $table->foreignUuid('team_member_id')->constrained('team_members')->cascadeOnDelete();
             $table->integer('fmr')->default(0); // Fair Market Rate per project, fallback ke TeamMember.fmr
@@ -31,3 +31,4 @@ return new class extends Migration
         Schema::dropIfExists('project_members');
     }
 };
+

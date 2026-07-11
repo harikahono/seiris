@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('revenues', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->foreignUuid('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignUuid('recorded_by')->constrained('team_members')->cascadeOnDelete();
             $table->string('description');
@@ -30,3 +30,4 @@ return new class extends Migration
         Schema::dropIfExists('revenues');
     }
 };
+

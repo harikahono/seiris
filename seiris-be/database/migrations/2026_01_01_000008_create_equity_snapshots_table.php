@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('equity_snapshots', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->foreignUuid('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignUuid('triggered_by_contribution')->nullable()
                 ->constrained('contributions')
@@ -31,3 +31,4 @@ return new class extends Migration
         Schema::dropIfExists('equity_snapshots');
     }
 };
+
