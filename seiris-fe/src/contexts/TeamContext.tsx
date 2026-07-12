@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import api from "@/api/axios";
+import { useAuth } from "./AuthContext";
 import type { DashboardTeamItem } from "@/types";
 import { toast } from "sonner";
 
@@ -23,6 +24,8 @@ export function TeamProvider({ children }: { children: ReactNode }) {
   const [teams, setTeams] = useState<DashboardTeamItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { user } = useAuth();
+
   const refreshTeams = useCallback(() => {
     setIsLoading(true);
     api
@@ -32,7 +35,13 @@ export function TeamProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  useEffect(() => { refreshTeams(); }, [refreshTeams]);
+  useEffect(() => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+    refreshTeams();
+  }, [refreshTeams, user]);
 
   // H-H: clear teams on logout signal from AuthContext
   useEffect(() => {
