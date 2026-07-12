@@ -11,15 +11,24 @@ interface VotePanelProps {
   currentMemberId: string;
   onVoted: () => void;
   isProjectMember?: boolean;
+  frozen?: boolean;
 }
 
-export default function VotePanel({ contribution, currentMemberId, onVoted, isProjectMember = true }: VotePanelProps) {
+export default function VotePanel({ contribution, currentMemberId, onVoted, isProjectMember = true, frozen = false }: VotePanelProps) {
   const [vote, setVote] = useState<"APPROVE" | "REJECT" | null>(null);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (contribution.status !== "PENDING") return null;
   if (!isProjectMember) return null;
+
+  if (frozen) {
+    return (
+      <div className="rounded-xl border border-gray-800 bg-card p-5 text-sm text-gray-500">
+        🔒 Project ini sudah dikunci, tidak bisa melakukan vote lagi.
+      </div>
+    );
+  }
 
   const isCreator = contribution.member.id === currentMemberId;
   const hasVoted = contribution.approvals.some((a) => a.member.id === currentMemberId);
@@ -36,7 +45,7 @@ export default function VotePanel({ contribution, currentMemberId, onVoted, isPr
       if (isAxiosError(err) && err.response) {
         const status = err.response.status;
         const serverMsg = err.response.data?.message as string | undefined;
-        toast.error(serverMsg ?? (status === 403 ? "Tim/project sudah di-freeze atau akses ditolak" : status === 409 ? "Vote sudah tidak valid (sudah vote / kontribusi selesai)" : "Gagal melakukan vote"));
+        toast.error(serverMsg ?? (status === 403 ? "Tim atau project sudah dikunci, tidak bisa vote." : status === 409 ? "Tidak bisa vote. Mungkin kontribusi sudah selesai." : "Gagal melakukan vote"));
       } else {
         toast.error("Gagal melakukan vote — periksa koneksi");
       }

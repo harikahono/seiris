@@ -31,8 +31,9 @@ const FILTERS: { key: Filter; label: string }[] = [
 export default function ContributionsTab() {
   const { team, fmr } = useOutletContext<TeamContext>();
   const teamId = team.id;
-  const { currentProjectId } = useProjectContext();
+  const { currentProjectId, projects } = useProjectContext();
   const { refreshVersion } = useRealtime();
+  const isProjectFrozen = !!currentProjectId && (projects.find((p) => p.id === currentProjectId)?.is_frozen ?? false);
 
   // basePath: kalau ada project -> scoped, kalau null -> tim (induk)
   const basePath = currentProjectId
@@ -104,6 +105,12 @@ export default function ContributionsTab() {
 
   return (
     <div className="space-y-6">
+      {isProjectFrozen && (
+        <div className="flex items-center gap-2 rounded-lg border border-gray-800 bg-card px-4 py-3 text-sm text-gray-400">
+          <span>🔒</span>
+          <span>Project ini sudah dikunci — seluruh perubahan sudah tidak bisa dilakukan.</span>
+        </div>
+      )}
       {/* ── Toggle: Kontribusi / Equity ── */}
       <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
         <button
@@ -162,7 +169,9 @@ export default function ContributionsTab() {
               <button
                 type="button"
                 onClick={() => setShowForm(true)}
-                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-accent-hover"
+                disabled={isProjectFrozen}
+                title={isProjectFrozen ? "Project sudah dikunci, kontribusi baru tidak bisa ditambah" : undefined}
+                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus className="size-4" />
                 Kontribusi
@@ -204,7 +213,7 @@ export default function ContributionsTab() {
                       description={filter === "all"
                         ? "Buat kontribusi pertama untuk mulai menghitung equity."
                         : `Tidak ada kontribusi dengan status "${filter}".`}
-                      action={filter === "all" ? { label: "Buat Kontribusi", onClick: () => setShowForm(true) } : undefined}
+                      action={!isProjectFrozen && filter === "all" ? { label: "Buat Kontribusi", onClick: () => setShowForm(true) } : undefined}
                     />
                   )}
                   {loading && (

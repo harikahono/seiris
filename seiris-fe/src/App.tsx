@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams, Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TeamProvider } from "@/contexts/TeamContext";
 import { RealtimeProvider } from "@/contexts/RealtimeContext";
+import { ProjectProvider } from "@/contexts/ProjectContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AuthPage from "@/pages/AuthPage";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -17,6 +18,15 @@ import ContributionDetailPage from "@/pages/teams/ContributionDetailPage";
 import LandingPage from "@/pages/LandingPage";
 import { CheckCircle2, XCircle, Info, AlertTriangle } from "lucide-react";
 
+function ProjectProviderRoute() {
+  const { teamId } = useParams();
+  return (
+    <ProjectProvider teamId={teamId ?? null}>
+      <Outlet />
+    </ProjectProvider>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -29,15 +39,17 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<RealtimeProvider><DashboardLayout /></RealtimeProvider>}>
                 <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/teams/:teamId" element={<TeamDetailPage />}>
-                  <Route index element={<Navigate to="dashboard" replace />} />
-                  <Route path="members" element={<TeamMembersTab />} />
-                  <Route path="contributions" element={<ContributionsTab />} />
-                  <Route path="revenue" element={<RevenueTab />} />
-                  <Route path="audit" element={<AuditLogTab />} />
-                  <Route path="settings" element={<TeamSettingsTab />} />
+                <Route element={<ProjectProviderRoute />}>
+                  <Route path="/teams/:teamId" element={<TeamDetailPage />}>
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="members" element={<TeamMembersTab />} />
+                    <Route path="contributions" element={<ContributionsTab />} />
+                    <Route path="revenue" element={<RevenueTab />} />
+                    <Route path="audit" element={<AuditLogTab />} />
+                    <Route path="settings" element={<TeamSettingsTab />} />
+                  </Route>
+                  <Route path="/teams/:teamId/contributions/:contributionId" element={<ContributionDetailPage />} />
                 </Route>
-                <Route path="/teams/:teamId/contributions/:contributionId" element={<ContributionDetailPage />} />
               </Route>
             </Route>
           </Routes>
