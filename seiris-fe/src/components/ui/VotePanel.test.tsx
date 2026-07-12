@@ -54,4 +54,13 @@ describe("VotePanel", () => {
     });
     await waitFor(() => expect(onVoted).toHaveBeenCalled());
   });
+
+  it("shows locked note and hides vote buttons when frozen", () => {
+    render(<VotePanel contribution={contribution as any} currentMemberId="member-me" onVoted={onVoted} frozen />);
+
+    expect(screen.getByText(/sudah dikunci/i)).toBeDefined();
+    expect(screen.queryByText("Setuju")).toBeNull();
+    expect(screen.queryByText("Tolak")).toBeNull();
+    expect(screen.queryByRole("button", { name: /Kirim Vote/i })).toBeNull();
+  });
 });

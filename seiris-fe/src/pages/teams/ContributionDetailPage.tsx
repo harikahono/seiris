@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRealtime } from "@/contexts/RealtimeContext";
+import { useProjectContext } from "@/contexts/ProjectContext";
 import type { Contribution as ContributionType, Team } from "@/types";
 import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
@@ -50,6 +51,7 @@ export default function ContributionDetailPage() {
 
   // ── Realtime: refresh on Pusher event ──
   const { refreshVersion } = useRealtime();
+  const { projects } = useProjectContext();
   const prevRefresh = useRef(0);
   useEffect(() => {
     if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
@@ -268,7 +270,13 @@ export default function ContributionDetailPage() {
       {/* ── Vote Panel ── */}
       {currentMemberId && (
         <div className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
-          <VotePanel contribution={contribution} currentMemberId={currentMemberId} onVoted={fetchData} isProjectMember={isProjectMember} />
+          <VotePanel
+            contribution={contribution}
+            currentMemberId={currentMemberId}
+            onVoted={fetchData}
+            isProjectMember={isProjectMember}
+            frozen={contribution.project_id ? (projects.find((p) => p.id === contribution.project_id)?.is_frozen ?? false) : false}
+          />
         </div>
       )}
     </div>

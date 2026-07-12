@@ -24,7 +24,8 @@ export default function TeamMembersTab() {
   const [proposalsOpen, setProposalsOpen] = useState(true);
 
   const { refreshVersion } = useRealtime();
-  const { currentProjectId } = useProjectContext();
+  const { currentProjectId, projects } = useProjectContext();
+  const isProjectFrozen = !!currentProjectId && (projects.find((p) => p.id === currentProjectId)?.is_frozen ?? false);
   const isOwner = team.owner.id === currentUserId;
   const activeMembers = team.members.filter((m) => m.status === "active");
   const currentMember = activeMembers.find((m) => m.user.id === currentUserId);
@@ -174,7 +175,7 @@ export default function TeamMembersTab() {
       toast.success(`${member.user.name} ditambahkan ke project`);
       fetchTeam(currentProjectId ?? undefined);
     } catch {
-      toast.error("Gagal menambahkan anggota ke project");
+      toast.error(isProjectFrozen ? "Project ini sudah dikunci, anggota tidak bisa ditambah lagi." : "Gagal menambahkan anggota ke project");
     } finally {
       setManagingProject(null);
     }
@@ -188,7 +189,7 @@ export default function TeamMembersTab() {
       toast.success(`${member.user.name} dikeluarkan dari project`);
       fetchTeam(currentProjectId ?? undefined);
     } catch {
-      toast.error("Gagal mengeluarkan anggota dari project");
+      toast.error(isProjectFrozen ? "Project ini sudah dikunci, anggota tidak bisa dikeluarkan lagi." : "Gagal mengeluarkan anggota dari project");
     } finally {
       setManagingProject(null);
     }
@@ -367,13 +368,22 @@ export default function TeamMembersTab() {
                             <p className="text-[10px] text-gray-600">(global)</p>
                           )}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => startEditFmr(member)}
-                          className="rounded p-1.5 text-gray-500 hover:text-accent transition"
-                        >
-                          <Pencil className="size-3.5" />
-                        </button>
+                        {isProjectFrozen ? (
+                          <span
+                            className="rounded p-1.5 text-gray-600"
+                            title="Project sudah dikunci, FMR tidak bisa diubah"
+                          >
+                            🔒
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => startEditFmr(member)}
+                            className="rounded p-1.5 text-gray-500 hover:text-accent transition"
+                          >
+                            <Pencil className="size-3.5" />
+                          </button>
+                        )}
                       </>
                     )}
                   </div>
@@ -400,28 +410,37 @@ export default function TeamMembersTab() {
                 )}
 
                 {hasProjectScope && isOwner && member.role !== "owner" && editingFmr !== member.id && (
-                  member.project_fmr != null ? (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFromProject(member)}
-                      disabled={managingProject === member.id}
-                      className="rounded px-2 py-1 text-xs text-yellow-400 transition hover:bg-yellow-500/10 disabled:opacity-50"
+                  isProjectFrozen ? (
+                    <span
+                      className="rounded px-2 py-1 text-xs text-gray-600"
+                      title="Project sudah dikunci, anggota tidak bisa ditambah atau dikeluarkan"
                     >
-                      {managingProject === member.id ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : 'Keluar'}
-                    </button>
+                      🔒 Dikunci
+                    </span>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleAddToProject(member)}
-                      disabled={managingProject === member.id}
-                      className="rounded px-2 py-1 text-xs text-green-400 transition hover:bg-green-500/10 disabled:opacity-50"
-                    >
-                      {managingProject === member.id ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : 'Masuk'}
-                    </button>
+                    member.project_fmr != null ? (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFromProject(member)}
+                        disabled={managingProject === member.id}
+                        className="rounded px-2 py-1 text-xs text-yellow-400 transition hover:bg-yellow-500/10 disabled:opacity-50"
+                      >
+                        {managingProject === member.id ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : 'Keluar'}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleAddToProject(member)}
+                        disabled={managingProject === member.id}
+                        className="rounded px-2 py-1 text-xs text-green-400 transition hover:bg-green-500/10 disabled:opacity-50"
+                      >
+                        {managingProject === member.id ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : 'Masuk'}
+                      </button>
+                    )
                   )
                 )}
               </div>

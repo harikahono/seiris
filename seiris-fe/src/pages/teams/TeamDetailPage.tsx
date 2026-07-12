@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Outlet } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
-import { ProjectProvider } from "@/contexts/ProjectContext";
 import ProjectSelector from "@/components/teams/ProjectSelector";
 import type { Team } from "@/types";
 import { ArrowLeft } from "lucide-react";
@@ -114,11 +113,9 @@ export default function TeamDetailPage() {
       </div>
 
       {/* ── Project Scope Selector (Slicing Pie Beranak) ── */}
-      <ProjectProvider teamId={teamId ?? null}>
-        <ProjectSelector />
-        {/* ── Tab Content ── */}
-        <Outlet context={context} />
-      </ProjectProvider>
+      <ProjectSelector />
+      {/* ── Tab Content ── */}
+      <Outlet context={context} />
     </div>
   );
 }

@@ -41,8 +41,13 @@ vi.mock("@/components/ui/Pagination", () => ({
   default: () => null,
 }));
 
+const mockProjectCtx = vi.hoisted(() => ({
+  currentProjectId: null as string | null,
+  projects: [] as Array<{ id: string; is_frozen: boolean }>,
+}));
+
 vi.mock("@/contexts/ProjectContext", () => ({
-  useProjectContext: () => ({ currentProjectId: null }),
+  useProjectContext: () => mockProjectCtx,
 }));
 
 vi.mock("@/contexts/RealtimeContext", () => ({
@@ -127,4 +132,38 @@ describe("ContributionsTab", () => {
       expect(screen.getByText("Belum ada kontribusi")).toBeDefined();
     });
   });
+
+  it("locks contribution creation when current project is frozen", async () => {
+    mockProjectCtx.currentProjectId = "p1";
+    mockProjectCtx.projects = [{ id: "p1", is_frozen: true }];
+    mockAxiosGet.mockImplementation((url: string) => {
+      if (url.endsWith("/equity")) {
+        return Promise.resolve({
+          data: {
+            data: {
+              equity_map: [],
+              total_slices: 0,
+              slices_by_type: { CASH: 0 },
+              is_frozen: false,
+              calculated_at: null,
+            },
+          },
+        });
+      }
+      return Promise.resolve({ data: { data: [], meta: { current_page: 1, last_page: 1, total: 0 } } });
+    });
+
+    render(<ContributionsTab />, { wrapper: Wrapper });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Project ini sudah dikunci/i)).toBeDefined();
+    });
+    const kontribBtns = screen.getAllByRole("button", { name: /Kontribusi/i });
+    expect(kontribBtns.some((b) => b.hasAttribute("disabled"))).toBe(true);
+  });
+});
+
+afterEach(() => {
+  mockProjectCtx.currentProjectId = null;
+  mockProjectCtx.projects = [];
 });
