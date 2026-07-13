@@ -108,7 +108,6 @@ export default function RevenueTab() {
             description={isOwner
               ? "Catat revenue pertama untuk mulai distribusi profit."
               : "Belum ada revenue yang dicatat."}
-            action={isOwner ? { label: "Catat Revenue", onClick: () => setShowForm(true) } : undefined}
           />
         )}
 
