@@ -4,7 +4,7 @@ import api from "@/api/axios";
 import type { Revenue } from "@/types";
 import { toast } from "sonner";
 import {
-  CheckCircle2, Clock, Loader2, ExternalLink,
+  CheckCircle2, Clock, Info, Loader2, ExternalLink,
   SendHorizontal, UserCheck,
 } from "lucide-react";
 import { formatRp } from "@/lib/constants";
@@ -102,14 +102,25 @@ function DistributionTable({ revenue }: { revenue: Revenue }) {
 interface RevenueCardProps {
   revenue: Revenue;
   isOwner: boolean;
+  hasEquity?: boolean | null;
   onDistributed: () => void;
 }
 
-export default function RevenueCard({ revenue, isOwner, onDistributed }: RevenueCardProps) {
+export default function RevenueCard({ revenue, isOwner, hasEquity, onDistributed }: RevenueCardProps) {
   const [distributing, setDistributing] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"distribute" | "request" | null>(null);
 
   const status = revenue.status ?? (revenue.is_distributed ? "distributed" : "pending");
+  const noEquity = hasEquity === false;
+  const equityHint = (
+    <span
+      className="flex items-center gap-1.5 rounded-lg border border-gray-800 bg-gray-900/40 px-3 py-2 text-xs text-gray-500"
+      title="Butuh minimal 1 kontribusi yang diapprove"
+    >
+      <Info className="size-4" />
+      Belum ada equity
+    </span>
+  );
 
   const handleDistribute = async () => {
     setDistributing(true);
@@ -152,6 +163,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
   const renderAction = () => {
     // Owner + pending → distribusikan langsung
     if (isOwner && status === "pending") {
+      if (noEquity) return equityHint;
       return (
         <button
           type="button"
@@ -167,6 +179,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
 
     // Owner + distribute_requested → setujui + distribusikan
     if (isOwner && status === "distribute_requested") {
+      if (noEquity) return equityHint;
       return (
         <button
           type="button"
@@ -182,6 +195,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
 
     // Non-owner + pending → ajukan distribusi
     if (!isOwner && status === "pending") {
+      if (noEquity) return equityHint;
       return (
         <button
           type="button"
