@@ -153,6 +153,8 @@ export interface Contribution {
   approvals: ContributionApproval[];
   approvals_count: number;
   created_at: string;
+  // Jam kerja (TIME/IDEA/NETWORK)
+  hours?: number | null;
 }
 
 export interface CreateContributionPayload {

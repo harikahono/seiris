@@ -135,6 +135,7 @@ class ContributionController extends Controller
                 'member_id'         => $member->id,
                 'type'              => $request->type,
                 'description'       => $request->description,
+                'hours'             => $request->hours,
                 'value'             => $value,
                 'multiplier'        => $slicesData['multiplier'],
                 'total_slices'      => $slicesData['total_slices'],

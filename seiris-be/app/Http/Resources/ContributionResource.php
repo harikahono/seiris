@@ -36,6 +36,12 @@ class ContributionResource extends JsonResource
             ),
 
             'created_at'        => $this->created_at?->toISOString(),
+
+            // Jam kerja (TIME/IDEA/NETWORK)
+            'hours'             => $this->when(
+                in_array($this->type, ['TIME', 'IDEA', 'NETWORK']),
+                fn() => $this->hours !== null ? (float) $this->hours : null
+            ),
         ];
     }
 }

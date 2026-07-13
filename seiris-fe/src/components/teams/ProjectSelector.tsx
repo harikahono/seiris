@@ -1,4 +1,5 @@
 import { useProjectContext } from "@/contexts/ProjectContext";
+import { useTeamContext } from "@/contexts/TeamContext";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import api from "@/api/axios";
@@ -6,6 +7,7 @@ import { toast } from "sonner";
 
 export default function ProjectSelector() {
   const { projects, currentProjectId, setCurrentProject, refreshProjects } = useProjectContext();
+  const { currentTeamId } = useTeamContext();
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
@@ -15,8 +17,12 @@ export default function ProjectSelector() {
       toast.error("Nama project wajib diisi.");
       return;
     }
+    if (!currentTeamId) {
+      toast.error("Tim tidak ditemukan.");
+      return;
+    }
     api
-      .post(`/teams/${projects[0]?.team_id}/projects`, { name: name.trim(), description: desc.trim() })
+      .post(`/teams/${currentTeamId}/projects`, { name: name.trim(), description: desc.trim() })
       .then(() => {
         toast.success(`Project "${name.trim()}" berhasil dibuat.`);
         setName("");
