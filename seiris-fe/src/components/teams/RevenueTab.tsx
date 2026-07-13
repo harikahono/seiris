@@ -3,6 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
 import { useProjectContext } from "@/contexts/ProjectContext";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Revenue } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { Loader2, Plus, TrendingUp } from "lucide-react";
@@ -20,6 +21,8 @@ export default function RevenueTab() {
   const basePath = currentProjectId
     ? `/teams/${teamId}/projects/${currentProjectId}`
     : `/teams/${teamId}`;
+  const { user } = useAuth();
+  const isCurrentUserProjectMember = !currentProjectId || (user != null && team.members.find((m) => m.user.id === user.id)?.project_fmr !== null);
   const { refreshVersion } = useRealtime();
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,7 +113,7 @@ export default function RevenueTab() {
         )}
 
         {revenues.map((r) => (
-          <RevenueCard key={r.id} revenue={r} isOwner={isOwner} hasEquity={hasEquity} onDistributed={fetchRevenues} />
+          <RevenueCard key={r.id} revenue={r} isOwner={isOwner} hasEquity={hasEquity} isProjectMember={isCurrentUserProjectMember} onDistributed={fetchRevenues} />
         ))}
 
         {loading && page === 1 ? (

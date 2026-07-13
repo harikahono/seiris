@@ -39,7 +39,7 @@ export default function ContributionDetailPage() {
       setCurrentMemberId(myMember?.id ?? null);
       // H2: project-scoped → cek roster via project_fmr existence (not null/undefined)
       // Jika project_fmr ada (undefined/null/0/apa pun) artinya member ada di roster
-      setIsProjectMember(!c.project_id || myMember?.project_fmr !== undefined);
+      setIsProjectMember(!c.project_id || myMember?.project_fmr !== null);
     } catch {
       toast.error("Gagal memuat detail kontribusi");
     } finally {

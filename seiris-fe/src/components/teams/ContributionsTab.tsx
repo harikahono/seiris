@@ -3,6 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
 import { useProjectContext } from "@/contexts/ProjectContext";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Contribution, ContributionStatus, EquityData } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -33,7 +34,10 @@ export default function ContributionsTab() {
   const teamId = team.id;
   const { currentProjectId, projects } = useProjectContext();
   const { refreshVersion } = useRealtime();
+  const { user } = useAuth();
   const isProjectFrozen = !!currentProjectId && (projects.find((p) => p.id === currentProjectId)?.is_frozen ?? false);
+  const myMember = user ? team.members.find((m) => m.user.id === user.id) : undefined;
+  const isCurrentUserProjectMember = !currentProjectId || (myMember?.project_fmr ?? null) !== null;
 
   // basePath: kalau ada project -> scoped, kalau null -> tim (induk)
   const basePath = currentProjectId
@@ -169,14 +173,20 @@ export default function ContributionsTab() {
               <button
                 type="button"
                 onClick={() => setShowForm(true)}
-                disabled={isProjectFrozen}
-                title={isProjectFrozen ? "Project sudah dikunci, kontribusi baru tidak bisa ditambah" : undefined}
+                disabled={isProjectFrozen || (currentProjectId !== null && !isCurrentUserProjectMember)}
+                title={isProjectFrozen ? "Project sudah dikunci, kontribusi baru tidak bisa ditambah" : (!isCurrentUserProjectMember ? "Kamu bukan anggota project ini — hanya bisa melihat" : undefined)}
                 className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus className="size-4" />
                 Kontribusi
               </button>
             </div>
+
+            {currentProjectId !== null && !isCurrentUserProjectMember && (
+              <p className="mb-3 rounded-lg border border-gray-800 bg-gray-900/40 px-3 py-2 text-xs text-gray-500">
+                Mode lihat saja — kamu bukan anggota project ini. Minta owner menambahkanmu untuk bisa kontribusi &amp; vote.
+              </p>
+            )}
 
             <div className="relative">
               {loading && page === 1 ? (
