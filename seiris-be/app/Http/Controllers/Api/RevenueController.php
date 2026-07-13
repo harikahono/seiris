@@ -183,13 +183,7 @@ class RevenueController extends Controller
             ], 409);
         }
 
-        // M2: owner hanya boleh distribute SETELAH ada ajuan member
-        if ($revenue->status !== 'distribute_requested') {
-            return response()->json([
-                'message' => 'Distribusi belum diajukan. Mintalah salah satu member mengajukan distribusi dulu.',
-            ], 409);
-        }
-
+        // ponytail: owner boleh distribute langsung dari pending; request member (toast) opsional
         // Ambil snapshot equity terbaru — scope project kalau revenue punya project_id
         $snapshotQuery = $team->equitySnapshots();
         if ($revenue->project_id) {

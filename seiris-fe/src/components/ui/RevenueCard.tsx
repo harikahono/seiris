@@ -103,10 +103,9 @@ interface RevenueCardProps {
   revenue: Revenue;
   isOwner: boolean;
   onDistributed: () => void;
-  basePath?: string; // C-E: project-scoped URL prefix for distribute calls
 }
 
-export default function RevenueCard({ revenue, isOwner, onDistributed, basePath }: RevenueCardProps) {
+export default function RevenueCard({ revenue, isOwner, onDistributed }: RevenueCardProps) {
   const [distributing, setDistributing] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"distribute" | "request" | null>(null);
 
@@ -115,8 +114,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed, basePath 
   const handleDistribute = async () => {
     setDistributing(true);
     try {
-      // C-E: use project-scoped endpoint when basePath is provided
-      const url = basePath ? `${basePath}/revenues/${revenue.id}/distribute` : `/revenues/${revenue.id}/distribute`;
+      const url = `/revenues/${revenue.id}/distribute`;
       await api.post(url);
       toast.success(`Profit ${formatRp(revenue.distributable_amount)} berhasil didistribusikan`);
       onDistributed();
@@ -134,8 +132,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed, basePath 
   const handleRequestDistribute = async () => {
     setDistributing(true);
     try {
-      // C-E: use project-scoped endpoint when basePath is provided
-      const url = basePath ? `${basePath}/revenues/${revenue.id}/request-distribute` : `/revenues/${revenue.id}/request-distribute`;
+      const url = `/revenues/${revenue.id}/request-distribute`;
       await api.post(url);
       toast.success(`Permintaan distribusi "${revenue.description}" diajukan`);
       onDistributed();
