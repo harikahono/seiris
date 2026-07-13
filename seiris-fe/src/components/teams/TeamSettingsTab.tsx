@@ -9,7 +9,7 @@ import type { ApprovalThreshold } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Loader2, Snowflake, FolderKanban } from "lucide-react";
+import { Loader2, Snowflake, FolderKanban, AlertTriangle } from "lucide-react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface FieldErrors {
@@ -192,9 +192,12 @@ export default function TeamSettingsTab() {
         </p>
 
         {activeProjectsCount > 0 && (
-          <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-300">
-            ⚠️ Masih ada {activeProjectsCount} project yang belum di-freeze. Freeze semua project dulu
-            sebelum freeze tim (supaya cap table tidak kehilangan slices project aktif).
+          <div className="flex items-start gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-300">
+            <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+            <span>
+              Masih ada {activeProjectsCount} project yang belum di-freeze. Freeze semua project dulu
+              sebelum freeze tim (supaya cap table tidak kehilangan slices project aktif).
+            </span>
           </div>
         )}
 

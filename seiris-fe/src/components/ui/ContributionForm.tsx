@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { CONTRIBUTION_TYPES } from "@/lib/contribution";
 import { formatRp } from "@/lib/constants";
 import { toast } from "sonner";
-import { X, Loader2, ArrowLeft } from "lucide-react";
+import { X, Loader2, ArrowLeft, AlertTriangle } from "lucide-react";
 import type { ContributionType } from "@/types";
 
 interface ContributionFormProps {
@@ -137,7 +137,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
           <>
             {fmr === 0 && (
               <div className="mb-4 rounded-lg border border-yellow-700 bg-yellow-900/20 p-3 text-sm text-yellow-300">
-                <p className="font-medium">⚠️ FMR belum diset</p>
+                <p className="flex items-center gap-1 font-medium"><AlertTriangle className="size-3.5 text-yellow-500" /> FMR belum diset</p>
                 <p className="mt-1 text-yellow-400/80">
                   Owner belum mengatur FMR kamu. Kamu hanya bisa membuat kontribusi{" "}
                    <strong>Cash, Facility, atau Sales</strong> sampai FMR diatur.

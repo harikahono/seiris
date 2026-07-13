@@ -4,7 +4,7 @@ import api from "@/api/axios";
 import type { Contribution } from "@/types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Loader2, Lock } from "lucide-react";
 
 interface VotePanelProps {
   contribution: Contribution;
@@ -24,8 +24,9 @@ export default function VotePanel({ contribution, currentMemberId, onVoted, isPr
 
   if (frozen) {
     return (
-      <div className="rounded-xl border border-gray-800 bg-card p-5 text-sm text-gray-500">
-        🔒 Project ini sudah dikunci, tidak bisa melakukan vote lagi.
+      <div className="flex items-center gap-2 rounded-xl border border-gray-800 bg-card p-5 text-sm text-gray-500">
+        <Lock className="size-4 shrink-0" />
+        Project ini sudah dikunci, tidak bisa melakukan vote lagi.
       </div>
     );
   }

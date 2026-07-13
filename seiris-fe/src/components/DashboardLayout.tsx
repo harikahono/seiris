@@ -41,6 +41,8 @@ const features: FeatureItem[] = [
   { key: "settings", label: "Pengaturan", icon: Settings, path: "settings" },
 ];
 
+const toastDedupe = (msg: string) => toast(msg, { id: msg });
+
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
   const { currentTeamId, teams, isLoading: teamsLoading, setCurrentTeam, refreshTeams } = useTeamContext();
@@ -72,11 +74,11 @@ export default function DashboardLayout() {
       triggerRefresh();
       if (data?.approved_by) {
         const owner = data.contribution_owner ? ` (${data.contribution_owner})` : '';
-        toast(`✅ "${data.contribution_desc}"${owner} disetujui oleh ${data.approved_by}`);
+        toastDedupe(`"${data.contribution_desc}"${owner} disetujui oleh ${data.approved_by}`);
       }
     }, [triggerRefresh]),
     onContributionCreated: useCallback((data) => {
-      toast(`📝 ${data.member_name} membuat kontribusi ${data.type}: ${data.description}`);
+      toastDedupe(`${data.member_name} membuat kontribusi ${data.type}: ${data.description}`);
       triggerRefresh();
     }, [triggerRefresh]),
     onTeamUpdated: useCallback((data) => {
@@ -84,55 +86,55 @@ export default function DashboardLayout() {
       refreshTeams();
       switch (data?.action) {
         case 'member.joined':
-          toast(`👋 ${data.user_name} bergabung ke tim`);
+          toastDedupe(`${data.user_name} bergabung ke tim`);
           break;
         case 'member.exited':
-          toast(`🚪 ${data.user_name} keluar dari tim`);
+          toastDedupe(`${data.user_name} keluar dari tim`);
           break;
         case 'vote.cast':
-          toast(`🗳️ ${data.user_name} memberikan vote`);
+          toastDedupe(`${data.user_name} memberikan vote`);
           break;
         case 'team.updated':
-          toast(`⚙️ ${data.user_name} mengubah pengaturan tim`);
+          toastDedupe(`${data.user_name} mengubah pengaturan tim`);
           break;
         case 'team.frozen':
-          toast(`❄️ ${data.user_name} freeze equity tim`);
+          toastDedupe(`${data.user_name} freeze equity tim`);
           break;
         case 'project.created':
-          toast(`📁 ${data.user_name} membuat project "${data.project_name}"`);
+          toastDedupe(`${data.user_name} membuat project "${data.project_name}"`);
           break;
         case 'project.frozen':
-          toast(`🔒 ${data.user_name} freeze project "${data.project_name}"`);
+          toastDedupe(`${data.user_name} freeze project "${data.project_name}"`);
           break;
         case 'member.fmr_updated':
-          toast(`💰 FMR ${data.user_name} diperbarui`);
+          toastDedupe(`FMR ${data.user_name} diperbarui`);
           break;
         case 'fmr.proposed':
-          toast(`📊 ${data.user_name} mengusulkan perubahan FMR`);
+          toastDedupe(`${data.user_name} mengusulkan perubahan FMR`);
           break;
         case 'fmr.approved':
-          toast(`✅ Usulan FMR ${data.member_name} disetujui oleh ${data.approver_name}`);
+          toastDedupe(`Usulan FMR ${data.member_name} disetujui oleh ${data.approver_name}`);
           break;
         case 'fmr.rejected':
-          toast(`❌ Usulan FMR ${data.member_name} ditolak oleh ${data.approver_name}`);
+          toastDedupe(`Usulan FMR ${data.member_name} ditolak oleh ${data.approver_name}`);
           break;
         case 'revenue.created':
-          toast(`💰 ${data.user_name} mencatat revenue baru`);
+          toastDedupe(`${data.user_name} mencatat revenue baru`);
           break;
         case 'profit.requested':
-          toast(`📤 ${data.user_name} meminta distribusi profit`);
+          toastDedupe(`${data.user_name} meminta distribusi profit`);
           break;
         case 'profit.distributed':
-          toast(`✅ ${data.user_name} mendistribusikan profit`);
+          toastDedupe(`${data.user_name} mendistribusikan profit`);
           break;
         case 'contribution.rejected':
-          toast(`❌ Kontribusi "${data.contribution_desc}" (${data.contribution_owner_name}) ditolak oleh ${data.user_name}`);
+          toastDedupe(`Kontribusi "${data.contribution_desc}" (${data.contribution_owner_name}) ditolak oleh ${data.user_name}`);
           break;
         case 'member.added_to_project':
-          toast(`➕ ${data.user_name} menambahkan ${data.member_name} ke project`);
+          toastDedupe(`${data.user_name} menambahkan ${data.member_name} ke project`);
           break;
         case 'member.removed_from_project':
-          toast(`➖ ${data.user_name} mengeluarkan ${data.member_name} dari project`);
+          toastDedupe(`${data.user_name} mengeluarkan ${data.member_name} dari project`);
           break;
       }
     }, [triggerRefresh, refreshTeams]),

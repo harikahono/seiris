@@ -22,6 +22,15 @@ function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function passwordStrength(pw: string) {
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
+  if (/\d/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  return { score: s, label: ["Sangat lemah", "Lemah", "Cukup", "Kuat", "Sangat kuat"][s] };
+}
+
 export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
   const { login, register } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">(defaultMode);
@@ -215,6 +224,32 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
               {errors.password && (
                 <p className="mt-1 text-xs text-red-500">{errors.password}</p>
               )}
+              {mode === "signup" && password.length > 0 && (() => {
+                const { score, label } = passwordStrength(password);
+                return (
+                  <div className="mt-2">
+                    <div
+                      className="flex gap-1"
+                      role="meter"
+                      aria-valuenow={score}
+                      aria-valuemin={0}
+                      aria-valuemax={4}
+                      aria-label="Kekuatan password"
+                    >
+                      {[0, 1, 2, 3].map((i) => (
+                        <span
+                          key={i}
+                          className={cn(
+                            "h-1 flex-1 rounded-full",
+                            i < score ? ["bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500"][score - 1] : "bg-gray-800"
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Kekuatan: {label}</p>
+                  </div>
+                );
+              })()}
             </div>
 
             {mode === "signup" && (

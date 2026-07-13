@@ -35,33 +35,23 @@ export default function ProjectSelector() {
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-2">
-      <span className="text-xs uppercase tracking-wide text-gray-500">Scope:</span>
-      <button
-        type="button"
-        onClick={() => setCurrentProject(null)}
-        className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-          currentProjectId === null
-            ? "bg-[#e07820] text-white"
-            : "bg-gray-800/60 text-gray-300 hover:bg-gray-800"
-        }`}
+      <label htmlFor="project-scope" className="text-xs uppercase tracking-wide text-gray-500">
+        Scope:
+      </label>
+      <select
+        id="project-scope"
+        value={currentProjectId ?? ""}
+        onChange={(e) => setCurrentProject(e.target.value || null)}
+        className="rounded-md border border-gray-700 bg-gray-900 px-3 py-1.5 text-sm text-white outline-none focus:border-[#e07820]"
       >
-        Tim (Induk)
-      </button>
-      {projects.map((p) => (
-        <button
-          key={p.id}
-          type="button"
-          onClick={() => setCurrentProject(p.id)}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-            currentProjectId === p.id
-              ? "bg-[#e07820] text-white"
-              : "bg-gray-800/60 text-gray-300 hover:bg-gray-800"
-          }`}
-        >
-          {p.name}
-          {p.is_frozen && <span className="ml-1 text-[10px] opacity-80">🔒</span>}
-        </button>
-      ))}
+        <option value="">Tim (Induk)</option>
+        {projects.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+            {p.is_frozen ? " (dikunci)" : ""}
+          </option>
+        ))}
+      </select>
 
       {creating ? (
         <div className="flex items-center gap-2">
