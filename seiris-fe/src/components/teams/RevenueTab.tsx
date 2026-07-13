@@ -17,6 +17,9 @@ export default function RevenueTab() {
   const { team, isOwner } = useOutletContext<TeamContext>();
   const teamId = team.id;
   const { currentProjectId } = useProjectContext();
+  const basePath = currentProjectId
+    ? `/teams/${teamId}/projects/${currentProjectId}`
+    : `/teams/${teamId}`;
   const { refreshVersion } = useRealtime();
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +31,7 @@ export default function RevenueTab() {
   const fetchRevenues = useCallback(() => {
     return api
       .get<{ data: Revenue[]; meta: { current_page: number; last_page: number; total: number } }>(
-        `/teams/${teamId}/revenues`,
+        `${basePath}/revenues`,
         { params: { page } }
       )
       .then((res) => {
@@ -36,7 +39,7 @@ export default function RevenueTab() {
         setLastPage(res.data.meta.last_page);
       })
       .catch(() => toast.error("Gagal memuat revenue"));
-  }, [teamId, page]);
+  }, [basePath, page]);
 
   // Initial load + page/scope change → reset page + loading
   useEffect(() => {
@@ -44,7 +47,7 @@ export default function RevenueTab() {
     setRevenues([]);
     fetchRevenues().finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamId]);
+  }, [basePath]);
 
   // Page change → loading + fetch with new page
   const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
