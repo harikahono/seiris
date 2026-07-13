@@ -33,12 +33,15 @@ class EnsureProjectMember
 
         abort_if(!$member, 403, 'Kamu bukan anggota tim ini.');
 
-        // C-B: verify user is in this project's roster
-        $inProject = DB::table('project_members')
-            ->where('project_id', $project->id)
-            ->where('team_member_id', $member->id)
-            ->exists();
-        abort_if(!$inProject, 403, 'Kamu bukan anggota project ini.');
+        // ponytail: view-only tier — tim member boleh GET project;
+        // write (POST/PUT/DELETE) wajib anggota roster project.
+        if ($request->method() !== 'GET') {
+            $inProject = DB::table('project_members')
+                ->where('project_id', $project->id)
+                ->where('team_member_id', $member->id)
+                ->exists();
+            abort_if(!$inProject, 403, 'Kamu bukan anggota project ini.');
+        }
 
         $request->merge(['teamMember' => $member]);
 

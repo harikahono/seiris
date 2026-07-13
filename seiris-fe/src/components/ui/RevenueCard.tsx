@@ -103,15 +103,17 @@ interface RevenueCardProps {
   revenue: Revenue;
   isOwner: boolean;
   hasEquity?: boolean | null;
+  isProjectMember?: boolean | null;
   onDistributed: () => void;
 }
 
-export default function RevenueCard({ revenue, isOwner, hasEquity, onDistributed }: RevenueCardProps) {
+export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMember, onDistributed }: RevenueCardProps) {
   const [distributing, setDistributing] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"distribute" | "request" | null>(null);
 
   const status = revenue.status ?? (revenue.is_distributed ? "distributed" : "pending");
   const noEquity = hasEquity === false;
+  const notProjectMember = isProjectMember === false;
   const equityHint = (
     <span
       className="flex items-center gap-1.5 rounded-lg border border-gray-800 bg-gray-900/40 px-3 py-2 text-xs text-gray-500"
@@ -119,6 +121,15 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, onDistributed
     >
       <Info className="size-4" />
       Belum ada equity
+    </span>
+  );
+  const projectHint = (
+    <span
+      className="flex items-center gap-1.5 rounded-lg border border-gray-800 bg-gray-900/40 px-3 py-2 text-xs text-gray-500"
+      title="Hanya anggota project yang bisa mengajukan distribusi"
+    >
+      <Info className="size-4" />
+      Bukan anggota project ini
     </span>
   );
 
@@ -195,6 +206,7 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, onDistributed
 
     // Non-owner + pending → ajukan distribusi
     if (!isOwner && status === "pending") {
+      if (notProjectMember) return projectHint;
       if (noEquity) return equityHint;
       return (
         <button
