@@ -223,7 +223,6 @@ export default function ContributionsTab() {
                       description={filter === "all"
                         ? "Buat kontribusi pertama untuk mulai menghitung equity."
                         : `Tidak ada kontribusi dengan status "${filter}".`}
-                      action={!isProjectFrozen && filter === "all" ? { label: "Buat Kontribusi", onClick: () => setShowForm(true) } : undefined}
                     />
                   )}
                   {loading && (
