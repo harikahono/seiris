@@ -7,6 +7,7 @@ import { useRealtime } from "@/contexts/RealtimeContext";
 import type { Team, EquityData, Contribution } from "@/types";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { cn } from "@/lib/utils";
+import { formatRp } from "@/lib/constants";
 import { toast } from "sonner";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
@@ -250,14 +251,19 @@ function TeamDashboard({ teamId }: { teamId: string }) {
             />
           </div>
 
-          <div className="animate-fade-in-up" style={{ animationDelay: "80ms" }}>
+          <Link
+            to={`/teams/${teamId}/contributions`}
+            className="animate-fade-in-up block rounded-xl"
+            style={{ animationDelay: "80ms" }}
+            aria-label="Lihat semua kontribusi tim"
+          >
             <StatCard
               icon={FileText}
               label="Total Kontribusi"
               value={String(totalContribCount)}
               sub={pendingCount > 0 ? `${pendingCount} pending` : undefined}
             />
-          </div>
+          </Link>
 
           <div className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
             <StatCard
@@ -280,13 +286,14 @@ function TeamDashboard({ teamId }: { teamId: string }) {
                 <Link
                   to={`/teams/${teamId}/revenue`}
                   className="flex items-center gap-1 text-xs text-accent hover:text-accent-hover"
+                  aria-label="Lihat detail revenue"
                 >
                   Detail <ChevronRight className="size-3" />
                 </Link>
               </div>
               <div className="mt-2 flex items-baseline gap-3">
                 <p className="text-2xl font-bold text-white">
-                  Rp {(totalRevenue / 1000).toFixed(0)}rb
+                  {formatRp(totalRevenue)}
                 </p>
                 {totalDistributed > 0 && (
                   <span className="text-xs text-gray-500">
@@ -414,7 +421,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     <span className="font-mono text-xs text-gray-600">
-                      Rp {(c.value / 1000).toFixed(0)}rb
+                      {formatRp(c.value)}
                     </span>
                     <StatusBadge status={c.status} />
                   </div>

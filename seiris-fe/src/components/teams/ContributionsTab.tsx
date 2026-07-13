@@ -14,7 +14,7 @@ import ContributionTypeBar from "@/components/ui/ContributionTypeBar";
 import MemberEquityTable from "@/components/ui/MemberEquityTable";
 import ExportPdfButton from "@/components/ui/ExportPdfButton";
 import Pagination from "@/components/ui/Pagination";
-import { Plus, Loader2, ListChecks } from "lucide-react";
+import { Plus, Loader2, ListChecks, Lock } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
@@ -111,7 +111,7 @@ export default function ContributionsTab() {
     <div className="space-y-6">
       {isProjectFrozen && (
         <div className="flex items-center gap-2 rounded-lg border border-gray-800 bg-card px-4 py-3 text-sm text-gray-400">
-          <span>🔒</span>
+          <Lock className="size-4 shrink-0 text-gray-500" />
           <span>Project ini sudah dikunci — seluruh perubahan sudah tidak bisa dilakukan.</span>
         </div>
       )}

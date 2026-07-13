@@ -7,7 +7,7 @@ import { useProjectContext } from "@/contexts/ProjectContext";
 import type { TeamMember, FmrProposal } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { toast } from "sonner";
-import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut, Info, ShieldAlert } from "lucide-react";
+import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut, Info, Lock, ShieldAlert } from "lucide-react";
 
 export default function TeamMembersTab() {
   const { team, currentUserId, fetchTeam } = useOutletContext<TeamContext>();
@@ -258,27 +258,29 @@ export default function TeamMembersTab() {
                   placeholder={String(currentMember.fmr || "50000")}
                   autoFocus
                 />
-                <button
-                  type="button"
-                  onClick={handleProposeFmr}
-                  disabled={submittingProposal}
-                  className="rounded p-1.5 text-green-400 hover:bg-gray-800 transition disabled:opacity-50"
-                  title="Kirim proposal"
-                >
+                  <button
+                    type="button"
+                    onClick={handleProposeFmr}
+                    disabled={submittingProposal}
+                    className="rounded p-1.5 text-green-400 hover:bg-gray-800 transition disabled:opacity-50"
+                    title="Kirim proposal"
+                    aria-label="Kirim proposal FMR"
+                  >
                   {submittingProposal ? (
                     <Loader2 className="size-4 animate-spin" />
                   ) : (
                     <Send className="size-4" />
                   )}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProposingFmr(false);
-                    setProposedFmrValue("");
-                  }}
-                  className="rounded p-1.5 text-gray-500 hover:bg-gray-800 transition"
-                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProposingFmr(false);
+                      setProposedFmrValue("");
+                    }}
+                    className="rounded p-1.5 text-gray-500 hover:bg-gray-800 transition"
+                    aria-label="Batal ajukan proposal"
+                  >
                   <X className="size-4" />
                 </button>
               </div>
@@ -342,6 +344,7 @@ export default function TeamMembersTab() {
                           onClick={() => saveFmr(member)}
                           disabled={savingFmr}
                           className="rounded p-1 text-green-400 hover:bg-gray-800"
+                          aria-label={`Simpan FMR ${member.user.name}`}
                         >
                           {savingFmr ? (
                             <Loader2 className="size-3.5 animate-spin" />
@@ -353,6 +356,7 @@ export default function TeamMembersTab() {
                           type="button"
                           onClick={cancelEditFmr}
                           className="rounded p-1 text-gray-500 hover:bg-gray-800"
+                          aria-label={`Batal edit FMR ${member.user.name}`}
                         >
                           <X className="size-3.5" />
                         </button>
@@ -369,17 +373,16 @@ export default function TeamMembersTab() {
                           )}
                         </div>
                         {isProjectFrozen ? (
-                          <span
-                            className="rounded p-1.5 text-gray-600"
-                            title="Project sudah dikunci, FMR tidak bisa diubah"
-                          >
-                            🔒
-                          </span>
+                            <Lock
+                              className="size-3.5 text-gray-600"
+                              aria-label="Project sudah dikunci, FMR tidak bisa diubah"
+                            />
                         ) : (
                           <button
                             type="button"
                             onClick={() => startEditFmr(member)}
                             className="rounded p-1.5 text-gray-500 hover:text-accent transition"
+                            aria-label={`Edit FMR ${member.user.name}`}
                           >
                             <Pencil className="size-3.5" />
                           </button>
@@ -411,12 +414,12 @@ export default function TeamMembersTab() {
 
                 {hasProjectScope && isOwner && member.role !== "owner" && editingFmr !== member.id && (
                   isProjectFrozen ? (
-                    <span
-                      className="rounded px-2 py-1 text-xs text-gray-600"
-                      title="Project sudah dikunci, anggota tidak bisa ditambah atau dikeluarkan"
-                    >
-                      🔒 Dikunci
-                    </span>
+                          <span
+                            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-600"
+                            title="Project sudah dikunci, anggota tidak bisa ditambah atau dikeluarkan"
+                          >
+                            <Lock className="size-3.5" /> Dikunci
+                          </span>
                   ) : (
                     member.project_fmr != null ? (
                       <button
