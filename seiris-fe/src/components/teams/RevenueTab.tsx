@@ -26,6 +26,7 @@ export default function RevenueTab() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
+  const [equitySlices, setEquitySlices] = useState<number | null>(null);
 
   // ── Fetch Revenues (no loading state — caller manages it) ──
   const fetchRevenues = useCallback(() => {
@@ -41,11 +42,20 @@ export default function RevenueTab() {
       .catch(() => toast.error("Gagal memuat revenue"));
   }, [basePath, page]);
 
+  // ── Fetch equity total_slices untuk scope ini (disable tombol distribusi kalau 0) ──
+  const fetchEquity = useCallback(() => {
+    return api
+      .get<{ data: { total_slices: number } }>(`${basePath}/equity`)
+      .then((res) => setEquitySlices(res.data.data.total_slices ?? 0))
+      .catch(() => setEquitySlices(null));
+  }, [basePath]);
+
   // Initial load + page/scope change → reset page + loading
   useEffect(() => {
     setPage(1);
     setRevenues([]);
-    fetchRevenues().finally(() => setLoading(false));
+    setEquitySlices(null);
+    Promise.all([fetchRevenues(), fetchEquity()]).finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basePath]);
 
@@ -58,8 +68,11 @@ export default function RevenueTab() {
     if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
     prevRefresh.current = refreshVersion;
     fetchRevenues();
+    fetchEquity();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
+
+  const hasEquity = equitySlices !== null && equitySlices > 0;
 
   const totalAmount = revenues.reduce((s, r) => s + r.amount, 0);
 
@@ -97,7 +110,7 @@ export default function RevenueTab() {
         )}
 
         {revenues.map((r) => (
-          <RevenueCard key={r.id} revenue={r} isOwner={isOwner} onDistributed={fetchRevenues} />
+          <RevenueCard key={r.id} revenue={r} isOwner={isOwner} hasEquity={hasEquity} onDistributed={fetchRevenues} />
         ))}
 
         {loading && page === 1 ? (
