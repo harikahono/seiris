@@ -103,7 +103,7 @@ class RevenueDistributionTest extends TestCase
         $this->assertEqualsWithDelta(40.0, $memberShare->equity_pct_snapshot, 0.0001);
     }
 
-    public function test_owner_cannot_distribute_before_member_requests(): void
+    public function test_owner_can_distribute_directly_without_member_request(): void
     {
         [$ownerUser, $ownerMember, $team, $memberUser, $member] = $this->makeOwnerAndMember();
         $this->seedSnapshot($team, $ownerMember, $member);
@@ -114,13 +114,17 @@ class RevenueDistributionTest extends TestCase
             'distributable_amount' => 500000,
             'revenue_date'         => now()->format('Y-m-d'),
         ]);
+        $store->assertStatus(201);
         $revenueId = $store->json('data.id');
 
-        // Langsung distribute tanpa ajuan member -> M2 guard
+        // Langsung distribute dari pending tanpa ajuan member -> 200
         $this->actingAs($ownerUser, 'sanctum')
             ->postJson("/api/revenues/{$revenueId}/distribute")
-            ->assertStatus(409);
+            ->assertStatus(200);
 
-        $this->assertDatabaseCount('profit_distributions', 0);
+        $revenue = Revenue::find($revenueId);
+        $this->assertSame('distributed', $revenue->status);
+        $this->assertTrue($revenue->is_distributed);
+        $this->assertDatabaseCount('profit_distributions', 2);
     }
 }
