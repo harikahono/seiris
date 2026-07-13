@@ -1,6 +1,6 @@
 import { useProjectContext } from "@/contexts/ProjectContext";
 import { useTeamContext } from "@/contexts/TeamContext";
-import { Plus } from "lucide-react";
+import { Plus, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import api from "@/api/axios";
 import { toast } from "sonner";
@@ -38,20 +38,23 @@ export default function ProjectSelector() {
       <label htmlFor="project-scope" className="text-xs uppercase tracking-wide text-gray-500">
         Scope:
       </label>
-      <select
-        id="project-scope"
-        value={currentProjectId ?? ""}
-        onChange={(e) => setCurrentProject(e.target.value || null)}
-        className="rounded-md border border-gray-700 bg-gray-900 px-3 py-1.5 text-sm text-white outline-none focus:border-[#e07820]"
-      >
-        <option value="">Tim (Induk)</option>
-        {projects.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name}
-            {p.is_frozen ? " (dikunci)" : ""}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          id="project-scope"
+          value={currentProjectId ?? ""}
+          onChange={(e) => setCurrentProject(e.target.value || null)}
+          className="max-w-[260px] appearance-none rounded-md border border-gray-700 bg-gray-900 py-1.5 pl-3 pr-9 text-sm text-white outline-none focus:border-[#e07820]"
+        >
+          <option value="">Tim (Induk)</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+              {p.is_frozen ? " (dikunci)" : ""}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
+      </div>
 
       {creating ? (
         <div className="flex items-center gap-2">
