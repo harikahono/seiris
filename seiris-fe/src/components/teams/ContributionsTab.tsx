@@ -147,7 +147,7 @@ export default function ContributionsTab() {
       {view === "contributions" && (
         <>
           <div>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-white">Kontribusi</h2>
               <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
                 {FILTERS.map((f) => (
@@ -221,7 +221,7 @@ export default function ContributionsTab() {
                       icon={ListChecks}
                       title={filter === "all" ? "Belum ada kontribusi" : "Tidak ditemukan"}
                       description={filter === "all"
-                        ? "Buat kontribusi pertama untuk mulai menghitung equity."
+                        ? "Catat kontribusi pertama untuk mulai menghitung equity."
                         : `Tidak ada kontribusi dengan status "${filter}".`}
                     />
                   )}

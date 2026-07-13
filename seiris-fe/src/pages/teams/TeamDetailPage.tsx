@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Outlet } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProjectContext } from "@/contexts/ProjectContext";
 import ProjectSelector from "@/components/teams/ProjectSelector";
 import type { Team } from "@/types";
 import { ArrowLeft } from "lucide-react";
@@ -20,6 +21,7 @@ export default function TeamDetailPage() {
   const { teamId } = useParams<{ teamId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { currentProjectId } = useProjectContext();
   const [team, setTeam] = useState<Team | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
@@ -41,7 +43,7 @@ export default function TeamDetailPage() {
       .finally(() => setInitialLoading(false));
   }, [teamId]);
 
-  useEffect(() => { fetchTeam(); }, [fetchTeam]);
+  useEffect(() => { fetchTeam(currentProjectId ?? undefined); }, [fetchTeam, currentProjectId]);
 
   if (initialLoading) {
     return (
