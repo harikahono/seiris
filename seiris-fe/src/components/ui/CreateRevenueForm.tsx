@@ -81,7 +81,14 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
       formData.append("amount", String(amountNum));
       formData.append("distributable_amount", String(distributable));
       formData.append("revenue_date", revenueDate);
-      formData.append("deductions", JSON.stringify(deductions));
+      // ponytail: kirim nested fields biar Laravel parse jadi array; skip kalau kosong
+      // (JSON.stringify → string, gagal validasi 'array' di backend)
+      if (deductions.length > 0) {
+        deductions.forEach((d, i) => {
+          formData.append(`deductions[${i}][for]`, d.for);
+          formData.append(`deductions[${i}][amount]`, String(d.amount));
+        });
+      }
       if (proof) formData.append("proof", proof);
 
       await api.post(`${basePath}/revenues`, formData);

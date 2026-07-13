@@ -56,6 +56,12 @@ export default function ContributionCard({
         </span>
         <span>·</span>
         <span className="tabular-nums">Rp {contribution.value.toLocaleString("id-ID")}</span>
+        {["TIME", "IDEA", "NETWORK"].includes(contribution.type) && contribution.hours != null && (
+          <>
+            <span>·</span>
+            <span className="tabular-nums">{Number(contribution.hours)} jam</span>
+          </>
+        )}
         {contribution.approvals_count > 0 && (
           <>
             <span>·</span>

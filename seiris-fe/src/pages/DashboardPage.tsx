@@ -160,12 +160,36 @@ function TeamDashboard({ teamId }: { teamId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
 
-  const copyInviteCode = () => {
+  const copyInviteCode = async () => {
     if (!team) return;
-    navigator.clipboard.writeText(team.invite_code);
-    setCopied(true);
-    toast.success("Kode undangan disalin");
-    setTimeout(() => setCopied(false), 2000);
+    const code = team.invite_code;
+    const copy = async (): Promise<boolean> => {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(code);
+        return true;
+      }
+      // ponytail: HTTP (VPS) gak punya navigator.clipboard → fallback execCommand
+      const ta = document.createElement("textarea");
+      ta.value = code;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      const copied = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return copied;
+    };
+    try {
+      if (await copy()) {
+        setCopied(true);
+        toast.success("Kode undangan disalin");
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        toast.error("Gagal menyalin kode undangan");
+      }
+    } catch {
+      toast.error("Gagal menyalin kode undangan");
+    }
   };
 
   const myMember = team?.members?.find((m) => m.user.id === user?.id);

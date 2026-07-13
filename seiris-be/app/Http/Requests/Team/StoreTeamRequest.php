@@ -18,7 +18,7 @@ class StoreTeamRequest extends FormRequest
             'name'               => ['required', 'string', 'min:2', 'max:100'],
             'description'        => ['nullable', 'string', 'max:500'],
             'approval_threshold' => ['nullable', 'in:50,75,100'],
-            'fmr'                => ['nullable', 'integer', 'min:0', 'max:99999999'],
+            'fmr'                => ['nullable', 'integer', 'min:0', 'max:' . config('seiris.max_student_fmr')],
         ];
     }
 
@@ -32,6 +32,7 @@ class StoreTeamRequest extends FormRequest
             'approval_threshold.in'    => 'Threshold harus 50, 75, atau 100.',
             'fmr.integer'              => 'FMR harus berupa angka.',
             'fmr.min'                  => 'FMR tidak boleh negatif.',
+            'fmr.max'                  => 'FMR maksimal Rp ' . number_format((int) config('seiris.max_student_fmr'), 0, ',', '.') . '/jam (batas mahasiswa).',
         ];
     }
 

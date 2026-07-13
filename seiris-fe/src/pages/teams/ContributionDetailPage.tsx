@@ -176,6 +176,14 @@ export default function ContributionDetailPage() {
               {contribution.total_slices.toLocaleString("id-ID")}
             </p>
           </div>
+          {(contribution.type === "TIME" || contribution.type === "IDEA" || contribution.type === "NETWORK") && contribution.hours != null && (
+            <div className="min-w-[100px] rounded-lg border border-gray-800 bg-gray-950/50 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500">Jam</p>
+              <p className="mt-1 font-mono text-sm font-medium text-white">
+                {Number(contribution.hours)} jam
+              </p>
+            </div>
+          )}
           {contribution.invoice_url && (
             <div className="flex items-end">
               <a

@@ -325,8 +325,8 @@ export default function TeamMembersTab() {
               </div>
 
               <div className="flex items-center gap-3">
-                {/* Owner: can edit FMR directly */}
-                {isOwner && member.role !== "owner" ? (
+                {/* Owner: can edit FMR directly (including own FMR) */}
+                {isOwner ? (
                   <div className="flex items-center gap-1">
                     {editingFmr === member.id ? (
                       <>

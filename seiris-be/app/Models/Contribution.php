@@ -20,7 +20,7 @@ class Contribution extends Model
         'value', 'multiplier', 'total_slices', 'status',
         'contribution_date',
         'deal_value', 'estimated_value', 'commission_rate',
-        'project_id',
+        'project_id', 'hours',
     ];
 
     protected function casts(): array
@@ -33,6 +33,7 @@ class Contribution extends Model
             'estimated_value'  => 'integer',
             'commission_rate'  => 'decimal:2',
             'contribution_date'=> 'date',
+            'hours'            => 'decimal:2',
         ];
     }
 
