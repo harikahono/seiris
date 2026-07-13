@@ -118,6 +118,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
       await api.post(url);
       toast.success(`Profit ${formatRp(revenue.distributable_amount)} berhasil didistribusikan`);
       onDistributed();
+      setConfirmAction(null);
     } catch (err) {
       if (isAxiosError(err) && err.response) {
         toast.error(err.response.data?.message || "Gagal mendistribusikan profit");
@@ -136,6 +137,7 @@ export default function RevenueCard({ revenue, isOwner, onDistributed }: Revenue
       await api.post(url);
       toast.success(`Permintaan distribusi "${revenue.description}" diajukan`);
       onDistributed();
+      setConfirmAction(null);
     } catch (err) {
       if (isAxiosError(err) && err.response) {
         toast.error(err.response.data?.message || "Gagal mengajukan distribusi");
