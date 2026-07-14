@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { formatRp } from "@/lib/constants";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
 
 // ── Status badge helper ──────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
@@ -110,6 +111,7 @@ interface RevenueCardProps {
 export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMember, onDistributed }: RevenueCardProps) {
   const [distributing, setDistributing] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"distribute" | "request" | null>(null);
+  const [showProof, setShowProof] = useState(false);
 
   const status = revenue.status ?? (revenue.is_distributed ? "distributed" : "pending");
   const noEquity = hasEquity === false;
@@ -247,15 +249,14 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
 
         <div className="flex shrink-0 flex-col items-end gap-2">
           {revenue.proof_url && (
-            <a
-              href={revenue.proof_url}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => setShowProof(true)}
               className="flex items-center gap-1 text-xs text-accent hover:underline"
             >
               <ExternalLink className="size-3" />
               Bukti
-            </a>
+            </button>
           )}
           <div className="text-right">
             <p className="text-[11px] text-gray-600">Siap dibagi</p>
@@ -308,6 +309,14 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
         loading={distributing}
         variant="primary"
       />
+
+      {revenue.proof_url && (
+        <ProofPreviewModal
+          url={revenue.proof_url}
+          open={showProof}
+          onClose={() => setShowProof(false)}
+        />
+      )}
     </div>
   );
 }
