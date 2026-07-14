@@ -74,6 +74,10 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
     }
     if (!revenueDate) return setErrors({ revenue_date: "Tanggal wajib diisi" });
 
+    if (proof && proof.size > 5 * 1024 * 1024) {
+      return setErrors({ proof: "Ukuran file maksimal 5MB." });
+    }
+
     setSaving(true);
     try {
       const formData = new FormData();
@@ -204,8 +208,8 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
             <label className="mb-1 block text-sm font-medium text-gray-300">Bukti (opsional)</label>
             <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-700 px-3 py-3 text-sm text-gray-500 transition hover:border-accent hover:text-accent">
               <Upload className="size-4" />
-              {proof ? proof.name : "Upload file PDF / JPG / PNG (max 5MB)"}
-              <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setProof(e.target.files?.[0] ?? null)} className="hidden" />
+              {proof ? `${proof.name} (${(proof.size / 1024 / 1024).toFixed(1)} MB)` : "Upload file PDF / JPG / PNG (max 5MB)"}
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => { const f = e.target.files?.[0] ?? null; setProof(f); if (f && f.size > 5 * 1024 * 1024) setErrors((p) => ({ ...p, proof: "Ukuran file maksimal 5MB." })); else setErrors((p) => ({ ...p, proof: undefined })); }} className="hidden" />
             </label>
             {errors.proof && <p className="mt-1 text-xs text-red-500">{errors.proof}</p>}
           </div>

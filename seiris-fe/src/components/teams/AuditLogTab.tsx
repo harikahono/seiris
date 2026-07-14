@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
+import { useProjectContext } from "@/contexts/ProjectContext";
 import type { AuditLogItem } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -44,6 +45,7 @@ function groupByDate(logs: AuditLogItem[]): Map<string, AuditLogItem[]> {
 
 export default function AuditLogTab() {
   const { team } = useOutletContext<TeamContext>();
+  const { currentProjectId, projects } = useProjectContext();
   const teamId = team.id;
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +58,7 @@ export default function AuditLogTab() {
     setLoading(true);
     const params: Record<string, unknown> = { page };
     if (filter) params.filter = filter;
+    if (currentProjectId) params.project_id = currentProjectId;
 
     api
       .get<{ data: AuditLogItem[]; meta: { current_page: number; last_page: number; total: number } }>(
@@ -69,7 +72,7 @@ export default function AuditLogTab() {
       })
       .catch(() => toast.error("Gagal memuat audit log"))
       .finally(() => setLoading(false));
-  }, [teamId, page, filter]);
+  }, [teamId, page, filter, currentProjectId]);
 
     
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
@@ -84,12 +87,22 @@ export default function AuditLogTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
 
+  // ── Reset ke page 1 saat scope project berubah ──
+  useEffect(() => { setPage(1); }, [currentProjectId]);
+
   const grouped = groupByDate(logs);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Audit Log</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-white">Audit Log</h2>
+          <span className="rounded-full border border-gray-700 bg-gray-900/50 px-2.5 py-0.5 text-[11px] font-medium text-gray-400">
+            {currentProjectId
+              ? (projects.find((p) => p.id === currentProjectId)?.name ?? "Project")
+              : "Tim (Induk)"}
+          </span>
+        </div>
         <span className="text-xs text-gray-500">{total} log</span>
       </div>
 
