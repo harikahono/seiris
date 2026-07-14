@@ -114,15 +114,19 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
   const [showProof, setShowProof] = useState(false);
 
   const status = revenue.status ?? (revenue.is_distributed ? "distributed" : "pending");
-  const noEquity = hasEquity === false;
   const notProjectMember = isProjectMember === false;
+  const canDistribute = revenue.distributable ?? hasEquity ?? false;
   const equityHint = (
     <span
       className="flex items-center gap-1.5 rounded-lg border border-gray-800 bg-gray-900/40 px-3 py-2 text-xs text-gray-500"
-      title="Butuh minimal 1 kontribusi yang diapprove"
+      title={
+        revenue.project_id
+          ? "Project belum punya equity — catat kontribusi di scope project ini"
+          : "Butuh minimal 1 kontribusi yang diapprove"
+      }
     >
       <Info className="size-4" />
-      Belum ada equity
+      {revenue.project_id ? "Project belum punya equity" : "Belum ada equity"}
     </span>
   );
   const projectHint = (
@@ -176,7 +180,7 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
   const renderAction = () => {
     // Owner + pending → distribusikan langsung
     if (isOwner && status === "pending") {
-      if (noEquity) return equityHint;
+      if (!canDistribute) return equityHint;
       return (
         <button
           type="button"
@@ -192,7 +196,7 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
 
     // Owner + distribute_requested → setujui + distribusikan
     if (isOwner && status === "distribute_requested") {
-      if (noEquity) return equityHint;
+      if (!canDistribute) return equityHint;
       return (
         <button
           type="button"
@@ -209,7 +213,7 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
     // Non-owner + pending → ajukan distribusi
     if (!isOwner && status === "pending") {
       if (notProjectMember) return projectHint;
-      if (noEquity) return equityHint;
+      if (!canDistribute) return equityHint;
       return (
         <button
           type="button"

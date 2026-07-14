@@ -184,16 +184,10 @@ class RevenueController extends Controller
         }
 
         // ponytail: owner boleh distribute langsung dari pending; request member (toast) opsional
-        // Ambil snapshot equity terbaru — scope project kalau revenue punya project_id
-        $snapshotQuery = $team->equitySnapshots();
-        if ($revenue->project_id) {
-            $snapshotQuery->where('project_id', $revenue->project_id);
-        } else {
-            $snapshotQuery->whereNull('project_id');
-        }
-        $snapshot = $snapshotQuery->first();
+        // Snapshot equity terbaru untuk scope revenue ini (project kalau ada, else tim)
+        $snapshot = $revenue->distributableSnapshot();
 
-        if (!$snapshot || empty($snapshot->equity_map)) {
+        if (!$snapshot) {
             return response()->json([
                 'message' => 'Belum ada equity snapshot. Pastikan ada kontribusi yang sudah diapprove.',
             ], 422);

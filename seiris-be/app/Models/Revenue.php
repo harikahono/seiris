@@ -68,4 +68,19 @@ class Revenue extends Model
     {
         return $this->hasMany(ProfitDistribution::class);
     }
+
+    /**
+     * Snapshot equity yang relevan untuk revenue ini (scope project kalau ada, else tim).
+     * Null kalau belum ada snapshot valid → revenue belum bisa didistribusikan.
+     */
+    public function distributableSnapshot(): ?EquitySnapshot
+    {
+        $query = EquitySnapshot::where('team_id', $this->team_id);
+        $this->project_id
+            ? $query->where('project_id', $this->project_id)
+            : $query->whereNull('project_id');
+        $snapshot = $query->first();
+
+        return ($snapshot && !empty($snapshot->equity_map)) ? $snapshot : null;
+    }
 }
