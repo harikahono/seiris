@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { AuditLogItem } from "@/types";
 import { formatRp } from "@/lib/constants";
+import RelativeTime from "@/components/ui/RelativeTime";
 import {
   ThumbsUp,
   ThumbsDown,
@@ -51,14 +52,6 @@ export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
   const meta = getActionMeta(log.action);
   const Icon = meta.icon;
 
-
-  const dateStr = new Date(log.created_at).toLocaleDateString("id-ID", {
-    day: "numeric", month: "short",
-  });
-  const timeStr = new Date(log.created_at).toLocaleString("id-ID", {
-    hour: "2-digit", minute: "2-digit",
-  });
-
   const isRevenue = !!teamId && !!log.subject_id && (log.subject_type?.includes("Revenue") ?? false);
   const isContribution = !!teamId && !!log.subject_id && (log.subject_type?.includes("Contribution") ?? false);
   const isClickable = isRevenue || isContribution;
@@ -84,8 +77,8 @@ export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
           </div>
         )}
       </div>
-      <span className="shrink-0 pt-0.5 text-[11px] tabular-nums text-gray-600">
-        {dateStr} · {timeStr}
+      <span className="shrink-0 whitespace-nowrap pt-0.5 text-[11px] tabular-nums text-gray-600">
+        <RelativeTime date={log.created_at} />
       </span>
     </div>
   );
