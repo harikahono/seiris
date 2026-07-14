@@ -15,6 +15,7 @@ import AuditLogTab from "@/components/teams/AuditLogTab";
 import ContributionsTab from "@/components/teams/ContributionsTab";
 import TeamSettingsTab from "@/components/teams/TeamSettingsTab";
 import ContributionDetailPage from "@/pages/teams/ContributionDetailPage";
+import RevenueDetailPage from "@/pages/teams/RevenueDetailPage";
 import LandingPage from "@/pages/LandingPage";
 import { CheckCircle2, XCircle, Info, AlertTriangle } from "lucide-react";
 
@@ -49,6 +50,7 @@ export default function App() {
                     <Route path="settings" element={<TeamSettingsTab />} />
                   </Route>
                   <Route path="/teams/:teamId/contributions/:contributionId" element={<ContributionDetailPage />} />
+            <Route path="/teams/:teamId/revenues/:revenueId" element={<RevenueDetailPage />} />
                 </Route>
               </Route>
             </Route>

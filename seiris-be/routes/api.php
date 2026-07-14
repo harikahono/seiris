@@ -90,6 +90,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         // Revenues
         Route::get('teams/{team}/revenues',                       [RevenueController::class, 'index']);
         Route::post('teams/{team}/revenues',                      [RevenueController::class, 'store'])->middleware('throttle:write');
+        Route::get('teams/{team}/revenues/{revenue}',             [RevenueController::class, 'show']);
 
         // FMR Proposals
         Route::post('teams/{team}/fmr-proposals',                 [FmrProposalController::class, 'store'])->middleware('throttle:write');

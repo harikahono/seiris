@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate, Outlet } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Outlet } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProjectContext } from "@/contexts/ProjectContext";
@@ -19,9 +19,11 @@ export interface TeamContext {
 
 export default function TeamDetailPage() {
   const { teamId } = useParams<{ teamId: string }>();
+  const { pathname } = useLocation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { currentProjectId } = useProjectContext();
+  const isSettings = pathname.endsWith("/settings");
   const [team, setTeam] = useState<Team | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
@@ -114,8 +116,8 @@ export default function TeamDetailPage() {
         <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
       </div>
 
-      {/* ── Project Scope Selector (Slicing Pie Beranak) ── */}
-      <ProjectSelector />
+      {/* ── Project Scope Selector (Slicing Pie Beranak) — disembunyiin di Settings (team-level) ── */}
+      {!isSettings && <ProjectSelector />}
       {/* ── Tab Content ── */}
       <Outlet context={context} />
     </div>
