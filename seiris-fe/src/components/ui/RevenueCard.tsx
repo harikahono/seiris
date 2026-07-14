@@ -1,42 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
 import type { Revenue } from "@/types";
 import { toast } from "sonner";
 import {
-  CheckCircle2, Clock, Info, Loader2, ExternalLink,
-  SendHorizontal, UserCheck,
+  Info, Loader2, ExternalLink, UserCheck,
+  SendHorizontal,
 } from "lucide-react";
 import { formatRp } from "@/lib/constants";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
-
-// ── Status badge helper ──────────────────────────────────────
-function StatusBadge({ status }: { status: string }) {
-  switch (status) {
-    case "distributed":
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-[10px] font-medium text-green-400">
-          <CheckCircle2 className="size-3" />
-          Didistribusikan
-        </span>
-      );
-    case "distribute_requested":
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-400">
-          <UserCheck className="size-3" />
-          Menunggu Persetujuan
-        </span>
-      );
-    default:
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-yellow-500/10 px-2 py-0.5 text-[10px] font-medium text-yellow-400">
-          <Clock className="size-3" />
-          Belum
-        </span>
-      );
-  }
-}
+import RevenueStatusBadge from "@/components/ui/RevenueStatusBadge";
 
 // ── Distribution table ───────────────────────────────────────
 function DistributionTable({ revenue }: { revenue: Revenue }) {
@@ -102,13 +77,15 @@ function DistributionTable({ revenue }: { revenue: Revenue }) {
 // ── Main card ─────────────────────────────────────────────────
 interface RevenueCardProps {
   revenue: Revenue;
+  teamId: string;
   isOwner: boolean;
   hasEquity?: boolean | null;
   isProjectMember?: boolean | null;
   onDistributed: () => void;
 }
 
-export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMember, onDistributed }: RevenueCardProps) {
+export default function RevenueCard({ revenue, teamId, isOwner, hasEquity, isProjectMember, onDistributed }: RevenueCardProps) {
+  const navigate = useNavigate();
   const [distributing, setDistributing] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"distribute" | "request" | null>(null);
   const [showProof, setShowProof] = useState(false);
@@ -241,12 +218,16 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
   };
 
   return (
-    <div className="group rounded-xl border border-gray-700/40 bg-card p-5 shadow-[0_2px_12px_rgba(0,0,0,0.25)] transition-all duration-200 hover:border-gray-600/60 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.35)]">
+    <div
+      role="button"
+      onClick={() => navigate(`/teams/${teamId}/revenues/${revenue.id}`)}
+      className="group cursor-pointer rounded-xl border border-gray-700/40 bg-card p-5 shadow-[0_2px_12px_rgba(0,0,0,0.25)] transition-all duration-200 hover:border-gray-600/60 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.35)]"
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3">
             <p className="text-2xl font-bold tabular-nums text-white">{formatRp(revenue.amount)}</p>
-            <StatusBadge status={status} />
+            <RevenueStatusBadge status={status} />
           </div>
           <p className="mt-1 text-sm text-gray-400 leading-relaxed">{revenue.description}</p>
         </div>
@@ -255,7 +236,7 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
           {revenue.proof_url && (
             <button
               type="button"
-              onClick={() => setShowProof(true)}
+              onClick={(e) => { e.stopPropagation(); setShowProof(true); }}
               className="flex items-center gap-1 text-xs text-accent hover:underline"
             >
               <ExternalLink className="size-3" />
@@ -294,10 +275,16 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
           <span className="hidden sm:inline">Dicatat oleh {revenue.recorded_by.user.name}</span>
         </div>
 
-        {status !== "distributed" && renderAction()}
+        <span onClick={(e) => e.stopPropagation()}>
+          {status !== "distributed" && renderAction()}
+        </span>
       </div>
 
-      {status === "distributed" && <DistributionTable revenue={revenue} />}
+      {status === "distributed" && (
+        <span onClick={(e) => e.stopPropagation()}>
+          <DistributionTable revenue={revenue} />
+        </span>
+      )}
 
       <ConfirmModal
         open={confirmAction !== null}

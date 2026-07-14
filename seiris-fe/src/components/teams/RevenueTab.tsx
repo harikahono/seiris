@@ -112,7 +112,7 @@ export default function RevenueTab() {
         )}
 
         {revenues.map((r) => (
-          <RevenueCard key={r.id} revenue={r} isOwner={isOwner} hasEquity={hasEquity} isProjectMember={isCurrentUserProjectMember} onDistributed={fetchRevenues} />
+          <RevenueCard key={r.id} revenue={r} teamId={teamId} isOwner={isOwner} hasEquity={hasEquity} isProjectMember={isCurrentUserProjectMember} onDistributed={fetchRevenues} />
         ))}
 
         {loading && page === 1 ? (
