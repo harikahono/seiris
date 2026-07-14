@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, ExternalLink } from "lucide-react";
 
 interface ProofPreviewModalProps {
@@ -21,7 +22,9 @@ export default function ProofPreviewModal({ url, open, onClose }: ProofPreviewMo
 
   if (!open) return null;
 
-  return (
+  // ponytail: portal ke body — lepas dari ancestor ber-transform (animate-fade-in-up)
+  // supaya position:fixed relatif viewport, bukan ke wrapper konten.
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
       onClick={onClose}
@@ -64,6 +67,7 @@ export default function ProofPreviewModal({ url, open, onClose }: ProofPreviewMo
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

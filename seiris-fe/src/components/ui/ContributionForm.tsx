@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import api from "@/api/axios";
 import { parseErrors } from "@/lib/parseErrors";
 import { cn } from "@/lib/utils";
@@ -130,7 +131,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
         : "border-gray-700 focus:border-accent focus:ring-accent"
     );
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
         {step === "select" && (
@@ -353,5 +354,5 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
         )}
       </div>
     </div>
-  );
+  , document.body);
 }
