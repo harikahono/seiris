@@ -207,6 +207,7 @@ export interface RevenueDistribution {
 export interface Revenue {
   id: string;
   project_id: string | null;
+  distributable?: boolean;
   description: string;
   amount: number;
   distributable_amount: number;

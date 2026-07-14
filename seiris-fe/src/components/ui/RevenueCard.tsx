@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { formatRp } from "@/lib/constants";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
 
 // ── Status badge helper ──────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
@@ -110,17 +111,22 @@ interface RevenueCardProps {
 export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMember, onDistributed }: RevenueCardProps) {
   const [distributing, setDistributing] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"distribute" | "request" | null>(null);
+  const [showProof, setShowProof] = useState(false);
 
   const status = revenue.status ?? (revenue.is_distributed ? "distributed" : "pending");
-  const noEquity = hasEquity === false;
   const notProjectMember = isProjectMember === false;
+  const canDistribute = revenue.distributable ?? hasEquity ?? false;
   const equityHint = (
     <span
       className="flex items-center gap-1.5 rounded-lg border border-gray-800 bg-gray-900/40 px-3 py-2 text-xs text-gray-500"
-      title="Butuh minimal 1 kontribusi yang diapprove"
+      title={
+        revenue.project_id
+          ? "Project belum punya equity — catat kontribusi di scope project ini"
+          : "Butuh minimal 1 kontribusi yang diapprove"
+      }
     >
       <Info className="size-4" />
-      Belum ada equity
+      {revenue.project_id ? "Project belum punya equity" : "Belum ada equity"}
     </span>
   );
   const projectHint = (
@@ -174,7 +180,7 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
   const renderAction = () => {
     // Owner + pending → distribusikan langsung
     if (isOwner && status === "pending") {
-      if (noEquity) return equityHint;
+      if (!canDistribute) return equityHint;
       return (
         <button
           type="button"
@@ -190,7 +196,7 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
 
     // Owner + distribute_requested → setujui + distribusikan
     if (isOwner && status === "distribute_requested") {
-      if (noEquity) return equityHint;
+      if (!canDistribute) return equityHint;
       return (
         <button
           type="button"
@@ -207,7 +213,7 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
     // Non-owner + pending → ajukan distribusi
     if (!isOwner && status === "pending") {
       if (notProjectMember) return projectHint;
-      if (noEquity) return equityHint;
+      if (!canDistribute) return equityHint;
       return (
         <button
           type="button"
@@ -247,15 +253,14 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
 
         <div className="flex shrink-0 flex-col items-end gap-2">
           {revenue.proof_url && (
-            <a
-              href={revenue.proof_url}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => setShowProof(true)}
               className="flex items-center gap-1 text-xs text-accent hover:underline"
             >
               <ExternalLink className="size-3" />
               Bukti
-            </a>
+            </button>
           )}
           <div className="text-right">
             <p className="text-[11px] text-gray-600">Siap dibagi</p>
@@ -308,6 +313,14 @@ export default function RevenueCard({ revenue, isOwner, hasEquity, isProjectMemb
         loading={distributing}
         variant="primary"
       />
+
+      {revenue.proof_url && (
+        <ProofPreviewModal
+          url={revenue.proof_url}
+          open={showProof}
+          onClose={() => setShowProof(false)}
+        />
+      )}
     </div>
   );
 }

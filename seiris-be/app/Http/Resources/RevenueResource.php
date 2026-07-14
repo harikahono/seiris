@@ -13,6 +13,8 @@ class RevenueResource extends JsonResource
     {
         return [
             'id'                   => $this->id,
+            'project_id'           => $this->project_id,
+            'distributable'        => (bool) $this->distributableSnapshot(),
             'description'          => $this->description,
             'amount'               => $this->amount,
             'distributable_amount' => $this->distributable_amount,
