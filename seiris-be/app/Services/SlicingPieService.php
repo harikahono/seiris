@@ -82,21 +82,24 @@ class SlicingPieService
             }
         }
 
-        // Lock snapshot untuk scope ini
-        DB::table('equity_snapshots')
-            ->where('team_id', $team->id)
-            ->where('project_id', $isProjectScope ? $project->id : null)
-            ->lockForUpdate()
-            ->get();
+        // ponytail: lockForUpdate NO-OP kalau di luar transaction → wrap sendiri biar caller gak wajib ingat
+        $snapshot = DB::transaction(function () use ($team, $isProjectScope, $project, $triggeredByContributionId, $totalSlices, $equityMap) {
+            // Lock snapshot untuk scope ini
+            DB::table('equity_snapshots')
+                ->where('team_id', $team->id)
+                ->where('project_id', $isProjectScope ? $project->id : null)
+                ->lockForUpdate()
+                ->get();
 
-        $snapshot = EquitySnapshot::create([
-            'team_id'                   => $team->id,
-            'project_id'                => $isProjectScope ? $project->id : null,
-            'triggered_by_contribution' => $triggeredByContributionId,
-            'total_slices'              => $totalSlices,
-            'equity_map'                => $equityMap,
-            'is_frozen'                 => $isProjectScope ? ($project->is_frozen ?? false) : ($team->is_frozen ?? false),
-        ]);
+            return EquitySnapshot::create([
+                'team_id'                   => $team->id,
+                'project_id'                => $isProjectScope ? $project->id : null,
+                'triggered_by_contribution' => $triggeredByContributionId,
+                'total_slices'              => $totalSlices,
+                'equity_map'                => $equityMap,
+                'is_frozen'                 => $isProjectScope ? ($project->is_frozen ?? false) : ($team->is_frozen ?? false),
+            ]);
+        });
 
         AuditLogService::log(
             teamId:      $team->id,

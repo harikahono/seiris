@@ -125,6 +125,57 @@ class RevenueDistributionTest extends TestCase
         $revenue = Revenue::find($revenueId);
         $this->assertSame('distributed', $revenue->status);
         $this->assertTrue($revenue->is_distributed);
-        $this->assertDatabaseCount('profit_distributions', 2);
+            $this->assertDatabaseCount('profit_distributions', 2);
+    }
+
+    public function test_distribute_uses_latest_snapshot_not_oldest(): void
+    {
+        [$ownerUser, $ownerMember, $team, $memberUser, $member] = $this->makeOwnerAndMember();
+
+        // Snapshot LAMA (60/40) — harusnya diabaikan
+        $old = EquitySnapshot::create([
+            'team_id'      => $team->id,
+            'project_id'   => null,
+            'total_slices' => 10000,
+            'equity_map'   => [
+                $ownerMember->id => ['slices' => 6000, 'equity_pct' => 60.0],
+                $member->id      => ['slices' => 4000, 'equity_pct' => 40.0],
+            ],
+            'is_frozen'    => false,
+        ]);
+        $old->forceFill(['created_at' => now()->subHour()])->save();
+
+        // Snapshot BARU (70/30) — ini yang dipakai
+        EquitySnapshot::create([
+            'team_id'      => $team->id,
+            'project_id'   => null,
+            'total_slices' => 10000,
+            'equity_map'   => [
+                $ownerMember->id => ['slices' => 7000, 'equity_pct' => 70.0],
+                $member->id      => ['slices' => 3000, 'equity_pct' => 30.0],
+            ],
+            'is_frozen'    => false,
+        ]);
+
+        $store = $this->actingAs($ownerUser, 'sanctum')->postJson("/api/teams/{$team->id}/revenues", [
+            'description'          => 'Revenue bug-1',
+            'amount'               => 1000000,
+            'distributable_amount' => 1000000,
+            'revenue_date'         => now()->format('Y-m-d'),
+        ]);
+        $store->assertStatus(201);
+        $revenueId = $store->json('data.id');
+
+        $this->actingAs($ownerUser, 'sanctum')
+            ->postJson("/api/revenues/{$revenueId}/distribute")
+            ->assertStatus(200);
+
+        $ownerShare = ProfitDistribution::where('revenue_id', $revenueId)
+            ->where('member_id', $ownerMember->id)->first();
+        $memberShare = ProfitDistribution::where('revenue_id', $revenueId)
+            ->where('member_id', $member->id)->first();
+
+        $this->assertSame(700000, $ownerShare->amount);  // 70% (latest), bukan 60%
+        $this->assertSame(300000, $memberShare->amount);
     }
 }

@@ -79,7 +79,8 @@ class Revenue extends Model
         $this->project_id
             ? $query->where('project_id', $this->project_id)
             : $query->whereNull('project_id');
-        $snapshot = $query->first();
+        // ponytail: append-only snapshots → first() = paling lama; latest() = equity sekarang
+        $snapshot = $query->latest()->first();
 
         return ($snapshot && !empty($snapshot->equity_map)) ? $snapshot : null;
     }
