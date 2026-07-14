@@ -112,6 +112,23 @@ class RevenueController extends Controller
      * POST /api/revenues/{revenue}/request-distribute
      * Ajukan distribusi revenue â€” semua active member bisa
      */
+    /**
+     * GET /api/teams/{team}/revenues/{revenue}
+     * Detail revenue - scope tim
+     */
+    public function show(Request $request, Team $team, Revenue $revenue): JsonResponse
+    {
+        if ($revenue->team_id !== $team->id) {
+            abort(404);
+        }
+
+        $revenue->load(['recordedBy.user', 'distributions.member.user']);
+
+        return response()->json([
+            'data' => new RevenueResource($revenue),
+        ]);
+    }
+
     public function requestDistribute(Request $request, Revenue $revenue): JsonResponse
     {
         $team = $revenue->team;

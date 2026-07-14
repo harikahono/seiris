@@ -47,11 +47,10 @@ interface AuditLogItemProps {
   teamId?: string;
 }
 
-const ACTION_LINK_PREFIXES = ["contribution.", "vote."];
-
 export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
   const meta = getActionMeta(log.action);
   const Icon = meta.icon;
+
 
   const dateStr = new Date(log.created_at).toLocaleDateString("id-ID", {
     day: "numeric", month: "short",
@@ -60,8 +59,12 @@ export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
     hour: "2-digit", minute: "2-digit",
   });
 
-  const isClickable = teamId && log.subject_id &&
-    ACTION_LINK_PREFIXES.some(p => log.action.startsWith(p));
+  const isRevenue = !!teamId && !!log.subject_id && (log.subject_type?.includes("Revenue") ?? false);
+  const isContribution = !!teamId && !!log.subject_id && (log.subject_type?.includes("Contribution") ?? false);
+  const isClickable = isRevenue || isContribution;
+  const href = isRevenue
+    ? `/teams/${teamId}/revenues/${log.subject_id}`
+    : `/teams/${teamId}/contributions/${log.subject_id}`;
 
   const row = (
     <div className="flex gap-3 px-4 py-3 transition hover:bg-gray-800/30">
@@ -90,7 +93,7 @@ export default function AuditLogEntry({ log, teamId }: AuditLogItemProps) {
   if (isClickable) {
     return (
       <Link
-        to={`/teams/${teamId}/contributions/${log.subject_id}`}
+        to={href}
         className="block cursor-pointer"
       >
         {row}
