@@ -12,7 +12,7 @@ Semua type ada di satu file. Yang sering dipakai:
 | `Team` | id, name, description, invite_code, approval_threshold (`"50"\|"75"\|"100"`), is_frozen, frozen_at, owner, members[], members_count |
 | `TeamMember` | id, role (`"owner"\|"member"`), fmr, **project_fmr** (`number\|null`, per-project FMR), status (`"active"\|"exited"`), exited_at, user, joined_at |
 | `ProjectItem` | id, team_id, name, description, is_frozen, frozen_at, created_at, updated_at |
-| `Contribution` | id, **project_id** (`string\|null`), type (`ContributionType`), description, value, multiplier (`string`), total_slices, status (`"PENDING"\|"APPROVED"\|"REJECTED"`), contribution_date, deal_value/estimated_value/commission_rate (SALES), invoice_amount/invoice_url (**legacy REVENUE**, data lama), member, approvals[], approvals_count, hours? |
+| `Contribution` | id, **project_id** (`string\|null`), type (`ContributionType`), description, value, multiplier (`string`), total_slices, status (`"PENDING"\|"APPROVED"\|"REJECTED"`), contribution_date, deal_value/estimated_value/commission_rate (SALES), member, approvals[], approvals_count, hours? |
 | `ContributionApproval` | id, vote (`"APPROVE"\|"REJECT"`), note, member, voted_at |
 | `EquityData` | snapshot_id, **project_id** (`string\|null`), total_slices, equity_map (`EquityMemberEntry[]`), slices_by_type, is_frozen, calculated_at |
 | `EquityMemberEntry` | member_id, name, role, slices, equity_pct |

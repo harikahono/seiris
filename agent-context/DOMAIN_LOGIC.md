@@ -26,7 +26,7 @@ equity_%   = individual_slices / total_slices
 - `FMR = 0` **memblokir** kontribusi `TIME`/`IDEA`/`NETWORK` (controller layer, `ContributionController`). `CASH`/`FACILITY`/`SALES` tetap boleh.
 - `value` dihitung di `ContributionController::calculateValue`, lalu `SlicingPieService::calculateSlices(type, value)` → `total_slices = round(value * multiplier)`.
 
-> **CORRECTION:** AGENTS.md & `SLICING_PIE_RULES.md` menyebut tipe `REVENUE` (`actual_amount - invoice_amount`). Itu **legacy** — di `types/index.ts` cuma sisa `invoice_amount`/`invoice_url` (komentar "Legacy REVENUE (data lama)"). Tipe sah sekarang: `CASH, TIME, IDEA, NETWORK, FACILITY, SALES`. Penjualan pakai `SALES`, bukan `REVENUE`.
+> **CORRECTION:** `REVENUE` tipe sudah **legacy**. Kolom `invoice_amount`, `invoice_url`, `actual_amount` dan `invoice_path` di‑drop (lihat GOTCHAS). Sekarang hanya tipe sah: `CASH, TIME, IDEA, NETWORK, FACILITY, SALES`. Penjualan pakai `SALES`, bukan `REVENUE`.
 
 ## 3. Slicing Pie Beranak (nested pie)
 

@@ -33,3 +33,4 @@
 - **Bad-leaver:** slice non-cash = 0 di `recalculate()`; slice cash tetap dihitung.
 - **`Contribution.value`/`hours`/dsb boleh berubah di model, tapi `total_slices` tidak** — slice final dihitung ulang saat APPROVED lewat `recalculate()`.
 - **Distribusi butuh snapshot scope:** `Revenue::distributableSnapshot()` null → distribute 422. Untuk revenue project-scoped, harus ada snapshot `project_id` sama.
+- **Legacy invoice fields** (`invoice_path`, `invoice_amount`, `actual_amount`) **dihapus** (migration `2026_07_09_000001_drop_revenue_enum_and_legacy_columns.php`). Gunakan `proof_path`/`proof_url` pada Contribution untuk bukti. ✅

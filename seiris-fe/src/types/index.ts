@@ -146,9 +146,6 @@ export interface Contribution {
   deal_value: number | null;
   estimated_value: number | null;
   commission_rate: number | null;
-  // Legacy REVENUE (data lama)
-  invoice_amount: number | null;
-  invoice_url: string | null;
   member: TeamMember;
   approvals: ContributionApproval[];
   approvals_count: number;

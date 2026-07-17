@@ -42,7 +42,7 @@ composer install
 cp .env.example .env        # atur DB, MAX_STUDENT_FMR=150000
 php artisan key:generate
 php artisan migrate --seed
-php artisan storage:link     # untuk upload invoice
+php artisan storage:link     # untuk upload proof (bukti kontribusi/revenue)
 php artisan serve            # http://localhost:8000
 ```
 
@@ -135,7 +135,7 @@ composer run test            # config:clear → php artisan test (PHPUnit, SQLit
 | CASH | ×4 | `amount` |
 | TIME / IDEA / NETWORK | ×2 | `hours × FMR` |
 | FACILITY | ×2 | `amount` |
-| REVENUE | ×2 | `actual_amount - invoice_amount` |
+| REVENUE | ×2 | *legacy – removed (use `proof` on Revenue)* |
 
 - Equity % = `(member_slices / total_team_slices) × 100`
 - **FMR** (Fair Market Rate) cap: `MAX_STUDENT_FMR=150000` IDR/jam
@@ -171,7 +171,7 @@ Client: `usePusher()` hook di `DashboardLayout` handle 3 events + presence membe
 
 ---
 
-## Models (10, semua pake HasUuids)
+## Models (12, semua pake HasUuids)
 
 - User, Team, TeamMember, Contribution, ContributionApproval
 - EquitySnapshot, Revenue, ProfitDistribution, FmrProposal, AuditLog
@@ -191,7 +191,7 @@ Client: `usePusher()` hook di `DashboardLayout` handle 3 events + presence membe
 - `QUEUE_CONNECTION=database` di `.env.example` — butuh `queue:listen` jalan.
 - `composer run dev` pake `npm` legacy. Frontend tetep `pnpm` — jalanin manual kalo script gagal.
 - Migrations pake `gen_random_uuid()` (PostgreSQL native). Gagal di MySQL.
-- Storage link: `php artisan storage:link` untuk invoice uploads.
+- Storage link: `php artisan storage:link` untuk proof uploads (bukti kontribusi/revenue).
 
 ---
 

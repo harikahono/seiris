@@ -23,7 +23,7 @@ cp .env.example .env     # set DB, MAX_STUDENT_FMR=150000
 php artisan key:generate
 php artisan migrate --seed
 php artisan serve         # http://localhost:8000 (CLI SAPI, bukan php-fpm)
-php artisan storage:link  # for invoice uploads
+php artisan storage:link  # for proof uploads (bukti kontribusi/revenue)
 ```
 - `composer run dev` — `php artisan serve` + `queue:listen` + `pail` + `npm run dev`
 - `composer run test` — `php artisan config:clear && php artisan test` (PHPUnit, SQLite `:memory:`)
