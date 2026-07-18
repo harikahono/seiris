@@ -25,8 +25,9 @@ class AuditLogController extends Controller
         $query = AuditLog::where('team_id', $team->id);
 
         // H-I: filter by project_id — for project-scoped audit views
+        // ponytail: whereRaw because Laravel doesn't support ->> operator in where()
         if ($request->filled('project_id')) {
-            $query->where('payload->>project_id', $request->project_id);
+            $query->whereRaw("payload->>'project_id' = ?", [$request->project_id]);
         }
 
         if ($request->filled('filter')) {
