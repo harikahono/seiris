@@ -139,7 +139,7 @@ table.data tbody tr:nth-child(odd)  { background: #fff; }
   {{-- BAR CHART (horizontal) --}}
   <td width="62%">
     <div class="section-title">Slices Per Anggota</div>
-    @php $maxSlices = max(array_column($snapshot['equity_map'], 'slices')); @endphp
+    @php $maxSlices = $snapshot['equity_map'] ? max(array_column($snapshot['equity_map'], 'slices')) : 0; @endphp
     <table style="width:100%; border-collapse:collapse;">
       @foreach($snapshot['equity_map'] as $m)
       <tr>
