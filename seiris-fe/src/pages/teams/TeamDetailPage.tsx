@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation, Outlet } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRealtime } from "@/contexts/RealtimeContext";
 import { useProjectContext } from "@/contexts/ProjectContext";
 import ProjectSelector from "@/components/teams/ProjectSelector";
 import type { Team } from "@/types";
@@ -23,6 +24,7 @@ export default function TeamDetailPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { currentProjectId } = useProjectContext();
+  const { refreshVersion } = useRealtime();
   const isSettings = pathname.endsWith("/settings");
   const [team, setTeam] = useState<Team | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -46,6 +48,15 @@ export default function TeamDetailPage() {
   }, [teamId]);
 
   useEffect(() => { fetchTeam(currentProjectId ?? undefined); }, [fetchTeam, currentProjectId]);
+
+  // Realtime: re-fetch team data when Pusher event arrives
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    fetchTeam(currentProjectId ?? undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
 
   if (initialLoading) {
     return (

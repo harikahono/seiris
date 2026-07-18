@@ -7,7 +7,8 @@ import { useProjectContext } from "@/contexts/ProjectContext";
 import type { Contribution as ContributionType, Team } from "@/types";
 import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
-import { ArrowLeft, ThumbsUp, ThumbsDown, X } from "lucide-react";
+import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
+import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Skeleton from "@/components/ui/Skeleton";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ export default function ContributionDetailPage() {
   const navigate = useNavigate();
   const [contribution, setContribution] = useState<ContributionType | null>(null);
   const [showDiff, setShowDiff] = useState(false);
+  const [showProof, setShowProof] = useState(false);
   const [diffFiles, setDiffFiles] = useState<any[]>([]);
   const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -182,9 +184,12 @@ export default function ContributionDetailPage() {
 
         {featureEnabled && (
           <>
-            {/* Proof link */}
+            {/* Proof link — pakai modal seperti revenue */}
             {contribution.proof_url && (
-              <a href={contribution.proof_url} target="_blank" rel="noopener noreferrer" className="inline-block mb-3 text-sm text-accent underline hover:text-accent-hover">Lihat Bukti</a>
+              <button onClick={() => setShowProof(true)} className="mb-3 flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent">
+                <ExternalLink className="size-4" />
+                Lihat Bukti
+              </button>
             )}
             {/* GitHub diff button */}
             {contribution.source_url && (
@@ -192,31 +197,51 @@ export default function ContributionDetailPage() {
             )}
             {/* Diff modal */}
             {showDiff && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                <div className="w-full max-w-2xl rounded-xl bg-[#0d0d0d] p-6 shadow-2xl">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-white">Diff GitHub</h2>
-                    <button onClick={() => setShowDiff(false)} className="text-gray-400 hover:text-white"><X className="size-5" /></button>
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+                <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
+                    <span className="text-sm font-medium text-gray-300">Diff GitHub</span>
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={contribution.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-accent hover:underline"
+                      >
+                        <ExternalLink className="size-3.5" />
+                        Lihat di GitHub
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => setShowDiff(false)}
+                        className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white"
+                        aria-label="Tutup"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="max-h-96 overflow-y-auto space-y-4">
-                    {diffFiles.length === 0 ? (
-                      <p className="text-gray-400">Tidak ada perubahan.</p>
-                    ) : (
-                      diffFiles.map((f, i) => (
-                        <div key={i} className="rounded border border-gray-700 bg-gray-950 p-2">
-                          <p className="mb-1 text-xs font-medium text-accent">{f.filename}</p>
-                          <pre className="whitespace-pre-wrap text-xs leading-5">
-                          {f.patch.split('\n').map((line: string, li: number) => {
-                            let cls = "text-gray-300";
-                            if (line.startsWith('+')) cls = "text-green-400";
-                            else if (line.startsWith('-')) cls = "text-red-400";
-                            else if (line.startsWith('@@')) cls = "text-cyan-400";
-                            return <div key={li} className={cls}>{line}</div>;
-                          })}
-                        </pre>
-                        </div>
-                      ))
-                    )}
+                  <div className="flex-1 overflow-auto p-4">
+                    <div className="space-y-4">
+                      {diffFiles.length === 0 ? (
+                        <p className="text-gray-400">Tidak ada perubahan.</p>
+                      ) : (
+                        diffFiles.map((f, i) => (
+                          <div key={i} className="rounded border border-gray-700 bg-gray-950 p-2">
+                            <p className="mb-1 text-xs font-medium text-accent">{f.filename}</p>
+                            <pre className="whitespace-pre-wrap text-xs leading-5">
+                            {f.patch.split('\n').map((line: string, li: number) => {
+                              let cls = "text-gray-300";
+                              if (line.startsWith('+')) cls = "text-green-400";
+                              else if (line.startsWith('-')) cls = "text-red-400";
+                              else if (line.startsWith('@@')) cls = "text-cyan-400";
+                              return <div key={li} className={cls}>{line}</div>;
+                            })}
+                          </pre>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -337,11 +362,15 @@ export default function ContributionDetailPage() {
           <VotePanel
             contribution={contribution}
             currentMemberId={currentMemberId}
-            onVoted={fetchData}
+            onVoted={() => navigate(`/teams/${teamId}/contributions`)}
             isProjectMember={isProjectMember}
             frozen={contribution.project_id ? (projects.find((p) => p.id === contribution.project_id)?.is_frozen ?? false) : false}
           />
         </div>
+      )}
+
+      {contribution.proof_url && (
+        <ProofPreviewModal open={showProof} onClose={() => setShowProof(false)} url={contribution.proof_url} />
       )}
     </div>
   );

@@ -85,6 +85,8 @@ export default function ContributionsTab() {
 
   // Initial load + page change → loading=true from initial state
   useEffect(() => {
+    setLoading(true);
+    setEquityLoading(true);
     setPage(1);
     Promise.all([fetchEquity(), fetchContributions()])
       .finally(() => { setLoading(false); setEquityLoading(false); });
@@ -182,7 +184,7 @@ export default function ContributionsTab() {
               </button>
             </div>
 
-            {currentProjectId !== null && !isCurrentUserProjectMember && (
+            {currentProjectId !== null && !isCurrentUserProjectMember && !loading && (
               <p className="mb-3 rounded-lg border border-gray-800 bg-gray-900/40 px-3 py-2 text-xs text-gray-500">
                 Mode lihat saja — kamu bukan anggota project ini. Minta owner menambahkanmu untuk bisa kontribusi &amp; vote.
               </p>
