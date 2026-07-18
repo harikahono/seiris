@@ -25,10 +25,40 @@ return new class extends Migration
 
             $table->index(['team_id', 'is_frozen']);
         });
+
+        // project_id FK — can't be inlined in create_* tables because
+        // projects table must exist first for the constraint to work.
+        Schema::table('contributions', function (Blueprint $table) {
+            $table->foreignUuid('project_id')->nullable()->after('member_id')
+                ->constrained('projects')->restrictOnDelete();
+            $table->index(['project_id', 'status']);
+        });
+
+        Schema::table('revenues', function (Blueprint $table) {
+            $table->foreignUuid('project_id')->nullable()->after('team_id')
+                ->constrained('projects')->restrictOnDelete();
+            $table->index('project_id');
+        });
+
+        Schema::table('equity_snapshots', function (Blueprint $table) {
+            $table->foreignUuid('project_id')->nullable()->after('team_id')
+                ->constrained('projects')->restrictOnDelete();
+            $table->index(['team_id', 'project_id']);
+        });
     }
 
     public function down(): void
     {
+        Schema::table('equity_snapshots', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('project_id');
+        });
+        Schema::table('revenues', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('project_id');
+        });
+        Schema::table('contributions', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('project_id');
+        });
+
         Schema::dropIfExists('projects');
     }
 };

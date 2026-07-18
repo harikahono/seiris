@@ -20,7 +20,7 @@ class Contribution extends Model
         'value', 'multiplier', 'total_slices', 'status',
         'contribution_date',
         'deal_value', 'estimated_value', 'commission_rate',
-        'project_id', 'hours',
+        'project_id', 'hours', 'proof_path', 'source_url',
     ];
 
     protected function casts(): array
@@ -35,6 +35,14 @@ class Contribution extends Model
             'contribution_date'=> 'date',
             'hours'            => 'decimal:2',
         ];
+    }
+
+    /**
+     * ponytail: proof URL accessor – mirrors Revenue proof_url.
+     */
+    public function getProofUrlAttribute(): ?string
+    {
+        return $this->proof_path ? asset('storage/' . $this->proof_path) : null;
     }
 
     public function team(): BelongsTo

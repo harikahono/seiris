@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import { createPortal } from "react-dom";
 import api from "@/api/axios";
 import { parseErrors } from "@/lib/parseErrors";
@@ -27,6 +27,8 @@ interface FieldErrors {
   deal_value?: string;
   estimated_value?: string;
   commission_rate?: string;
+  proof?: string;
+  source_url?: string;
 }
 
 export default function ContributionForm({ teamId, projectId, fmr, open, onClose, onCreated }: ContributionFormProps) {
@@ -43,7 +45,20 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
   const [estimatedValue, setEstimatedValue] = useState("");
   const [commissionRate, setCommissionRate] = useState("50");
   const [loading, setLoading] = useState(false);
+  // optional proof & source URL
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [sourceUrl, setSourceUrl] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [featureEnabled, setFeatureEnabled] = useState(true);
+
+  // Check feature flag
+  useEffect(() => {
+    api.get("/config")
+      .then((res) => {
+        setFeatureEnabled(!!res.data.features?.contribution_proof);
+      })
+      .catch(() => setFeatureEnabled(true));
+  }, []);
 
   if (!open) return null;
 
@@ -67,33 +82,31 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrors({});
-
     if (!type) return;
 
     setLoading(true);
     try {
+      // always use FormData to support file upload & source_url
+      const formData = new FormData();
+      formData.append('type', type);
+      formData.append('description', description.trim());
+      formData.append('contribution_date', contributionDate);
       if (isSales) {
-        const payload: Record<string, unknown> = {
-          type,
-          description: description.trim(),
-          contribution_date: contributionDate,
-          deal_value: Number(dealValue),
-          estimated_value: Number(estimatedValue),
-          commission_rate: Number(commissionRate),
-        };
-        if (projectId) payload.project_id = projectId;
-        await api.post(`${basePath}/contributions`, payload);
+        formData.append('deal_value', String(Number(dealValue)));
+        formData.append('estimated_value', String(Number(estimatedValue)));
+        formData.append('commission_rate', String(Number(commissionRate)));
       } else {
-        const payload: Record<string, unknown> = {
-          type,
-          description: description.trim(),
-          contribution_date: contributionDate,
-        };
-        if (requiresHours) payload.hours = Number(hours);
-        if (requiresAmount) payload.amount = Number(amount);
-        if (projectId) payload.project_id = projectId;
-        await api.post(`${basePath}/contributions`, payload);
+        if (requiresHours) formData.append('hours', String(Number(hours)));
+        if (requiresAmount) formData.append('amount', String(Number(amount)));
       }
+      if (projectId) formData.append('project_id', projectId);
+      if (featureEnabled) {
+        if (proofFile) formData.append('proof', proofFile);
+        if (sourceUrl) formData.append('source_url', sourceUrl.trim());
+      }
+
+      await api.post(`${basePath}/contributions`, formData);
+
       toast.success(`Kontribusi "${description.trim()}" (${type}) berhasil dicatat, menunggu vote`);
       onCreated();
       handleClose();
@@ -119,6 +132,8 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
     setDealValue("");
     setEstimatedValue("");
     setCommissionRate("50");
+    setProofFile(null);
+    setSourceUrl("");
     setErrors({});
     onClose();
   };
@@ -218,31 +233,44 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
                 {errors.contribution_date && <p className="mt-1 text-xs text-red-500">{errors.contribution_date}</p>}
               </div>
 
-              {requiresHours && (
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-300">
-                    Jumlah Jam <span className="text-gray-500">(min 0.5, maks 744)</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0.5"
-                    max="744"
-                    placeholder="Contoh: 8"
-                    value={hours}
-                    onChange={(e) => setHours(e.target.value)}
-                    required
-                    className={inputClass("hours")}
-                  />
-                  {errors.hours && <p className="mt-1 text-xs text-red-500">{errors.hours}</p>}
-                  {hours && !errors.hours && (
-                    <p className="mt-1 text-xs text-gray-500">
-                      ≈ {(Number(hours) * fmr).toLocaleString("id-ID")} value →{" "}
-                      <span className="text-accent">{(Number(hours) * fmr * 2).toLocaleString("id-ID")} slices</span>
-                    </p>
-                  )}
+              {featureEnabled && (<>
+                {/* Proof file */}
+                <div className="mt-4">
+                  <label className="mb-1.5 block text-sm font-medium text-gray-300">Bukti (PDF/JPG/PNG, maks 5 MB)</label>
+                  <input type="file" accept="application/pdf,image/jpeg,image/png" onChange={(e) => setProofFile(e.target.files?.[0] || null)} className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1" />
                 </div>
-              )}
+                {/* Source URL */}
+                <div className="mt-4">
+                  <label className="mb-1.5 block text-sm font-medium text-gray-300">Link GitHub PR/Commit</label>
+                  <input type="url" placeholder="https://github.com/.../pull/123" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1" />
+                </div>
+              </>)}
+
+              {requiresHours && (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                  Jumlah Jam <span className="text-gray-500">(min 0.5, maks 744)</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0.5"
+                  max="744"
+                  placeholder="Contoh: 8"
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                  required
+                  className={inputClass("hours")}
+                />
+                {errors.hours && <p className="mt-1 text-xs text-red-500">{errors.hours}</p>}
+                {hours && !errors.hours && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    ≈ {(Number(hours) * fmr).toLocaleString("id-ID")} value →{" "}
+                    <span className="text-accent">{(Number(hours) * fmr * 2).toLocaleString("id-ID")} slices</span>
+                  </p>
+                )}
+              </div>
+            )}
 
               {requiresAmount && (
                 <div>

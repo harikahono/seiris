@@ -12,19 +12,19 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('team_id')->constrained('teams')->cascadeOnDelete();
             $table->foreignUuid('member_id')->constrained('team_members')->cascadeOnDelete();
-            $table->enum('type', ['TIME', 'CASH', 'IDEA', 'NETWORK', 'FACILITY', 'REVENUE']);
+            $table->string('type', 20); // CASH, TIME, IDEA, NETWORK, FACILITY, SALES
             $table->string('description');
             $table->unsignedBigInteger('value')->comment('Contribution value in IDR');
             $table->decimal('multiplier', 3, 1)->comment('2.0 or 4.0');
             $table->unsignedBigInteger('total_slices')->comment('value * multiplier, immutable after creation');
+            $table->decimal('hours', 8, 2)->nullable()->comment('Hours worked (TIME/IDEA/NETWORK)');
             $table->enum('status', ['PENDING', 'APPROVED', 'REJECTED'])->default('PENDING');
+            $table->string('proof_path')->nullable();
+            $table->string('source_url')->nullable();
             $table->date('contribution_date');
-
-            // REVENUE specific
-            $table->unsignedBigInteger('invoice_amount')->nullable()->comment('Amount reported to team');
-            $table->unsignedBigInteger('actual_amount')->nullable()->comment('Actual deal value from invoice');
-            $table->string('invoice_path')->nullable()->comment('Path to uploaded invoice file');
-
+            $table->unsignedBigInteger('deal_value')->nullable();
+            $table->unsignedBigInteger('estimated_value')->nullable();
+            $table->decimal('commission_rate', 5, 2)->unsigned()->nullable();
             $table->timestamps();
 
             $table->index(['team_id', 'status']);

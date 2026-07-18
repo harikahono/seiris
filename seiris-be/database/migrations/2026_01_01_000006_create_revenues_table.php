@@ -15,12 +15,15 @@ return new class extends Migration
             $table->string('description');
             $table->unsignedBigInteger('amount')->comment('Gross revenue in IDR');
             $table->unsignedBigInteger('distributable_amount')->comment('Amount to be distributed as profit');
+            $table->json('deductions')->nullable();
+            $table->string('status', 30)->default('pending');
             $table->string('proof_path')->nullable()->comment('Path to payment proof');
             $table->date('revenue_date');
             $table->boolean('is_distributed')->default(false);
             $table->timestamp('distributed_at')->nullable();
             $table->timestamps();
 
+            $table->index(['team_id', 'status']);
             $table->index(['team_id', 'is_distributed']);
         });
     }

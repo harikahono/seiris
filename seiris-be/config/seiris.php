@@ -5,6 +5,11 @@
 // ============================================================
 
 return [
+    // Feature flags – toggle optional features without code changes
+    'features' => [
+        // Enable proof upload & GitHub link for contributions
+        'contribution_proof' => true,
+    ],
     /*
     |--------------------------------------------------------------------------
     | Batas Maksimum Fair Market Rate (FMR) untuk Mahasiswa

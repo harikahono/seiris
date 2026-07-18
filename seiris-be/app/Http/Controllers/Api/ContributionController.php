@@ -15,6 +15,9 @@ use App\Services\SlicingPieService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 
 class ContributionController extends Controller
@@ -115,9 +118,14 @@ class ContributionController extends Controller
         $value = $this->calculateValue($request, $member, $fmr);
 
         // Hitung slices
+        // Handle optional proof upload
+        $proofPath = null;
+        if ($request->hasFile('proof')) {
+            $proofPath = $request->file('proof')->store('contributions', 'public');
+        }
         $slicesData = SlicingPieService::calculateSlices($request->type, $value);
 
-            $contribution = DB::transaction(function () use ($request, $team, $member, $value, $slicesData, $project) {
+            $contribution = DB::transaction(function () use ($request, $team, $member, $value, $slicesData, $project, $proofPath) {
             // LOCK: Ambil data tim dengan row-level lock untuk mencegah race condition
             // saat multiple kontribusi dibuat/diproses bersamaan untuk tim yang sama
             $lockedTeam = DB::table('teams')
@@ -144,6 +152,8 @@ class ContributionController extends Controller
                 'deal_value'        => $request->deal_value,
                 'estimated_value'   => $request->estimated_value,
                 'commission_rate'   => $request->commission_rate,
+                'proof_path'        => $proofPath,
+                'source_url'        => $request->input('source_url'),
             ]);
 
             AuditLogService::logFromRequest(
@@ -199,6 +209,109 @@ class ContributionController extends Controller
                 $contribution->load(['member.user', 'approvals.member.user'])
             ),
         ]);
+    }
+
+    // ── Proof & GitHub Diff Endpoints ─────────────────────────────
+    /**
+     * POST /api/teams/{team}/contributions/{contribution}/proof
+     * Attach or replace proof file / source URL (only while PENDING).
+     */
+    public function attachProof(Request $request, Team $team, Contribution $contribution, ?Project $project = null): JsonResponse
+    {
+        // auth handled by middleware
+        // ensure contribution belongs to team / project
+        if ($contribution->team_id !== $team->id) {
+            return response()->json(['message' => 'Kontribusi tidak ditemukan.'], 404);
+        }
+        if ($project && $contribution->project_id !== $project->id) {
+            return response()->json(['message' => 'Kontribusi tidak ditemukan di project ini.'], 404);
+        }
+        // only pending contributions can be updated
+        if ($contribution->status !== 'PENDING') {
+            return response()->json(['message' => 'Hanya kontribusi PENDING yang dapat di‑update bukti.'], 422);
+        }
+        // only contributor or team owner may modify
+        $member = $request->teamMember; // set by middleware
+        if ($member->id !== $contribution->member_id && !$member->isOwner()) {
+            return response()->json(['message' => 'Tidak berhak mengubah bukti.'], 403);
+        }
+        // validate optional inputs
+        $request->validate([
+            'proof' => ['nullable','file','mimes:pdf,jpg,png','max:5120'],
+            'source_url' => ['nullable','url','regex:/^https:\\/\\/github\\.com\\/[^\\/]+\\/[^\\/]+\\/(pull\\/\\d+|commit\\/[a-f0-9]+)$/'],
+        ]);
+        // source_url validation handled by regex rule above
+        $proofPath = null;
+        if ($request->hasFile('proof')) {
+            $proofPath = $request->file('proof')->store('contributions', 'public');
+        }
+        // update fields
+        $contribution->update([
+            'proof_path' => $proofPath ?? $contribution->proof_path,
+            'source_url' => $request->input('source_url') ?? $contribution->source_url,
+        ]);
+        return response()->json([
+            'message' => 'Bukti kontribusi berhasil disimpan.',
+            'data' => new ContributionResource($contribution->load('member.user')),
+        ]);
+    }
+
+    /**
+     * GET /api/teams/{team}/contributions/{contribution}/github-diff
+     * Fetch diff from GitHub PR/commit URL (cached 1 day).
+     */
+    public function githubDiff(Request $request, Team $team, Contribution $contribution, ?Project $project = null): JsonResponse
+    {
+        // auth handled by middleware
+        if ($contribution->team_id !== $team->id) {
+            return response()->json(['message' => 'Kontribusi tidak ditemukan.'], 404);
+        }
+        if ($project && $contribution->project_id !== $project->id) {
+            return response()->json(['message' => 'Kontribusi tidak ditemukan di project ini.'], 404);
+        }
+        $url = $contribution->source_url;
+        if (!$url) {
+            return response()->json(['message' => 'source_url tidak ada pada kontribusi ini.'], 422);
+        }
+        // allow only github.com and pull/commit paths
+        if (!str_contains($url, 'github.com') || !(str_contains($url, '/pull/') || str_contains($url, '/commit/'))) {
+            return response()->json(['message' => 'URL bukan link GitHub PR atau commit yang valid.'], 422);
+        }
+        $cacheKey = 'github_diff:' . md5($url);
+        $diff = Cache::remember($cacheKey, now()->addDay(), function () use ($url, $contribution) {
+            $token = $contribution->member->user->github_token ?? null;
+            $headers = [];
+            if ($token) {
+                $headers['Authorization'] = "Bearer $token";
+            }
+            $response = Http::withHeaders($headers)->timeout(5)->get($url . '.diff');
+            if ($response->failed()) {
+                Log::warning('[GitHubDiff] fetch failed', ['url' => $url, 'status' => $response->status()]);
+                return null;
+            }
+            // parser: split by "diff --git" lines
+            $raw = $response->body();
+            $files = [];
+            $chunks = preg_split('/\ndiff --git /', $raw);
+            foreach ($chunks as $chunk) {
+                if (empty(trim($chunk))) continue;
+                // first chunk already starts with "diff --git", others need it prepended
+                if (!str_starts_with($chunk, 'diff --git')) {
+                    $chunk = 'diff --git ' . $chunk;
+                }
+                if (preg_match('/^diff --git a\/([^ ]+) b\/([^ ]+)/m', $chunk, $m)) {
+                    $files[] = [
+                        'filename' => $m[2],
+                        'patch' => $chunk,
+                    ];
+                }
+            }
+            return $files;
+        });
+        if ($diff === null) {
+            return response()->json(['message' => 'Gagal mengambil diff dari GitHub.'], 502);
+        }
+        return response()->json(['files' => $diff]);
     }
 
     // ── Private Helpers ───────────────────────────────────────

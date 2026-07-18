@@ -4,7 +4,7 @@
 
 ## Konvensi
 - Pagination: `{ data[], meta:{ current_page, last_page, total } }` (kecuali disebutkan).
-- Error: `422` validasi (`{message:'Data tidak valid.', errors:{...}}`, pesan Indonesia), `403` forbidden, `409` conflict, `413`/file-too-big, `401` unauth.
+- Error: `422` validasi (`{message:'Data tidak valid.', errors:{...}}`, pesan Indonesia), `403` forbidden, `409` conflict, `413`/file-too-big, `401` unauth, `502` (GitHub diff fetch gagal).
 - Throttle: `api`=120/menit, `write`=30/menit, `auth`=5/email + 60/ip per menit (definisi di `AppServiceProvider::RateLimiter`, BUKAN `config/auth.php`).
 - Middleware scope: `team.member` (EnsureTeamMember) / `project.member` (EnsureProjectMember, write-tier wajib roster project). Route tanpa `{team}` param (vote/distribute/request-distribute/fmr approve-reject) cek membership manual di controller.
 
@@ -20,7 +20,16 @@
 | POST | `/auth/login` | auth | email, password | `{message, token, user}` / 401 `Email atau password salah.` |
 | POST | `/auth/logout` | write | — | `{message:'Logout berhasil.'}` |
 | GET | `/auth/me` | — | — | `{user:UserResource}` |
+| PATCH | `/users/me/profile` | write | name, email, password? (nullable, min:8, confirmed), profile_photo? (file, image, max 5MB) | 200 `{message, user:UserResource}` |
+| PATCH | `/users/me/github-token` | write | `github_token` (nullable string, max:255, empty → clear) | 200 `{message, user:UserResource}` |
 | POST | `/broadcasting/auth` | write | channel_name | respon Pusher auth (presence) |
+
+## Config
+| Method | Path | Res |
+|--------|------|-----|
+| GET | `/config` | `{ features: { contribution_proof: bool } }` — feature flags (inline closure, no controller) |
+
+> `UserResource` sekarang punya field `has_github_token: bool` (bukan token itu sendiri).
 
 ## Dashboard
 | Method | Path | Res |
@@ -49,8 +58,12 @@
 | Method | Path | Throttle | Body | Res |
 |--------|------|----------|------|-----|
 | GET | `/teams/{team}/contributions` | — | `status?`, `page` | paginasi ContributionResource |
-| POST | `/teams/{team}/contributions` | write | type, description, contribution_date, + per-type (TIME/IDEA/NETWORK: hours; CASH/FACILITY: amount; SALES: deal_value,estimated_value,commission_rate) | 201 `{message, data}` / 403 frozen / 422 FMR=0 (TIME/IDEA/NETWORK) |
+| POST | `/teams/{team}/contributions` | write | type, description, contribution_date, proof? (file, pdf/jpg/png max 5MB), source_url? (regex: github PR/commit URL), + per-type (TIME/IDEA/NETWORK: hours; CASH/FACILITY: amount; SALES: deal_value,estimated_value,commission_rate) | 201 `{message, data}` / 403 frozen / 422 FMR=0 (TIME/IDEA/NETWORK) |
 | GET | `/teams/{team}/contributions/{contribution}` | — | — | `{data:ContributionResource}` / 404 |
+| POST | `/teams/{team}/contributions/{contribution}/proof` | write | proof? (file), source_url? (regex) | 200 `{data:ContributionResource}` / 422 not PENDING / 403 unauthorized |
+| GET | `/teams/{team}/contributions/{contribution}/github-diff` | — | — | `{files:[{filename,patch}]}` (cached 1 hari) / 422 no source_url / 502 GitHub unreachable |
+
+> Routes `proof` dan `github-diff` hanya terdaftar bila `config('seiris.features.contribution_proof') === true`. `source_url` regex: `/^https:\/\/github\.com\/[^\/]+\/[^\/]+\/(pull\/\d+|commit\/[a-f0-9]+)$/`.
 
 ## Voting (TANPA team.member — cek manual)
 | Method | Path | Throttle | Body | Res / Error |
@@ -95,6 +108,8 @@
 | GET | `/teams/{team}/projects/{project}/contributions` | project.member | `status?`,`page` | paginasi ContributionResource (scope project) |
 | POST | `/teams/{team}/projects/{project}/contributions` | write | spt contribution tim | 201 `{message, data}` / 403 bukan roster |
 | GET | `/teams/{team}/projects/{project}/contributions/{contribution}` | project.member | — | `{data:ContributionResource}` |
+| POST | `/teams/{team}/projects/{project}/contributions/{contribution}/proof` | write | proof? (file), source_url? (regex) | 200 `{data:ContributionResource}` / 422 / 403 |
+| GET | `/teams/{team}/projects/{project}/contributions/{contribution}/github-diff` | — | — | `{files:[{filename,patch}]}` (cached) / 422 / 502 |
 | GET | `/teams/{team}/projects/{project}/revenues` | project.member | `page` | paginasi RevenueResource (scope project) |
 | POST | `/teams/{team}/projects/{project}/revenues` | write | spt revenue tim | 201 `{message, data}` / 403 bukan roster |
 | GET | `/teams/{team}/projects/{project}/equity` | project.member | — | inline equity scope project |

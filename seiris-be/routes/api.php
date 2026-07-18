@@ -55,10 +55,15 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Auth
     Route::post('auth/logout', [AuthController::class, 'logout'])->middleware('throttle:write');
-    Route::get('auth/me',      [AuthController::class, 'me']);
+    Route::get('auth/me', [AuthController::class, 'me']);
+    // User settings
+    Route::patch('users/me/profile', [AuthController::class, 'updateProfile'])->middleware('throttle:write');
+    Route::patch('users/me/github-token', [AuthController::class, 'updateGithubToken'])->middleware('throttle:write');
 
     // Dashboard
     Route::get('my-dashboard', [DashboardController::class, 'index']);
+    // Config
+    Route::get('config', fn () => response()->json(['features' => config('seiris.features')]));
 
     // Teams — no team param (create, list, join)
     Route::post('teams',       [TeamController::class, 'store'])->middleware('throttle:write');
@@ -86,6 +91,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('teams/{team}/contributions',                  [ContributionController::class, 'index']);
         Route::post('teams/{team}/contributions',                 [ContributionController::class, 'store'])->middleware('throttle:write');
         Route::get('teams/{team}/contributions/{contribution}',   [ContributionController::class, 'show']);
+        // Proof attach/replace (PENDING only) & GitHub diff viewer (read‑only) – toggleable via feature flag
+        if (config('seiris.features.contribution_proof')) {
+            Route::post('teams/{team}/contributions/{contribution}/proof', [ContributionController::class, 'attachProof'])->middleware('throttle:write');
+            Route::get('teams/{team}/contributions/{contribution}/github-diff', [ContributionController::class, 'githubDiff']);
+        }
 
         // Revenues
         Route::get('teams/{team}/revenues',                       [RevenueController::class, 'index']);
@@ -117,6 +127,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
             Route::get('contributions',                           [ContributionController::class, 'index']);
             Route::post('contributions',                          [ContributionController::class, 'store'])->middleware('throttle:write');
             Route::get('contributions/{contribution}',            [ContributionController::class, 'show']);
+            // Proof & diff scoped ke project (feature flag)
+            if (config('seiris.features.contribution_proof')) {
+                Route::post('contributions/{contribution}/proof', [ContributionController::class, 'attachProof'])->middleware('throttle:write');
+                Route::get('contributions/{contribution}/github-diff', [ContributionController::class, 'githubDiff']);
+            }
 
             // Revenues scoped ke project
             Route::get('revenues',                                [RevenueController::class, 'index']);

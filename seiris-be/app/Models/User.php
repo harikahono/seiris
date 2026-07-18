@@ -14,7 +14,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasUuids, HasFactory;
 
-        protected $fillable = ['name', 'email', 'password'];
+        protected $fillable = ['name', 'email', 'password', 'github_token', 'profile_photo_path'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -24,6 +24,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
         ];
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        return $this->profile_photo_path
+            ? asset('storage/' . $this->profile_photo_path)
+            : null;
     }
 
     public function teamMembers(): HasMany

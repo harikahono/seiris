@@ -51,6 +51,15 @@ For investors, the key advantage is that every equity change leaves an **immutab
 
 > Security: passwords are never displayed; every API request requires the token.
 
+### 3.1 Account Settings (`/settings`)
+After login, you can access **Pengaturan Akun** from the sidebar:
+- **Profil**: update nama, email, password (opsional), dan foto profil (JPG/PNG/WebP, maks 5 MB).
+- **GitHub Token**: optional personal access token (classic, with `repo` scope) used to fetch private repo diffs for contribution proof. You can show/hide the token or clear it.
+
+> **Team Settings** (Pengaturan Tim) hanya terlihat oleh **owner** tim pada sidebar. Anggota biasa tidak melihat menu tersebut.
+
+
+
 ## 4. Dashboard
 Main screen after login:
 - **"My Equity" card** — your %, your slices, total team slices.
@@ -111,6 +120,21 @@ The **Create Contribution** button is automatically **disabled + 🔒**, and a b
 
 (Revenue is still allowed — see §10.)
 
+### 8.5 Bukti Kontribusi (Proof & GitHub Link)
+When creating a contribution you can optionally add:
+- **File bukti** (PDF, JPG, PNG up to 5 MB) — e.g. receipt, contract, screenshot.
+- **Link GitHub** (PR or commit URL) — e.g. `https://github.com/owner/repo/pull/123` or `https://github.com/owner/repo/commit/abc123`.
+
+Only the **creator** or **owner** can attach proof, and only while the contribution is still **PENDING** (before approval/rejection).
+
+On the Contribution Detail page, you'll see:
+- **Proof file** → click to download.
+- **GitHub link** → click to open on GitHub.
+- **Lihat Diff** (if GitHub link is set) → opens an inline diff viewer with syntax coloring (green = added, red = removed, cyan = code context).
+
+### 8.6 Diff Cache
+The GitHub diff is **cached for 1 day** on the server. Subsequent views load instantly. To fetch a fresh diff, wait for the cache to expire.
+
 ## 9. Equity & Freeze
 ### 9.1 Equity tab
 Pie chart, member table (% & slices), and breakdown by contribution type. An **Export PDF** button produces the cap table (useful for investors).
@@ -153,6 +177,15 @@ A: No. Equity snapshots are append-only; to correct, create a new contribution (
 
 **Q: What's the difference between freezing a project vs the team?**
 A: Freezing a project locks one project's pie; freezing the team locks the entire cap table (all projects must be frozen first).
+
+**Q: The diff viewer shows "Failed to Fetch Diff" — what now?**
+A: For **private repos**, set your GitHub Personal Access Token in Pengaturan Akun → GitHub Token. The token must have `repo` scope. For public repos, no token is needed.
+
+**Q: I attached the wrong file — can I replace it?**
+A: Yes, as long as the contribution is still PENDING. Just upload again — the old file is replaced.
+
+**Q: Can I add a GitHub link after creating the contribution?**
+A: Yes. Open the contribution detail page and use the attach form (PENDING only). Both file and link can be added or updated.
 
 **Q: How does an investor see ownership?**
 A: Export the PDF cap table from the Equity tab (team scope).

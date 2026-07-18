@@ -7,7 +7,7 @@ import { useProjectContext } from "@/contexts/ProjectContext";
 import type { Contribution as ContributionType, Team } from "@/types";
 import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
-import { ArrowLeft, ThumbsUp, ThumbsDown } from "lucide-react";
+import { ArrowLeft, ThumbsUp, ThumbsDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Skeleton from "@/components/ui/Skeleton";
 import { toast } from "sonner";
@@ -17,9 +17,12 @@ export default function ContributionDetailPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [contribution, setContribution] = useState<ContributionType | null>(null);
+  const [showDiff, setShowDiff] = useState(false);
+  const [diffFiles, setDiffFiles] = useState<any[]>([]);
   const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isProjectMember, setIsProjectMember] = useState(true);
+  const [featureEnabled, setFeatureEnabled] = useState(true);
 
   const fetchData = useCallback(async () => {
     if (!teamId || !contributionId) return;
@@ -48,6 +51,26 @@ export default function ContributionDetailPage() {
   }, [teamId, contributionId, user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Check feature flag
+  useEffect(() => {
+    api.get("/config")
+      .then((res) => setFeatureEnabled(!!res.data.features?.contribution_proof))
+      .catch(() => setFeatureEnabled(true));
+  }, []);
+
+  // Load GitHub diff for this contribution
+  const loadDiff = async () => {
+    if (!teamId || !contributionId) return;
+    try {
+      const res = await api.get<{ files: any[] }>(`/teams/${teamId}/contributions/${contributionId}/github-diff`);
+      setDiffFiles(res.data.files ?? []);
+      setShowDiff(true);
+    } catch (e) {
+      toast.error('Gagal mengambil diff dari GitHub');
+    }
+  };
+
 
   // ── Realtime: refresh on Pusher event ──
   const { refreshVersion } = useRealtime();
@@ -156,6 +179,51 @@ export default function ContributionDetailPage() {
         </div>
 
         <p className="mb-5 text-sm text-gray-300 leading-relaxed">{contribution.description}</p>
+
+        {featureEnabled && (
+          <>
+            {/* Proof link */}
+            {contribution.proof_url && (
+              <a href={contribution.proof_url} target="_blank" rel="noopener noreferrer" className="inline-block mb-3 text-sm text-accent underline hover:text-accent-hover">Lihat Bukti</a>
+            )}
+            {/* GitHub diff button */}
+            {contribution.source_url && (
+              <button onClick={loadDiff} className="mb-3 ml-4 rounded bg-accent px-3 py-1 text-sm font-medium text-black hover:bg-accent-hover">Lihat Perubahan Kode</button>
+            )}
+            {/* Diff modal */}
+            {showDiff && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                <div className="w-full max-w-2xl rounded-xl bg-[#0d0d0d] p-6 shadow-2xl">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold text-white">Diff GitHub</h2>
+                    <button onClick={() => setShowDiff(false)} className="text-gray-400 hover:text-white"><X className="size-5" /></button>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto space-y-4">
+                    {diffFiles.length === 0 ? (
+                      <p className="text-gray-400">Tidak ada perubahan.</p>
+                    ) : (
+                      diffFiles.map((f, i) => (
+                        <div key={i} className="rounded border border-gray-700 bg-gray-950 p-2">
+                          <p className="mb-1 text-xs font-medium text-accent">{f.filename}</p>
+                          <pre className="whitespace-pre-wrap text-xs leading-5">
+                          {f.patch.split('\n').map((line: string, li: number) => {
+                            let cls = "text-gray-300";
+                            if (line.startsWith('+')) cls = "text-green-400";
+                            else if (line.startsWith('-')) cls = "text-red-400";
+                            else if (line.startsWith('@@')) cls = "text-cyan-400";
+                            return <div key={li} className={cls}>{line}</div>;
+                          })}
+                        </pre>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
 
         <div className="flex flex-wrap gap-6">
           <div className="min-w-[120px] rounded-lg border border-gray-800 bg-gray-950/50 p-3">

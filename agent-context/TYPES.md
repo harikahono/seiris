@@ -8,11 +8,11 @@ Semua type ada di satu file. Yang sering dipakai:
 
 | Interface | Field penting |
 |-----------|---------------|
-| `User` | id, name, email, avatar, created_at |
+| `User` | id, name, email, avatar, created_at, **has_github_token** (`boolean\|undefined`), **profile_photo_url** (`string\|null`) |
 | `Team` | id, name, description, invite_code, approval_threshold (`"50"\|"75"\|"100"`), is_frozen, frozen_at, owner, members[], members_count |
 | `TeamMember` | id, role (`"owner"\|"member"`), fmr, **project_fmr** (`number\|null`, per-project FMR), status (`"active"\|"exited"`), exited_at, user, joined_at |
 | `ProjectItem` | id, team_id, name, description, is_frozen, frozen_at, created_at, updated_at |
-| `Contribution` | id, **project_id** (`string\|null`), type (`ContributionType`), description, value, multiplier (`string`), total_slices, status (`"PENDING"\|"APPROVED"\|"REJECTED"`), contribution_date, deal_value/estimated_value/commission_rate (SALES), member, approvals[], approvals_count, hours? |
+| `Contribution` | id, **project_id** (`string\|null`), type (`ContributionType`), description, value, multiplier (`string`), total_slices, status (`"PENDING"\|"APPROVED"\|"REJECTED"`), contribution_date, deal_value/estimated_value/commission_rate (SALES), member, approvals[], approvals_count, hours?, **proof_url** (`string\|null`), **source_url** (`string\|null`) |
 | `ContributionApproval` | id, vote (`"APPROVE"\|"REJECT"`), note, member, voted_at |
 | `EquityData` | snapshot_id, **project_id** (`string\|null`), total_slices, equity_map (`EquityMemberEntry[]`), slices_by_type, is_frozen, calculated_at |
 | `EquityMemberEntry` | member_id, name, role, slices, equity_pct |
@@ -22,7 +22,7 @@ Semua type ada di satu file. Yang sering dipakai:
 | `FmrProposal` | id, proposed_fmr, status (`"PENDING"\|"APPROVED"\|"REJECTED"`), member, reviewer, created_at, reviewed_at |
 | `AuditLogItem` | id, action, actor, subject_type, subject_id, payload, ip_address, created_at |
 
-Payload types: `LoginPayload`, `RegisterPayload`, `CreateTeamPayload`, `CreateContributionPayload`, `VotePayload`, `CreateRevenuePayload` (proof?: `File`). Pagination: `PaginatedData<T> = { data, meta:{current_page,last_page,total} }`.
+Payload types: `LoginPayload`, `RegisterPayload`, `CreateTeamPayload`, `CreateContributionPayload` (proof?: `File`, source_url?: `string`), `VotePayload`, `CreateRevenuePayload` (proof?: `File`). Pagination: `PaginatedData<T> = { data, meta:{current_page,last_page,total} }`.
 
 ## BE models (12, semua `HasUuids`)
 
@@ -45,10 +45,10 @@ Payload types: `LoginPayload`, `RegisterPayload`, `CreateTeamPayload`, `CreateCo
 
 | Resource | Field diekspor |
 |----------|---------------|
-| `UserResource` | id, name, email, created_at |
+| `UserResource` | id, name, email, created_at, **has_github_token** (`bool`), **profile_photo_url** (`string\|null`) |
 | `TeamMemberResource` | id, team_id, role, fmr, **project_fmr**, status, exited_at, user, joined_at |
 | `TeamResource` | id, name, description, invite_code, approval_threshold, is_frozen, frozen_at, owner, members[], members_count, created_at |
-| `ContributionResource` | id, type, description, value, multiplier, total_slices, status, contribution_date, deal_value/estimated_value/commission_rate (SALES), member, approvals[], approvals_count, created_at, hours (TIME/IDEA/NETWORK) |
+| `ContributionResource` | id, type, description, value, multiplier, total_slices, status, contribution_date, deal_value/estimated_value/commission_rate (SALES), member, approvals[], approvals_count, created_at, hours (TIME/IDEA/NETWORK), **proof_url** (`string\|null`), **source_url** (`string\|null`) |
 | `ContributionApprovalResource` | id, vote, note, member, voted_at |
 | `RevenueResource` | id, **project_id**, **distributable** (`bool = !!distributableSnapshot()`), description, amount, distributable_amount, deductions, proof_url, revenue_date, status, is_distributed, distributed_at, recorded_by, distributions[], created_at |
 | `FmrProposalResource` | id, proposed_fmr, status, member, reviewer, created_at, reviewed_at |
