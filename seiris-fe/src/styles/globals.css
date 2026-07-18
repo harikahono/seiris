@@ -91,7 +91,7 @@
 }
 
 /* ponytail: position relative supaya nomor baris diff mengikuti tiap baris, bukan stuck */
-.d2h-code-line,
-.d2h-code-side-line {
-  position: relative;
+.d2h-wrapper .d2h-code-side-line,
+.d2h-wrapper .d2h-code-line {
+  position: relative !important;
 }

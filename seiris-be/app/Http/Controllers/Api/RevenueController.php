@@ -95,6 +95,7 @@ class RevenueController extends Controller
                     'amount'               => $revenue->amount,
                     'distributable_amount' => $revenue->distributable_amount,
                 ],
+                projectId:   $revenue->project_id,
             );
 
             return $revenue;
@@ -166,16 +167,17 @@ class RevenueController extends Controller
 
         $revenue->update(['status' => 'distribute_requested']);
 
-        AuditLogService::logFromRequest(
-            request:     $request,
-            teamId:      $team->id,
-            action:      'profit.requested',
-            subjectType: Revenue::class,
-            subjectId:   $revenue->id,
-            payload:     [
-                'distributable_amount' => $revenue->distributable_amount,
-            ],
-        );
+            AuditLogService::logFromRequest(
+                request:     $request,
+                teamId:      $team->id,
+                action:      'profit.requested',
+                subjectType: Revenue::class,
+                subjectId:   $revenue->id,
+                payload:     [
+                    'distributable_amount' => $revenue->distributable_amount,
+                ],
+                projectId:   $revenue->project_id,
+            );
 
         broadcast(new TeamUpdated($team, 'profit.requested', $request->user()->name))->toOthers();
 
@@ -252,6 +254,7 @@ class RevenueController extends Controller
                     'snapshot_id'          => $snapshot->id,
                     'distributions_count'  => count($distributions),
                 ],
+                projectId:   $revenue->project_id,
             );
 
             return $distributions;
