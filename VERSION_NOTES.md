@@ -49,4 +49,48 @@ Custom 429 JSON response with `Retry-After` headers.
 - `routes/api.php` — throttle policy assignments
 
 ---
-*V2 tagged after P0/P1/P2 fixes + rate limiter + docs cleanup*
+
+## V2.1 — Contribution Proof & Diff Viewer (2026-07-18)
+
+### What Changed
+Added **bukti kontribusi** feature: file upload + GitHub link/source_url + diff viewer for contributions.
+
+### New Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| PATCH | `/api/users/me/github-token` | Save/clear GitHub personal access token |
+| GET | `/api/config` | Returns feature flags (`{features:{contribution_proof:bool}}`) |
+| POST | `/api/teams/{team}/contributions/{contribution}/proof` | Attach proof file & source URL to a PENDING contribution |
+| GET | `/api/teams/{team}/contributions/{contribution}/github-diff` | Fetch & cache diff from GitHub PR/commit URL |
+| POST | `/api/teams/{team}/projects/{project}/contributions/{contribution}/proof` | (same, project-scoped) |
+| GET | `/api/teams/{team}/projects/{project}/contributions/{contribution}/github-diff` | (same, project-scoped) |
+
+### Database
+- `contributions` — added `proof_path` (string, nullable), `source_url` (string, nullable)
+- `users` — added `github_token` (string, nullable)
+
+### Feature Flag
+- `config/seiris.php`: `features.contribution_proof` (bool) — guards all proof/diff routes + FE UI
+
+### Frontend Changes
+- `ContributionForm.tsx` — proof file upload & source URL input (flagged)
+- `ContributionDetailPage.tsx` — proof download link, GitHub link, diff viewer modal (with syntax coloring)
+- `SettingsPage.tsx` — GitHub token input (show/hide, clear)
+- `DashboardLayout.tsx` — sidebar link to "Pengaturan Akun"
+- `App.tsx` — `/settings` route added
+- `AuthContext.tsx` — `setUser` exposed for token update
+
+### Key Technical Details
+- Diff parser: `preg_split('/\ndiff --git /')` (bukan `explode`), handles multi-file diffs
+- Diff cache: `Cache::remember` TTL 1 day, key `github_diff:<md5(url)>`
+- GitHub auth: uses user's `github_token` if set (Bearer header) to fetch private repo diffs
+- Upload: 5 MB limit, `public` disk, `contributions/` path
+- Validation: `source_url` regex `/(pull\/\d+|commit\/[a-f0-9]+)$/` — supports both PRs and commits
+
+### Bug Fixes
+| ID | Issue | Fix |
+|----|-------|-----|
+| P1 | Commit hash regex `\d+` didn't match hex characters | Changed to `[a-f0-9]+` in both `StoreContributionRequest` and `attachProof` |
+| P2 | Diff parser used `explode("\n\n")` — broke on multi-file diffs | Changed to `preg_split('/\ndiff --git /')` |
+| P3 | `postJson()` used in file upload test — didn't send multipart | Changed to `post()` |
+| P4 | Missing `AuthContext.setUser` export prevented FE token update | Exposed `setUser` from context |

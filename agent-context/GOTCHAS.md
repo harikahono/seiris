@@ -34,3 +34,21 @@
 - **`Contribution.value`/`hours`/dsb boleh berubah di model, tapi `total_slices` tidak** — slice final dihitung ulang saat APPROVED lewat `recalculate()`.
 - **Distribusi butuh snapshot scope:** `Revenue::distributableSnapshot()` null → distribute 422. Untuk revenue project-scoped, harus ada snapshot `project_id` sama.
 - **Legacy invoice fields** (`invoice_path`, `invoice_amount`, `actual_amount`) **dihapus** (migration `2026_07_09_000001_drop_revenue_enum_and_legacy_columns.php`). Gunakan `proof_path`/`proof_url` pada Contribution untuk bukti. ✅
+
+## Proof & Diff traps (new in this patch)
+- **Feature flag `contribution_proof` guards TWO things:** route registration (BE) AND form/button rendering (FE). Bila dicabut, pastikan keduanya sinkron — FE jangan kirim request ke endpoint yang 404.
+- **`source_url` regex validasi** berlaku di dua tempat: `StoreContributionRequest` (saat create) dan inline `attachProof` (saat update). Regex harus sama: `/^https:\/\/github\.com\/[^\/]+\/[^\/]+\/(pull\/\d+|commit\/[a-f0-9]+)$/`. Jangan ubah satu tanpa yang lain.
+- **Diff parser pakai `preg_split('/\ndiff --git /')`**, bukan `explode("\n\n")`. Explode("\\n\\n") pecah di baris kosong mana pun dalam patch → hasil potongan tidak berguna. `preg_split` hanya pecah di delimiter file boundary `\ndiff --git `.
+- **Commit hash regex** (`[a-f0-9]+`) minimal 1 karakter hex. `\d+` hanya cocok angka → gagal untuk commit SHA yang mengandung huruf a-f. Pastikan kedua validasi source_url (StoreContributionRequest + attachProof) pakai `[a-f0-9]+`.
+- **`attachProof` hanya untuk PENDING.** Kontribusi APPROVED/REJECTED return 422. Jangan izinkan upload bukti setelah status berubah.
+- **Creator atau owner saja** yang boleh `attachProof`. Check: `$member->id !== $contribution->member_id && !$member->isOwner()` → 403.
+- **Multipart upload test** harus pakai `$this->post()` bukan `$this->postJson()` — `postJson()` tidak kirim file.
+- **Cache diff 1 hari** — key `github_diff:<md5(url)>`. Tidak ada mekanisme paksa-refresh selain nunggu TTL. Kalau mau fresh diff, butuh endpoint `DELETE` cache.
+- **GitHub token di User** — `has_github_token` boolean di `UserResource`, token never exposed. Token disimpan plaintext (nullable). Kalau ada security requirement enkripsi, perlu migration + mutator.
+- **`GET /config`** adalah **inline closure** di routes, bukan controller. Kalau butuh logic tambahan (e.g. user-specific flags), refactor jadi dedicated controller.
+
+## FE Proof traps
+- **ContributionForm** reset proof & source_url di `handleClose` (state dikosongkan). Bila buka form edit contributions lama, pastikan field tidak terisi data basi.
+- **`FieldErrors` type** di frontend: pas proof/source_url validasi error, key-nya `proof` dan `source_url` — sesuai field name, bukan `proof_path`/`source_url` (BE pakai nama field yang sama).
+- **Lihat Diff** tombol hanya muncul jika `source_url` terisi dan feature flag aktif. Guard di `ContributionDetailPage.tsx`.
+- **Syntax coloring** diff: `+` lines green, `-` lines red, `@@` lines cyan. Style inline di komponen (tidak pakai library eksternal).

@@ -1,6 +1,6 @@
 # SEIRIS — Agent Guide
 
-> **Dokumentasi lengkap ada di folder `agent-context/`** (diturunkan & diverifikasi dari kode per 2026-07-14). File ini cuma entry point + setup cepat. Baca `agent-context/` untuk arsitektur, tipe, logic domain, kontrak API, keputusan, dan gotchas.
+> **Dokumentasi lengkap ada di folder `agent-context/`** (diturunkan & diverifikasi dari kode per 2026-07-18). File ini cuma entry point + setup cepat. Baca `agent-context/` untuk arsitektur, tipe, logic domain, kontrak API, keputusan, dan gotchas.
 
 ## Docs Index (baca ini)
 - `agent-context/ARCHITECTURE.md` — stack, folder convention, data flow, Slicing Pie Beranak, realtime, deploy note.
@@ -50,6 +50,7 @@ pnpm lint         # ESLint
 | `/teams/:teamId/audit` | `AuditLogTab` |
 | `/teams/:teamId/settings` | `TeamSettingsTab` |
 | `/teams/:teamId/contributions/:contributionId` | `ContributionDetailPage` |
+| `/settings` | `SettingsPage` |
 
 ## Catatan penting (ringkas — lengkap di GOTCHAS.md)
 - **Models = 12** (bukan 10): ada `Project` + `ProjectMember` (Slicing Pie Beranak).
@@ -58,3 +59,5 @@ pnpm lint         # ESLint
 - **`exitMember` = POST** (bukan PUT).
 - Backend jalan **CLI SAPI** → upload limit di `php-cli/php.ini`; nginx butuh `client_max_body_size 20M`.
 - PostgreSQL wajib (row-lock `lockForUpdate`, `gen_random_uuid`).
+- **Feature flag**: `config.seiris.features.contribution_proof` guards proof/diff routes + FE UI. Setel `.env` atau `config/seiris.php`.
+- **Endpoint baru**: `PATCH /users/me/github-token`, `GET /config`, proof & github-diff routes (team & project scope).
