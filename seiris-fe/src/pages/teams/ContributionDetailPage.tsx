@@ -233,7 +233,7 @@ export default function ContributionDetailPage() {
                           <div key={i} className="rounded border border-gray-700 overflow-hidden">
                             <p className="px-3 py-1.5 text-xs font-medium text-accent border-b border-gray-700 bg-gray-900/50">{f.filename}</p>
                             <div
-                              className="d2h-wrapper max-w-full overflow-x-auto"
+                              className="d2h-wrapper d2h-dark-color-scheme max-w-full overflow-x-auto"
                               dangerouslySetInnerHTML={{
                                 __html: html(f.patch ?? '', {
                                   outputFormat: 'side-by-side',
