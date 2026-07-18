@@ -9,6 +9,8 @@ import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
 import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
 import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink } from "lucide-react";
+import { html } from "diff2html";
+import "diff2html/bundles/css/diff2html.min.css";
 import { cn } from "@/lib/utils";
 import Skeleton from "@/components/ui/Skeleton";
 import { toast } from "sonner";
@@ -203,7 +205,7 @@ export default function ContributionDetailPage() {
                     <span className="text-sm font-medium text-gray-300">Diff GitHub</span>
                     <div className="flex items-center gap-3">
                       <a
-                        href={contribution.source_url}
+                        href={contribution.source_url ?? ''}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-xs text-accent hover:underline"
@@ -227,17 +229,18 @@ export default function ContributionDetailPage() {
                         <p className="text-gray-400">Tidak ada perubahan.</p>
                       ) : (
                         diffFiles.map((f, i) => (
-                          <div key={i} className="rounded border border-gray-700 bg-gray-950 p-2">
-                            <p className="mb-1 text-xs font-medium text-accent">{f.filename}</p>
-                            <pre className="whitespace-pre-wrap text-xs leading-5">
-                            {f.patch.split('\n').map((line: string, li: number) => {
-                              let cls = "text-gray-300";
-                              if (line.startsWith('+')) cls = "text-green-400";
-                              else if (line.startsWith('-')) cls = "text-red-400";
-                              else if (line.startsWith('@@')) cls = "text-cyan-400";
-                              return <div key={li} className={cls}>{line}</div>;
-                            })}
-                          </pre>
+                          <div key={i} className="rounded border border-gray-700 overflow-hidden">
+                            <p className="px-3 py-1.5 text-xs font-medium text-accent border-b border-gray-700 bg-gray-900/50">{f.filename}</p>
+                            <div
+                              className="d2h-wrapper"
+                              dangerouslySetInnerHTML={{
+                                __html: html(f.patch ?? '', {
+                                  outputFormat: 'side-by-side',
+                                  drawFileList: false,
+                                  matching: 'lines',
+                                })
+                              }}
+                            />
                           </div>
                         ))
                       )}
