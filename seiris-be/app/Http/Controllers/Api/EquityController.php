@@ -153,7 +153,7 @@ class EquityController extends Controller
         }
         $snapshot = $snapshotQuery->latest()->first();
 
-        if (!$snapshot) {
+        if (!$snapshot || empty($snapshot->equity_map)) {
             abort(404, 'Belum ada data equity untuk diekspor.');
         }
 
