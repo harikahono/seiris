@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { CONTRIBUTION_TYPES } from "@/lib/contribution";
 import { formatRp } from "@/lib/constants";
 import { toast } from "sonner";
-import { X, Loader2, ArrowLeft, AlertTriangle } from "lucide-react";
+import { X, Loader2, ArrowLeft, AlertTriangle, Upload } from "lucide-react";
 import type { ContributionType } from "@/types";
 
 interface ContributionFormProps {
@@ -234,14 +234,19 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
               </div>
 
               {featureEnabled && (<>
-                {/* Proof file */}
-                <div className="mt-4">
-                  <label className="mb-1.5 block text-sm font-medium text-gray-300">Bukti (PDF/JPG/PNG, maks 5 MB)</label>
-                  <input type="file" accept="application/pdf,image/jpeg,image/png" onChange={(e) => setProofFile(e.target.files?.[0] || null)} className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1" />
+                {/* Proof file — style sinkron dengan CreateRevenueForm */}
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-300">Bukti (opsional)</label>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-700 px-3 py-3 text-sm text-gray-500 transition hover:border-accent hover:text-accent">
+                    <Upload className="size-4" />
+                    {proofFile ? `${proofFile.name} (${(proofFile.size / 1024 / 1024).toFixed(1)} MB)` : "Upload file PDF / JPG / PNG (max 5MB)"}
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => { const f = e.target.files?.[0] ?? null; setProofFile(f); if (f && f.size > 5 * 1024 * 1024) toast.error("Ukuran file maksimal 5MB."); }} className="hidden" />
+                  </label>
+                  {errors.proof && <p className="mt-1 text-xs text-red-500">{errors.proof}</p>}
                 </div>
                 {/* Source URL */}
-                <div className="mt-4">
-                  <label className="mb-1.5 block text-sm font-medium text-gray-300">Link GitHub PR/Commit</label>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-300">Link GitHub PR/Commit</label>
                   <input type="url" placeholder="https://github.com/.../pull/123" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1" />
                 </div>
               </>)}
