@@ -21,7 +21,7 @@ class Project extends Model
     {
         return [
             'is_frozen' => 'boolean',
-            'frozen_at' => 'timestamp',
+            'frozen_at' => 'datetime',
         ];
     }
 
