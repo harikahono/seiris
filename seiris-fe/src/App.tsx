@@ -54,6 +54,7 @@ export default function App() {
                 <Route path="/teams/:teamId/contributions/:contributionId" element={<ContributionDetailPage />} />
                 <Route path="/teams/:teamId/revenues/:revenueId" element={<RevenueDetailPage />} />
               </Route>
+              </Route>
             </Route>
           </Routes>
         </TeamProvider>
