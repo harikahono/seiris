@@ -33,7 +33,7 @@
 - **Bad-leaver:** slice non-cash = 0 di `recalculate()`; slice cash tetap dihitung.
 - **`Contribution.value`/`hours`/dsb boleh berubah di model, tapi `total_slices` tidak** — slice final dihitung ulang saat APPROVED lewat `recalculate()`.
 - **Distribusi butuh snapshot scope:** `Revenue::distributableSnapshot()` null → distribute 422. Untuk revenue project-scoped, harus ada snapshot `project_id` sama.
-- **Legacy invoice fields** (`invoice_path`, `invoice_amount`, `actual_amount`) **dihapus** (kini bagian dari `2026_07_18_000002_consolidate_migrations.php`). Gunakan `proof_path`/`proof_url` pada Contribution untuk bukti. ✅
+- **Legacy invoice fields** (`invoice_path`, `invoice_amount`, `actual_amount`) **dihapus** (kini langsung di `create_contributions_table` saja). Gunakan `proof_path`/`proof_url` pada Contribution untuk bukti. ✅
 
 ## Profile update traps
 - **`updateProfile` pakai multipart** karena ada upload foto. Frontend kirim `FormData` + `_method=PATCH` via `POST`, karena browser tidak support `PATCH` dengan `multipart/form-data`.

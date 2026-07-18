@@ -15,6 +15,9 @@ return new class extends Migration
             $table->enum('role', ['owner', 'member'])->default('member');
             $table->unsignedInteger('fmr')->default(0)->comment('Fair Market Rate per hour in IDR');
             $table->enum('status', ['active', 'exited'])->default('active');
+            $table->string('leaver_type')->nullable()
+                ->comment('null=active, good=resign/terminated without cause, bad=fired/quit without cause');
+            $table->text('exit_reason')->nullable();
             $table->timestamp('exited_at')->nullable();
             $table->timestamps();
 

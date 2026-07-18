@@ -17,6 +17,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Tidak ada UPDATE/DELETE — append only
+            $table->unique(['revenue_id', 'member_id'], 'profit_distributions_revenue_member_unique');
             $table->index('revenue_id');
             $table->index('member_id');
         });
