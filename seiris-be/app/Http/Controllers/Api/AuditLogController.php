@@ -26,7 +26,7 @@ class AuditLogController extends Controller
 
         // H-I: filter by project_id — for project-scoped audit views
         if ($request->filled('project_id')) {
-            $query->where('payload', 'like', '%"project_id":"' . $request->project_id . '"%');
+            $query->where('payload->>project_id', $request->project_id);
         }
 
         if ($request->filled('filter')) {
