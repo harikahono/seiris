@@ -9,7 +9,7 @@ import type { Contribution as ContributionType, Team } from "@/types";
 import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
 import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
-import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink } from "lucide-react";
+import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink, ChevronDown } from "lucide-react";
 import { html } from "diff2html";
 import "diff2html/bundles/css/diff2html.min.css";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,7 @@ export default function ContributionDetailPage() {
   const [showDiff, setShowDiff] = useState(false);
   const [showProof, setShowProof] = useState(false);
   const [diffFiles, setDiffFiles] = useState<any[]>([]);
+  const [expandedFiles, setExpandedFiles] = useState<Set<number>>(new Set([0]));
   const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isProjectMember, setIsProjectMember] = useState(true);
@@ -70,12 +71,20 @@ export default function ContributionDetailPage() {
     try {
       const res = await api.get<{ files: any[] }>(`/teams/${teamId}/contributions/${contributionId}/github-diff`);
       setDiffFiles(res.data.files ?? []);
+      setExpandedFiles(new Set([0]));
       setShowDiff(true);
     } catch (e) {
       toast.error('Gagal mengambil diff dari GitHub');
     }
   };
 
+  const toggleFile = (i: number) => {
+    setExpandedFiles(prev => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  };
 
   // ── Realtime: refresh on Pusher event ──
   const { refreshVersion } = useRealtime();
@@ -187,16 +196,22 @@ export default function ContributionDetailPage() {
 
         {featureEnabled && (
           <>
-            {/* Proof link — pakai modal seperti revenue */}
-            {contribution.proof_url && (
-              <button onClick={() => setShowProof(true)} className="mb-3 flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent">
-                <ExternalLink className="size-4" />
-                Lihat Bukti
-              </button>
-            )}
-            {/* GitHub diff button */}
-            {contribution.source_url && (
-              <button onClick={loadDiff} className="mb-3 ml-4 rounded bg-accent px-3 py-1 text-sm font-medium text-black hover:bg-accent-hover">Lihat Perubahan Kode</button>
+            {/* Button row: proof + diff */}
+            {(contribution.proof_url || contribution.source_url) && (
+              <div className="mb-5 flex flex-wrap gap-2">
+                {contribution.proof_url && (
+                  <button onClick={() => setShowProof(true)} className="flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent">
+                    <ExternalLink className="size-4" />
+                    Lihat Bukti
+                  </button>
+                )}
+                {contribution.source_url && (
+                  <button onClick={loadDiff} className="flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent">
+                    <ChevronDown className="size-4" />
+                    Lihat Perubahan Kode
+                  </button>
+                )}
+              </div>
             )}
             {/* Diff modal */}
             {showDiff && createPortal(
@@ -231,17 +246,25 @@ export default function ContributionDetailPage() {
                       ) : (
                         diffFiles.map((f, i) => (
                           <div key={i} className="rounded border border-gray-700 overflow-hidden">
-                            <p className="px-3 py-1.5 text-xs font-medium text-accent border-b border-gray-700 bg-gray-900/50">{f.filename}</p>
-                            <div
-                              className="d2h-wrapper d2h-dark-color-scheme max-w-full overflow-x-auto"
-                              dangerouslySetInnerHTML={{
-                                __html: html(f.patch ?? '', {
-                                  outputFormat: 'side-by-side',
-                                  drawFileList: false,
-                                  matching: 'lines',
-                                })
-                              }}
-                            />
+                            <button
+                              onClick={() => toggleFile(i)}
+                              className="flex w-full items-center justify-between gap-2 px-4 py-2 text-xs font-medium text-accent hover:bg-white/5 transition-colors border-b border-gray-700 bg-gray-900/50"
+                            >
+                              <span className="truncate">{f.filename}</span>
+                              <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${expandedFiles.has(i) ? 'rotate-180' : ''}`} />
+                            </button>
+                            {expandedFiles.has(i) && (
+                              <div
+                                className="d2h-wrapper d2h-dark-color-scheme max-w-full overflow-x-auto"
+                                dangerouslySetInnerHTML={{
+                                  __html: html(f.patch ?? '', {
+                                    outputFormat: 'side-by-side',
+                                    drawFileList: false,
+                                    matching: 'lines',
+                                  })
+                                }}
+                              />
+                            )}
                           </div>
                         ))
                       )}
