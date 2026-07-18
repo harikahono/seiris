@@ -91,10 +91,12 @@ public function updateGithubToken(Request $request): JsonResponse
     $user = $request->user();
     
     $request->validate([
-        'github_token' => ['required', 'string', 'max:255'],
+        'github_token' => ['nullable', 'string', 'max:255'],
     ]);
     
-    $user->update(['github_token' => $request->github_token]);
+    $user->update([
+        'github_token' => $request->filled('github_token') ? $request->github_token : null,
+    ]);
     
     return response()->json([
         'message' => 'GitHub token berhasil diperbarui.',
