@@ -238,7 +238,7 @@ class ContributionController extends Controller
         // validate optional inputs
         $request->validate([
             'proof' => ['nullable','file','mimes:pdf,jpg,png','max:5120'],
-            'source_url' => ['nullable','url','regex:/^https:\\/\\/github\\.com\\/[^\\/]+\\/[^\\/]+\\/(pull|commit)\\/\d+/'],
+            'source_url' => ['nullable','url','regex:/^https:\\/\\/github\\.com\\/[^\\/]+\\/[^\\/]+\\/(pull\\/\\d+|commit\\/[a-f0-9]+)$/'],
         ]);
         // source_url validation handled by regex rule above
         $proofPath = null;
@@ -289,10 +289,16 @@ class ContributionController extends Controller
                 Log::warning('[GitHubDiff] fetch failed', ['url' => $url, 'status' => $response->status()]);
                 return null;
             }
-            // simple parser: split by "diff --git" lines
+            // parser: split by "diff --git" lines
             $raw = $response->body();
             $files = [];
-            foreach (explode("\n\n", $raw) as $chunk) {
+            $chunks = preg_split('/\ndiff --git /', $raw);
+            foreach ($chunks as $chunk) {
+                if (empty(trim($chunk))) continue;
+                // first chunk already starts with "diff --git", others need it prepended
+                if (!str_starts_with($chunk, 'diff --git')) {
+                    $chunk = 'diff --git ' . $chunk;
+                }
                 if (preg_match('/^diff --git a\/([^ ]+) b\/([^ ]+)/m', $chunk, $m)) {
                     $files[] = [
                         'filename' => $m[2],

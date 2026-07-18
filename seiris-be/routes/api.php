@@ -126,6 +126,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
             Route::get('contributions',                           [ContributionController::class, 'index']);
             Route::post('contributions',                          [ContributionController::class, 'store'])->middleware('throttle:write');
             Route::get('contributions/{contribution}',            [ContributionController::class, 'show']);
+            // Proof & diff scoped ke project (feature flag)
+            if (config('seiris.features.contribution_proof')) {
+                Route::post('contributions/{contribution}/proof', [ContributionController::class, 'attachProof'])->middleware('throttle:write');
+                Route::get('contributions/{contribution}/github-diff', [ContributionController::class, 'githubDiff']);
+            }
 
             // Revenues scoped ke project
             Route::get('revenues',                                [RevenueController::class, 'index']);
