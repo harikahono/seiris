@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
@@ -198,9 +199,9 @@ export default function ContributionDetailPage() {
               <button onClick={loadDiff} className="mb-3 ml-4 rounded bg-accent px-3 py-1 text-sm font-medium text-black hover:bg-accent-hover">Lihat Perubahan Kode</button>
             )}
             {/* Diff modal */}
-            {showDiff && (
+            {showDiff && createPortal(
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-                <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card shadow-2xl">
+                <div className="relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card shadow-2xl">
                   <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
                     <span className="text-sm font-medium text-gray-300">Diff GitHub</span>
                     <div className="flex items-center gap-3">
@@ -232,7 +233,7 @@ export default function ContributionDetailPage() {
                           <div key={i} className="rounded border border-gray-700 overflow-hidden">
                             <p className="px-3 py-1.5 text-xs font-medium text-accent border-b border-gray-700 bg-gray-900/50">{f.filename}</p>
                             <div
-                              className="d2h-wrapper"
+                              className="d2h-wrapper max-w-full overflow-x-auto"
                               dangerouslySetInnerHTML={{
                                 __html: html(f.patch ?? '', {
                                   outputFormat: 'side-by-side',
@@ -247,7 +248,8 @@ export default function ContributionDetailPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </>
         )}
