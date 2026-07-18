@@ -73,7 +73,7 @@ export default function DashboardLayout() {
   usePusher(currentTeamId ?? undefined, {
     onEquityUpdated: useCallback((data) => {
       triggerRefresh();
-      if (data?.approved_by) {
+      if (data?.approved_by && data?.contribution_desc) {
         const owner = data.contribution_owner ? ` (${data.contribution_owner})` : '';
         toastDedupe(`"${data.contribution_desc}"${owner} disetujui oleh ${data.approved_by}`);
       }

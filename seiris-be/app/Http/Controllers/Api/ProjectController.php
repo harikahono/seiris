@@ -77,7 +77,7 @@ class ProjectController extends Controller
         broadcast(new TeamUpdated(
             $team,
             'project.created',
-            $request->user()->name,
+            $request->user()->name ?? '',
             projectName: $project->name,
         ))->toOthers();
 
@@ -138,8 +138,8 @@ class ProjectController extends Controller
         );
 
         broadcast(new TeamUpdated(
-            $team, 'member.added_to_project', $request->user()->name,
-            memberName: $member->user?->name,
+            $team, 'member.added_to_project', $request->user()->name ?? '',
+            memberName: $member->user?->name ?? 'Anggota',
         ))->toOthers();
 
         return response()->json(['message' => 'Anggota berhasil ditambahkan ke project.']);
@@ -191,8 +191,8 @@ class ProjectController extends Controller
         );
 
         broadcast(new TeamUpdated(
-            $team, 'member.removed_from_project', $request->user()->name,
-            memberName: $member->user?->name,
+            $team, 'member.removed_from_project', $request->user()->name ?? '',
+            memberName: $member->user?->name ?? 'Anggota',
         ))->toOthers();
 
         return response()->json(['message' => 'Anggota berhasil dikeluarkan dari project.']);
@@ -228,7 +228,7 @@ class ProjectController extends Controller
         broadcast(new TeamUpdated(
             $team,
             'project.frozen',
-            $request->user()->name,
+            $request->user()->name ?? '',
             projectName: $project->name,
         ))->toOthers();
 
@@ -236,7 +236,7 @@ class ProjectController extends Controller
         // dapat toast pie ter-update secara realtime.
         try {
             if ($snapshot instanceof EquitySnapshot) {
-                broadcast(new EquityUpdated($team, $snapshot, approvedByName: $request->user()->name))->toOthers();
+                broadcast(new EquityUpdated($team, $snapshot, approvedByName: $request->user()->name ?? ''))->toOthers();
             }
         } catch (\Throwable $e) {
             Log::warning('[ProjectController] EquityUpdated broadcast failed: ' . $e->getMessage());
