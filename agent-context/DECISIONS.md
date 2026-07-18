@@ -36,3 +36,4 @@
 - **ADR-023 PostgreSQL-only** — `gen_random_uuid()`, `lockForUpdate()` butuh PostgreSQL; SQLite hanya untuk test. ✅
 - **ADR-024 PDF export** — `barryvdh/laravel-dompdf` + font DejaVu Sans. ✅
 - **ADR-025 Backend jalan CLI SAPI** — `php artisan serve`, bukan php-fpm → upload limit di `php-cli/php.ini`, nginx butuh `client_max_body_size`. ✅
+- **ADR-026 Proof field naming** — Contribution menggunakan `proof_path` + `proof_url` (mirrored dari Revenue). Legacy `invoice_*`/`actual_amount` di‑drop, jangan gunakan lagi. ✅

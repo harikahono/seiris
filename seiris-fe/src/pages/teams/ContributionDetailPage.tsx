@@ -184,18 +184,6 @@ export default function ContributionDetailPage() {
               </p>
             </div>
           )}
-          {contribution.invoice_url && (
-            <div className="flex items-end">
-              <a
-                href={contribution.invoice_url}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent"
-              >
-                Lihat Invoice
-              </a>
-            </div>
-          )}
         </div>
 
         {contribution.type === "SALES" && (
