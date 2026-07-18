@@ -67,7 +67,7 @@ class FmrProposalController extends Controller
             return $proposal;
         });
 
-        broadcast(new TeamUpdated($team, 'fmr.proposed', $request->user()->name))->toOthers();
+        broadcast(new TeamUpdated($team, 'fmr.proposed', $request->user()->name ?? ''))->toOthers();
 
         return response()->json([
             'message' => 'Proposal FMR berhasil diajukan. Menunggu persetujuan owner.',
@@ -166,9 +166,9 @@ class FmrProposalController extends Controller
         broadcast(new TeamUpdated(
             $team,
             'fmr.approved',
-            $request->user()->name,
-            memberName: $result->member->user->name,
-            approverName: $request->user()->name,
+            $request->user()->name ?? '',
+            memberName: $result->member->user->name ?? 'Anggota',
+            approverName: $request->user()->name ?? '',
         ))->toOthers();
 
         return response()->json([
@@ -215,9 +215,9 @@ class FmrProposalController extends Controller
         broadcast(new TeamUpdated(
             $team,
             'fmr.rejected',
-            $request->user()->name,
-            memberName: $proposal->member->user->name,
-            approverName: $request->user()->name,
+            $request->user()->name ?? '',
+            memberName: $proposal->member->user->name ?? 'Anggota',
+            approverName: $request->user()->name ?? '',
         ))->toOthers();
 
         return response()->json([

@@ -136,7 +136,7 @@ class TeamController extends Controller
             payload:     $request->only(['name', 'description', 'approval_threshold']),
         );
 
-        broadcast(new TeamUpdated($team, 'team.updated', $request->user()->name))->toOthers();
+        broadcast(new TeamUpdated($team, 'team.updated', $request->user()->name ?? ''))->toOthers();
 
         return response()->json([
             'message' => 'Tim berhasil diperbarui.',
@@ -194,7 +194,7 @@ class TeamController extends Controller
             return $member;
         });
 
-        broadcast(new TeamUpdated($team, 'member.joined', $request->user()->name))->toOthers();
+        broadcast(new TeamUpdated($team, 'member.joined', $request->user()->name ?? ''))->toOthers();
 
         return response()->json([
             'message' => 'Berhasil bergabung ke tim.',
@@ -298,7 +298,7 @@ class TeamController extends Controller
             payload:     ['snapshot_id' => $snapshot->id],
         );
 
-        broadcast(new TeamUpdated($team, 'team.frozen', $request->user()->name))->toOthers();
+        broadcast(new TeamUpdated($team, 'team.frozen', $request->user()->name ?? ''))->toOthers();
 
         return response()->json([
             'message' => 'Equity tim berhasil di-freeze.',

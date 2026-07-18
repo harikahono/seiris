@@ -136,8 +136,8 @@ class ApprovalController extends Controller
             broadcast(new TeamUpdated(
                 team: $team,
                 action: 'vote.cast',
-                userName: $request->user()->name,
-                contributionDesc: $result->description,
+                userName: $request->user()->name ?? '',
+                contributionDesc: $result->description ?? '',
                 contributionOwnerName: $result->member->user->name ?? '',
             ))->toOthers();
         } catch (\Throwable $e) {
@@ -155,9 +155,9 @@ class ApprovalController extends Controller
                     broadcast(new EquityUpdated(
                         $team,
                         $snapshot,
-                        approvedByName: $voter->user->name,
-                        contributionDescription: $contribution->description,
-                        contributionOwnerName: $contribution->member->user->name,
+                        approvedByName: $voter->user->name ?? '',
+                        contributionDescription: $contribution->description ?? '',
+                        contributionOwnerName: $contribution->member->user->name ?? '',
                     ))->toOthers();
                 }
             } catch (\Throwable $e) {
@@ -167,9 +167,9 @@ class ApprovalController extends Controller
             broadcast(new TeamUpdated(
                 $team,
                 'contribution.rejected',
-                $voter->user->name,
-                $contribution->description,
-                contributionOwnerName: $contribution->member->user->name,
+                $voter->user->name ?? '',
+                $contribution->description ?? '',
+                contributionOwnerName: $contribution->member->user->name ?? '',
             ))->toOthers();
         }
 

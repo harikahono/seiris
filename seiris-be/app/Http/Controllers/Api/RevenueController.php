@@ -101,7 +101,7 @@ class RevenueController extends Controller
             return $revenue;
         });
 
-        broadcast(new TeamUpdated($team, 'revenue.created', $request->user()->name))->toOthers();
+        broadcast(new TeamUpdated($team, 'revenue.created', $request->user()->name ?? ''))->toOthers();
 
         return response()->json([
             'message' => 'Revenue berhasil dicatat.',
@@ -179,7 +179,7 @@ class RevenueController extends Controller
                 projectId:   $revenue->project_id,
             );
 
-        broadcast(new TeamUpdated($team, 'profit.requested', $request->user()->name))->toOthers();
+        broadcast(new TeamUpdated($team, 'profit.requested', $request->user()->name ?? ''))->toOthers();
 
         return response()->json([
             'message' => 'Permintaan distribusi diajukan. Menunggu persetujuan owner.',
@@ -261,7 +261,7 @@ class RevenueController extends Controller
         });
 
         try {
-            broadcast(new TeamUpdated($team, 'profit.distributed', $request->user()->name))->toOthers();
+            broadcast(new TeamUpdated($team, 'profit.distributed', $request->user()->name ?? ''))->toOthers();
         } catch (\Throwable $e) {
             Log::warning('[Distribute] Broadcast failed: ' . $e->getMessage());
         }
