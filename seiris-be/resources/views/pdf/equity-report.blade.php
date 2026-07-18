@@ -143,7 +143,7 @@ table.data tbody tr:nth-child(odd)  { background: #fff; }
     <table style="width:100%; border-collapse:collapse;">
       @foreach($snapshot['equity_map'] as $m)
       <tr>
-        <td style="width:70px; padding: 2px 4px; font-size: 7px; white-space:nowrap;">{{ Str::limit($m['name'], 15) }}</td>
+        <td style="width:70px; padding: 2px 4px; font-size: 7px; white-space:nowrap;">{{ $m['name'] }}</td>
         <td style="padding: 2px 0;">
           <div class="bar-wrap">
             <div class="bar-fill" style="width: {{ $maxSlices > 0 ? ($m['slices']/$maxSlices)*100 : 0 }}%;"></div>
