@@ -57,6 +57,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout'])->middleware('throttle:write');
     Route::get('auth/me', [AuthController::class, 'me']);
     // User settings
+    Route::patch('users/me/profile', [AuthController::class, 'updateProfile'])->middleware('throttle:write');
     Route::patch('users/me/github-token', [AuthController::class, 'updateGithubToken'])->middleware('throttle:write');
 
     // Dashboard

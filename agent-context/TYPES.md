@@ -8,7 +8,7 @@ Semua type ada di satu file. Yang sering dipakai:
 
 | Interface | Field penting |
 |-----------|---------------|
-| `User` | id, name, email, avatar, created_at, **has_github_token** (`boolean\|undefined`) |
+| `User` | id, name, email, avatar, created_at, **has_github_token** (`boolean\|undefined`), **profile_photo_url** (`string\|null`) |
 | `Team` | id, name, description, invite_code, approval_threshold (`"50"\|"75"\|"100"`), is_frozen, frozen_at, owner, members[], members_count |
 | `TeamMember` | id, role (`"owner"\|"member"`), fmr, **project_fmr** (`number\|null`, per-project FMR), status (`"active"\|"exited"`), exited_at, user, joined_at |
 | `ProjectItem` | id, team_id, name, description, is_frozen, frozen_at, created_at, updated_at |
@@ -45,7 +45,7 @@ Payload types: `LoginPayload`, `RegisterPayload`, `CreateTeamPayload`, `CreateCo
 
 | Resource | Field diekspor |
 |----------|---------------|
-| `UserResource` | id, name, email, created_at, **has_github_token** (`bool`) |
+| `UserResource` | id, name, email, created_at, **has_github_token** (`bool`), **profile_photo_url** (`string\|null`) |
 | `TeamMemberResource` | id, team_id, role, fmr, **project_fmr**, status, exited_at, user, joined_at |
 | `TeamResource` | id, name, description, invite_code, approval_threshold, is_frozen, frozen_at, owner, members[], members_count, created_at |
 | `ContributionResource` | id, type, description, value, multiplier, total_slices, status, contribution_date, deal_value/estimated_value/commission_rate (SALES), member, approvals[], approvals_count, created_at, hours (TIME/IDEA/NETWORK), **proof_url** (`string\|null`), **source_url** (`string\|null`) |

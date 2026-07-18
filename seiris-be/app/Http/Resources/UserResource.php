@@ -17,6 +17,7 @@ public function toArray(Request $request): array
         'name' => $this->name,
         'email' => $this->email,
         'has_github_token' => (bool) $this->github_token,
+        'profile_photo_url' => $this->profile_photo_url,
         'created_at' => $this->created_at?->toISOString(),
     ];
 }

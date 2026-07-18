@@ -144,8 +144,14 @@ export default function DashboardLayout() {
     }, []),
   });
 
+  // ── Only show team settings for owner ──
+  const currentTeam = teams.find((t) => t.id === currentTeamId);
+  const visibleFeatures = features.filter(
+    (f) => f.key !== "settings" || currentTeam?.is_owner
+  );
+
   // ── Active feature detection ──
-  const activeFeature = features.find((f) => {
+  const activeFeature = visibleFeatures.find((f) => {
     const match = location.pathname.match(/\/teams\/([^/]+)\/(.+)/);
     return match && match[2]?.startsWith(f.path);
   });
@@ -343,7 +349,7 @@ export default function DashboardLayout() {
                 className={cn("size-3 transition-transform duration-200", !featuresOpen && "-rotate-90")}
               />
               Fitur
-              <span className="ml-auto text-[10px] text-gray-600">{features.length}</span>
+              <span className="ml-auto text-[10px] text-gray-600">{visibleFeatures.length}</span>
             </button>
           )}
 
@@ -361,7 +367,7 @@ export default function DashboardLayout() {
           >
             <div className="overflow-hidden">
               <div className={cn("space-y-1", collapsed ? "" : "px-2 pt-1")}>
-                {features.map((feat) => {
+                {visibleFeatures.map((feat) => {
                   const Icon = feat.icon;
                   const isActive = activeFeature?.key === feat.key;
                   return (

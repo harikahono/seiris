@@ -11,6 +11,7 @@ export interface User {
   email: string;
   avatar: string | null;
   has_github_token: boolean;
+  profile_photo_url: string | null;
   created_at: string;
 }
 

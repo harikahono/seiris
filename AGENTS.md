@@ -43,7 +43,7 @@ pnpm lint         # ESLint
 | `/` | `LandingPage` (public) |
 | `/login` `/register` | `AuthPage` (public) |
 | `/dashboard` | `DashboardPage` (protected) |
-| `/teams/:teamId` | `TeamDetailPage` (outlet, 5 tab) |
+| `/teams/:teamId` | `TeamDetailPage` (outlet, tab — **Pengaturan hanya untuk owner**) |
 | `/teams/:teamId/members` | `TeamMembersTab` |
 | `/teams/:teamId/contributions` | `ContributionsTab` |
 | `/teams/:teamId/revenue` | `RevenueTab` |
@@ -60,4 +60,6 @@ pnpm lint         # ESLint
 - Backend jalan **CLI SAPI** → upload limit di `php-cli/php.ini`; nginx butuh `client_max_body_size 20M`.
 - PostgreSQL wajib (row-lock `lockForUpdate`, `gen_random_uuid`).
 - **Feature flag**: `config.seiris.features.contribution_proof` guards proof/diff routes + FE UI. Setel `.env` atau `config/seiris.php`.
-- **Endpoint baru**: `PATCH /users/me/github-token`, `GET /config`, proof & github-diff routes (team & project scope).
+- **Endpoint baru**: `PATCH /users/me/github-token`, `PATCH /users/me/profile`, `GET /config`, proof & github-diff routes (team & project scope).
+- **Settings pribadi**: semua user bisa akses `/settings` (nama, email, password, foto, GitHub token).
+- **Team Settings** di sidebar hanya tampil untuk owner.

@@ -20,7 +20,8 @@
 | POST | `/auth/login` | auth | email, password | `{message, token, user}` / 401 `Email atau password salah.` |
 | POST | `/auth/logout` | write | — | `{message:'Logout berhasil.'}` |
 | GET | `/auth/me` | — | — | `{user:UserResource}` |
-| PATCH | `/users/me/github-token` | write | `github_token` (nullable string, max:255, empty → clear) | 200 `{message, data:UserResource}` |
+| PATCH | `/users/me/profile` | write | name, email, password? (nullable, min:8, confirmed), profile_photo? (file, image, max 5MB) | 200 `{message, user:UserResource}` |
+| PATCH | `/users/me/github-token` | write | `github_token` (nullable string, max:255, empty → clear) | 200 `{message, user:UserResource}` |
 | POST | `/broadcasting/auth` | write | channel_name | respon Pusher auth (presence) |
 
 ## Config

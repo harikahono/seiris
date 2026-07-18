@@ -35,6 +35,14 @@
 - **Distribusi butuh snapshot scope:** `Revenue::distributableSnapshot()` null → distribute 422. Untuk revenue project-scoped, harus ada snapshot `project_id` sama.
 - **Legacy invoice fields** (`invoice_path`, `invoice_amount`, `actual_amount`) **dihapus** (migration `2026_07_09_000001_drop_revenue_enum_and_legacy_columns.php`). Gunakan `proof_path`/`proof_url` pada Contribution untuk bukti. ✅
 
+## Profile update traps
+- **`updateProfile` pakai multipart** karena ada upload foto. Frontend kirim `FormData` + `_method=PATCH` via `POST`, karena browser tidak support `PATCH` dengan `multipart/form-data`.
+- **`password` nullable** — jika tidak diisi, password lama tetap. Validasi `confirmed` hanya jalan jika `password` ada.
+- **Email unique** — `Rule::unique('users')->ignore($user->id)` agar user bisa pakai email sendiri.
+- **Old photo dihapus** saat upload baru (`Storage::delete`). Jika upload gagal di tengah, perlu rollback manual.
+- **`profile_photo_url` accessor** menghasilkan `asset('storage/...')`. Pastikan `php artisan storage:link` sudah jalan.
+- **Team Settings di sidebar** disembunyikan untuk non-owner via `visibleFeatures.filter()`. Route tetap bisa diakses via URL langsung — perlu tambahan guard di dalam `TeamSettingsTab` jika ingin proteksi penuh.
+
 ## Proof & Diff traps (new in this patch)
 - **Feature flag `contribution_proof` guards TWO things:** route registration (BE) AND form/button rendering (FE). Bila dicabut, pastikan keduanya sinkron — FE jangan kirim request ke endpoint yang 404.
 - **`source_url` regex validasi** berlaku di dua tempat: `StoreContributionRequest` (saat create) dan inline `attachProof` (saat update). Regex harus sama: `/^https:\/\/github\.com\/[^\/]+\/[^\/]+\/(pull\/\d+|commit\/[a-f0-9]+)$/`. Jangan ubah satu tanpa yang lain.

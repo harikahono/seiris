@@ -94,3 +94,30 @@ Added **bukti kontribusi** feature: file upload + GitHub link/source_url + diff 
 | P2 | Diff parser used `explode("\n\n")` — broke on multi-file diffs | Changed to `preg_split('/\ndiff --git /')` |
 | P3 | `postJson()` used in file upload test — didn't send multipart | Changed to `post()` |
 | P4 | Missing `AuthContext.setUser` export prevented FE token update | Exposed `setUser` from context |
+
+---
+
+## V2.3 — Pengaturan Akun Lengkap & Sidebar Refinement (2026-07-18)
+
+### What Changed
+- **Pengaturan Akun** (`/settings`) diperluas: edit nama, email, password (opsional), upload foto profil.
+- **Team Settings** di sidebar disembunyikan untuk non-owner.
+
+### New Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| PATCH | `/api/users/me/profile` | Update name, email, password (optional), profile photo (multipart) |
+
+### Database
+- `users` — added `profile_photo_path` (string, nullable)
+
+### Frontend Changes
+- `SettingsPage.tsx` — form lengkap: nama, email, password + confirm, foto profil (preview via objectURL)
+- `DashboardLayout.tsx` — menu "Pengaturan" (team) hanya tampil untuk owner (`visibleFeatures.filter`)
+- `User` type — added `profile_photo_url` (string|null)
+
+### Key Technical Details
+- Multipart upload via `FormData` + `_method=PATCH` (Laravel convention)
+- `password` field nullable — skip if empty
+- Old profile photo auto-deleted on replacement (`Storage::disk('public')->delete`)
+- Validation: email unique (ignore self), image max 5MB JPG/PNG/WebP

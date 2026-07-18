@@ -53,7 +53,10 @@ For investors, the key advantage is that every equity change leaves an **immutab
 
 ### 3.1 Account Settings (`/settings`)
 After login, you can access **Pengaturan Akun** from the sidebar:
+- **Profil**: update nama, email, password (opsional), dan foto profil (JPG/PNG/WebP, maks 5 MB).
 - **GitHub Token**: optional personal access token (classic, with `repo` scope) used to fetch private repo diffs for contribution proof. You can show/hide the token or clear it.
+
+> **Team Settings** (Pengaturan Tim) hanya terlihat oleh **owner** tim pada sidebar. Anggota biasa tidak melihat menu tersebut.
 
 
 

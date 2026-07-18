@@ -10,6 +10,8 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -79,6 +81,47 @@ class AuthController extends Controller
     {
         return response()->json([
             'user' => new UserResource($request->user()),
+        ]);
+    }
+
+    /**
+     * PATCH /api/users/me/profile
+     * Update user profile (name, email, password, profile photo)
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'name'           => ['required', 'string', 'max:255'],
+            'email'          => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'password'       => ['nullable', 'string', 'min:8', 'confirmed'],
+            'profile_photo'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ]);
+
+        $data = [
+            'name'  => $request->name,
+            'email' => $request->email,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        if ($request->hasFile('profile_photo')) {
+            // Delete old photo if exists
+            if ($user->profile_photo_path) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+            $data['profile_photo_path'] = $request->file('profile_photo')
+                ->store('profile_photos', 'public');
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui.',
+            'user'    => new UserResource($user->fresh()),
         ]);
     }
 
