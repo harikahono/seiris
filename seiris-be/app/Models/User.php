@@ -14,7 +14,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasUuids, HasFactory;
 
-        protected $fillable = ['name', 'email', 'password'];
+        protected $fillable = ['name', 'email', 'password', 'github_token'];
 
     protected $hidden = ['password', 'remember_token'];
 

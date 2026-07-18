@@ -17,6 +17,7 @@ import TeamSettingsTab from "@/components/teams/TeamSettingsTab";
 import ContributionDetailPage from "@/pages/teams/ContributionDetailPage";
 import RevenueDetailPage from "@/pages/teams/RevenueDetailPage";
 import LandingPage from "@/pages/LandingPage";
+import SettingsPage from "@/pages/SettingsPage";
 import { CheckCircle2, XCircle, Info, AlertTriangle } from "lucide-react";
 
 function ProjectProviderRoute() {
@@ -39,19 +40,19 @@ export default function App() {
             <Route path="/register" element={<AuthPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<RealtimeProvider><DashboardLayout /></RealtimeProvider>}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route element={<ProjectProviderRoute />}>
-                  <Route path="/teams/:teamId" element={<TeamDetailPage />}>
-                    <Route index element={<Navigate to="dashboard" replace />} />
-                    <Route path="members" element={<TeamMembersTab />} />
-                    <Route path="contributions" element={<ContributionsTab />} />
-                    <Route path="revenue" element={<RevenueTab />} />
-                    <Route path="audit" element={<AuditLogTab />} />
-                    <Route path="settings" element={<TeamSettingsTab />} />
-                  </Route>
-                  <Route path="/teams/:teamId/contributions/:contributionId" element={<ContributionDetailPage />} />
-            <Route path="/teams/:teamId/revenues/:revenueId" element={<RevenueDetailPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route element={<ProjectProviderRoute />}>
+                <Route path="/teams/:teamId" element={<TeamDetailPage />}>
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="members" element={<TeamMembersTab />} />
+                  <Route path="contributions" element={<ContributionsTab />} />
+                  <Route path="revenue" element={<RevenueTab />} />
+                  <Route path="audit" element={<AuditLogTab />} />
+                  <Route path="settings" element={<TeamSettingsTab />} />
                 </Route>
+                <Route path="/teams/:teamId/contributions/:contributionId" element={<ContributionDetailPage />} />
+                <Route path="/teams/:teamId/revenues/:revenueId" element={<RevenueDetailPage />} />
               </Route>
             </Route>
           </Routes>

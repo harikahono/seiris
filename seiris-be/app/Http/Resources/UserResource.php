@@ -10,13 +10,14 @@ class UserResource extends JsonResource
     /**
      * Whitelist DTO — never return password, remember_token, or raw timestamps.
      */
-    public function toArray(Request $request): array
-    {
-        return [
-            'id'         => $this->id,
-            'name'       => $this->name,
-            'email'      => $this->email,
-            'created_at' => $this->created_at?->toISOString(),
-        ];
-    }
+public function toArray(Request $request): array
+{
+    return [
+        'id' => $this->id,
+        'name' => $this->name,
+        'email' => $this->email,
+        'has_github_token' => (bool) $this->github_token,
+        'created_at' => $this->created_at?->toISOString(),
+    ];
+}
 }

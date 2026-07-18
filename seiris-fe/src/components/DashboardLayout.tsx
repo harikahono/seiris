@@ -9,21 +9,22 @@ import { cn } from "@/lib/utils";
 import CreateTeamModal from "@/components/ui/CreateTeamModal";
 
 import Skeleton from "@/components/ui/Skeleton";
-import {
-  LayoutDashboard,
-  LogOut,
-  ChevronDown,
-  ChevronLeft,
-  Menu,
-
-  Users,
-  ListChecks,
-  Settings,
-  PieChart,
-  TrendingUp,
-  ClipboardList,
-  Plus,
-  AlertTriangle,
+import { 
+  LayoutDashboard, 
+  LogOut, 
+  ChevronDown, 
+  ChevronLeft, 
+  Menu, 
+  
+  Users, 
+  ListChecks, 
+  Settings, 
+  PieChart, 
+  TrendingUp, 
+  ClipboardList, 
+  Plus, 
+  AlertTriangle, 
+  Key,
 } from "lucide-react";
 
 interface FeatureItem {
@@ -394,6 +395,23 @@ export default function DashboardLayout() {
               <p className="truncate">{user?.email}</p>
             </div>
           )}
+
+          {/* User Settings Link */}
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              cn(
+                "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition",
+                isActive
+                  ? "bg-accent/10 text-accent"
+                  : "text-gray-400 hover:bg-gray-800 hover:text-white",
+                collapsed && "justify-center px-2"
+              )
+            }
+          >
+            <Key className="size-4 shrink-0" />
+            {!collapsed && <span>Pengaturan Akun</span>}
+          </NavLink>
 
           <button
             type="button"

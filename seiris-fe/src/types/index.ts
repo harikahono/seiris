@@ -10,6 +10,7 @@ export interface User {
   name: string;
   email: string;
   avatar: string | null;
+  has_github_token: boolean;
   created_at: string;
 }
 
