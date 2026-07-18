@@ -53,16 +53,16 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         }
     })->middleware('throttle:write');
 
-// Auth
-Route::post('auth/logout', [AuthController::class, 'logout'])->middleware('throttle:write');
-Route::get('auth/me', [AuthController::class, 'me']);
-// User settings
-Route::patch('users/me/github-token', [AuthController::class, 'updateGithubToken'])->middleware('throttle:write');
+    // Auth
+    Route::post('auth/logout', [AuthController::class, 'logout'])->middleware('throttle:write');
+    Route::get('auth/me', [AuthController::class, 'me']);
+    // User settings
+    Route::patch('users/me/github-token', [AuthController::class, 'updateGithubToken'])->middleware('throttle:write');
 
-// Dashboard
-Route::get('my-dashboard', [DashboardController::class, 'index']);
-// Config
-Route::get('config', fn () => response()->json(['features' => config('seiris.features')]));
+    // Dashboard
+    Route::get('my-dashboard', [DashboardController::class, 'index']);
+    // Config
+    Route::get('config', fn () => response()->json(['features' => config('seiris.features')]));
 
     // Teams — no team param (create, list, join)
     Route::post('teams',       [TeamController::class, 'store'])->middleware('throttle:write');

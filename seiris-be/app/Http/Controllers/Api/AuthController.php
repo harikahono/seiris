@@ -72,35 +72,35 @@ class AuthController extends Controller
         ]);
     }
 
-/**
- * GET /api/auth/me
- */
-public function me(Request $request): JsonResponse
-{
-    return response()->json([
-        'user' => new UserResource($request->user()),
-    ]);
-}
+    /**
+     * GET /api/auth/me
+     */
+    public function me(Request $request): JsonResponse
+    {
+        return response()->json([
+            'user' => new UserResource($request->user()),
+        ]);
+    }
 
-/**
- * PATCH /api/users/me/github-token
- * Update user's GitHub personal access token (for private repo diff)
- */
-public function updateGithubToken(Request $request): JsonResponse
-{
-    $user = $request->user();
-    
-    $request->validate([
-        'github_token' => ['nullable', 'string', 'max:255'],
-    ]);
-    
-    $user->update([
-        'github_token' => $request->filled('github_token') ? $request->github_token : null,
-    ]);
-    
-    return response()->json([
-        'message' => 'GitHub token berhasil diperbarui.',
-        'user' => new UserResource($user),
-    ]);
-}
+    /**
+     * PATCH /api/users/me/github-token
+     * Update user's GitHub personal access token (for private repo diff)
+     */
+    public function updateGithubToken(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'github_token' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $user->update([
+            'github_token' => $request->filled('github_token') ? $request->github_token : null,
+        ]);
+
+        return response()->json([
+            'message' => 'GitHub token berhasil diperbarui.',
+            'user' => new UserResource($user),
+        ]);
+    }
 }
