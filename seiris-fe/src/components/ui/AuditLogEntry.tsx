@@ -25,7 +25,9 @@ const ACTION_META: Record<string, { icon: LucideIcon; color: string; label: stri
   "contribution.approved":    { icon: ThumbsUp,   color: "text-green-400", label: "Kontribusi disetujui" },
   "contribution.rejected":    { icon: ThumbsDown, color: "text-red-400",   label: "Kontribusi ditolak" },
   "equity.recalculated":      { icon: PieChart,   color: "text-orange-400",label: "Memperbarui equity" },
+  "equity.recalculated.project": { icon: PieChart, color: "text-orange-400",label: "Memperbarui equity (projek)" },
   "equity.frozen":            { icon: Snowflake,  color: "text-cyan-400",  label: "Freeze equity" },
+  "project.frozen":           { icon: Snowflake,  color: "text-cyan-400",  label: "Freeze projek" },
   "revenue.created":          { icon: TrendingUp, color: "text-emerald-400",label: "Mencatat revenue" },
   "profit.distributed":       { icon: Gift,       color: "text-emerald-400",label: "Mendistribusikan profit" },
   "team.created":             { icon: Settings,   color: "text-gray-400",  label: "Membuat tim" },
@@ -118,6 +120,7 @@ function renderPayload(action: string, payload: Record<string, unknown>): ReactN
         ? <PayloadRow label="Ditolak" value={`${payload.reject_count} dari ${payload.total_voters} suara`} />
         : null;
     case action === "equity.recalculated":
+    case action === "equity.recalculated.project":
       return <PayloadRow label="Total slices" value={Number(payload.total_slices).toLocaleString("id-ID")} />;
     case action === "equity.frozen":
       return payload.snapshot_id ? <PayloadRow label="Status" value="Equity difreeze" /> : null;
@@ -145,9 +148,11 @@ function renderPayload(action: string, payload: Record<string, unknown>): ReactN
       return payload.member_name ? <PayloadRow label="Anggota" value={`${payload.member_name} keluar`} /> : null;
     default: {
       if (typeof payload === "object" && payload !== null) {
-        return Object.entries(payload).map(([k, v]) => (
-          <PayloadRow key={k} label={k} value={String(v)} />
-        ));
+        return Object.entries(payload)
+          .filter(([k]) => !['scope', 'project_id', 'members_count'].includes(k))
+          .map(([k, v]) => (
+            <PayloadRow key={k} label={k} value={String(v)} />
+          ));
       }
       return <PayloadRow label="" value={String(payload)} />;
     }
