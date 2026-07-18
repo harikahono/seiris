@@ -20,6 +20,9 @@ class ContributionResource extends JsonResource
             'total_slices'      => $this->total_slices,
             'status'            => $this->status,
             'contribution_date' => $this->contribution_date?->toDateString(),
+            // Proof & source
+            'proof_url'        => $this->proof_url,
+            'source_url'       => $this->source_url,
 
             // SALES specific
             'deal_value'        => $this->when($this->type === 'SALES', $this->deal_value),

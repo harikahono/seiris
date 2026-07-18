@@ -18,6 +18,9 @@ class StoreContributionRequest extends FormRequest
             'type'              => ['required', 'in:TIME,CASH,IDEA,NETWORK,FACILITY,SALES'],
             'description'       => ['required', 'string', 'min:5', 'max:500'],
             'contribution_date' => ['required', 'date', 'before_or_equal:today'],
+            // optional proof file (≤5 MB) and GitHub link
+            'proof' => ['nullable','file','mimes:pdf,jpg,png','max:5120'],
+            'source_url' => ['nullable','url','regex:/^https:\/\/github\.com\/[^\/]+\/[^\/]+\/(pull|commit)\/\d+/'],
         ];
 
         // Rules tambahan per tipe

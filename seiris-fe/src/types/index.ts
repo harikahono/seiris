@@ -140,8 +140,11 @@ export interface Contribution {
   value: number;
   multiplier: string;
   total_slices: number;
-  status: ContributionStatus;
-  contribution_date: string;
+   status: ContributionStatus;
+   contribution_date: string;
+   // optional proof of contribution
+   proof_url?: string | null;
+   source_url?: string | null;
   // SALES specific
   deal_value: number | null;
   estimated_value: number | null;
@@ -162,7 +165,10 @@ export interface CreateContributionPayload {
   amount?: number;
   deal_value?: number;
   estimated_value?: number;
-  commission_rate?: number;
+   commission_rate?: number;
+   // optional proof fields (same as backend)
+   proof?: File;
+   source_url?: string;
 }
 
 export interface VotePayload {

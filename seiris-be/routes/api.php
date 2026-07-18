@@ -86,6 +86,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('teams/{team}/contributions',                  [ContributionController::class, 'index']);
         Route::post('teams/{team}/contributions',                 [ContributionController::class, 'store'])->middleware('throttle:write');
         Route::get('teams/{team}/contributions/{contribution}',   [ContributionController::class, 'show']);
+        // Proof attach/replace (PENDING only) & GitHub diff viewer (read‑only) – toggleable via feature flag
+        if (config('seiris.features.contribution_proof')) {
+            Route::post('teams/{team}/contributions/{contribution}/proof', [ContributionController::class, 'attachProof'])->middleware('throttle:write');
+            Route::get('teams/{team}/contributions/{contribution}/github-diff', [ContributionController::class, 'githubDiff']);
+        }
 
         // Revenues
         Route::get('teams/{team}/revenues',                       [RevenueController::class, 'index']);
