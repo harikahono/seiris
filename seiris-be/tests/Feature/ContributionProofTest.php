@@ -39,10 +39,11 @@ class ContributionProofTest extends TestCase
             'proof' => $file,
         ];
 
-        // Act
-        $response = $this->postJson(
+        // Act — pakai post() supaya file terkirim sebagai multipart
+        $response = $this->post(
             "/api/teams/{$team->id}/contributions/{$contribution->id}/proof",
-            $payload
+            $payload,
+            ['Accept' => 'application/json']
         );
 
         // Assert
