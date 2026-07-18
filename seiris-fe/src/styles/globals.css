@@ -90,8 +90,10 @@
   }
 }
 
-/* ponytail: position relative supaya nomor baris diff mengikuti tiap baris, bukan stuck */
-.d2h-wrapper .d2h-code-side-line,
-.d2h-wrapper .d2h-code-line {
-  position: relative !important;
+/* ponytail: line numbers ikut scroll; default position: absolute bikin "stuck" saat scroll */
+.d2h-code-side-linenumber,
+.d2h-code-linenumber {
+  position: static !important;
+  display: table-cell !important;
+  vertical-align: top;
 }
