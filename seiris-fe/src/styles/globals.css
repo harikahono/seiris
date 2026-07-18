@@ -89,3 +89,9 @@
     animation: fade-in-up 0.4s ease-out both;
   }
 }
+
+/* ponytail: position relative supaya nomor baris diff mengikuti tiap baris, bukan stuck */
+.d2h-code-line,
+.d2h-code-side-line {
+  position: relative;
+}
