@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, ExternalLink } from "lucide-react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface ProofPreviewModalProps {
   url: string;
@@ -9,6 +10,7 @@ interface ProofPreviewModalProps {
 }
 
 export default function ProofPreviewModal({ url, open, onClose }: ProofPreviewModalProps) {
+  const trapRef = useFocusTrap(open);
   const isPdf = /\.pdf$/i.test(url);
 
   useEffect(() => {
@@ -30,6 +32,7 @@ export default function ProofPreviewModal({ url, open, onClose }: ProofPreviewMo
       onClick={onClose}
     >
       <div
+        ref={trapRef}
         className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card"
         onClick={(e) => e.stopPropagation()}
       >

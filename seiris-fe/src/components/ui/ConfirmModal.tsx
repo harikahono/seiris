@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface ConfirmModalProps {
   open: boolean;
@@ -26,6 +27,7 @@ export default function ConfirmModal({
   loading = false,
   icon,
 }: ConfirmModalProps) {
+  const trapRef = useFocusTrap(open);
   if (!open) return null;
 
   const isDanger = variant === "danger";
@@ -36,7 +38,7 @@ export default function ConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
+      <div ref={trapRef} className="relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
         <div className="flex flex-col items-center text-center">
           {icon ?? (
             <div className={`flex size-12 items-center justify-center rounded-full ${isDanger ? "bg-red-500/10" : "bg-accent/10"}`}>

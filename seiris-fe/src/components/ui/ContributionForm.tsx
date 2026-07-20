@@ -8,6 +8,7 @@ import { formatRp } from "@/lib/constants";
 import { toast } from "sonner";
 import { X, Loader2, ArrowLeft, AlertTriangle, Upload } from "lucide-react";
 import type { ContributionType } from "@/types";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface ContributionFormProps {
   teamId: string;
@@ -32,6 +33,7 @@ interface FieldErrors {
 }
 
 export default function ContributionForm({ teamId, projectId, fmr, open, onClose, onCreated }: ContributionFormProps) {
+  const trapRef = useFocusTrap(open);
   const basePath = projectId
     ? `/teams/${teamId}/projects/${projectId}`
     : `/teams/${teamId}`;
@@ -147,8 +149,8 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
     );
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={handleClose}>
+      <div ref={trapRef} className="w-full max-w-lg rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {step === "select" && (
           <>
             {fmr === 0 && (
@@ -163,7 +165,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
             )}
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Pilih Jenis Kontribusi</h2>
-              <button type="button" onClick={handleClose} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white">
+              <button type="button" onClick={handleClose} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white" aria-label="Tutup">
                 <X className="size-4" />
               </button>
             </div>
@@ -197,11 +199,11 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
         {step === "form" && type && (
           <>
             <div className="mb-4 flex items-center gap-2">
-              <button type="button" onClick={() => setStep("select")} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white">
+              <button type="button" onClick={() => setStep("select")} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white" aria-label="Kembali ke pilih jenis">
                 <ArrowLeft className="size-4" />
               </button>
               <h2 className="text-lg font-semibold text-white">Buat Kontribusi {type}</h2>
-              <button type="button" onClick={handleClose} className="ml-auto rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white">
+              <button type="button" onClick={handleClose} className="ml-auto rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white" aria-label="Tutup">
                 <X className="size-4" />
               </button>
             </div>

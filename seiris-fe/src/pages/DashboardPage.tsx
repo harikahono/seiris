@@ -93,14 +93,16 @@ function StatCard({
   label,
   value,
   sub,
+  clickable = true,
 }: {
   icon: typeof PieChart;
   label: string;
   value: string;
   sub?: string;
+  clickable?: boolean;
 }) {
   return (
-    <div className="group rounded-xl border border-gray-800 bg-card p-4 transition-all duration-200 hover:border-gray-700 hover:-translate-y-0.5">
+    <div className={cn("rounded-xl border border-gray-800 bg-card p-4 transition-all duration-200", clickable ? "group hover:border-gray-700 hover:-translate-y-0.5" : "")}>
       <div className="flex items-center gap-2">
         <div className="flex size-8 items-center justify-center rounded-full bg-gray-800">
           <Icon className="size-4 text-gray-400" />
@@ -193,6 +195,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
                 type="button"
                 onClick={() => setShareOpen(true)}
                 className="rounded-lg border border-gray-700/50 p-2 text-gray-400 transition hover:border-accent hover:text-accent"
+                aria-label="Bagikan undangan"
               >
                 <Share2 className="size-4" />
               </button>
@@ -238,6 +241,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
               icon={UserCheck}
               label="Anggota Aktif"
               value={String(totalMembers)}
+              clickable={false}
             />
           </div>
 

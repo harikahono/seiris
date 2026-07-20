@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { X, Loader2, LogIn } from "lucide-react";
 import type { ApprovalThreshold, CreateTeamPayload } from "@/types";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 type Tab = "create" | "join";
 
@@ -25,6 +26,7 @@ interface CreateFieldErrors {
 }
 
 export default function CreateTeamModal({ open, onClose, onCreated, defaultTab = "create" }: CreateTeamModalProps) {
+  const trapRef = useFocusTrap(open);
   const [tab, setTab] = useState<Tab>(defaultTab);
 
   // ── Form: Buat Tim ──
@@ -146,7 +148,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
+      <div ref={trapRef} className="w-full max-w-md rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
         {/* ── Header + Tabs ── */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex flex-1 gap-2">
@@ -161,6 +163,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
             type="button"
             onClick={handleClose}
             className="ml-2 rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white"
+            aria-label="Tutup"
           >
             <X className="size-4" />
           </button>

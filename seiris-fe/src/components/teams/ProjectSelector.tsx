@@ -71,10 +71,10 @@ export default function ProjectSelector() {
             placeholder="Deskripsi (opsional)"
             className="w-44 rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-[#e07820]"
           />
-          <button onClick={createProject} className="rounded-md bg-green-600 px-2 py-1.5 text-sm text-white hover:bg-green-500">
+          <button onClick={createProject} className="rounded-md bg-accent px-2 py-1.5 text-sm text-black hover:bg-accent-hover">
             Simpan
           </button>
-          <button onClick={() => setCreating(false)} className="rounded-md bg-gray-700 px-2 py-1.5 text-sm text-white hover:bg-gray-600">
+          <button onClick={() => setCreating(false)} className="rounded-md border border-gray-700 px-2 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-white">
             Batal
           </button>
         </div>

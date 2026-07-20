@@ -9,6 +9,7 @@ import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { toast } from "sonner";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut, Info, Lock, ShieldAlert } from "lucide-react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 export default function TeamMembersTab() {
   const { team, currentUserId, fetchTeam } = useOutletContext<TeamContext>();
@@ -201,6 +202,7 @@ export default function TeamMembersTab() {
   const [leaverType, setLeaverType] = useState<"good" | "bad">("bad");
   const [exitReason, setExitReason] = useState("");
   const [exitingLoading, setExitingLoading] = useState(false);
+  const exitTrapRef = useFocusTrap(!!exitingMember);
 
   const handleExit = async () => {
     if (!exitingMember) return;
@@ -289,7 +291,7 @@ export default function TeamMembersTab() {
               <button
                 type="button"
                 onClick={() => setProposingFmr(true)}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition hover:bg-accent/20"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-accent/30 bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent transition hover:bg-accent/15"
               >
                 <Send className="size-3.5" />
                 Ajukan FMR
@@ -304,7 +306,7 @@ export default function TeamMembersTab() {
       <div className="rounded-xl border border-gray-800/50 bg-card overflow-hidden">
         {activeMembers.map((member, i) => (
           <div key={member.id}>
-            <div className="flex items-center justify-between px-5 py-4 transition hover:bg-gray-800/20">
+            <div className="flex items-center justify-between px-5 py-4 cursor-default">
               <div className="flex items-center gap-3">
                 <UserAvatar user={member.user} size="lg" />
                 <div>
@@ -342,7 +344,7 @@ export default function TeamMembersTab() {
                           type="button"
                           onClick={() => saveFmr(member)}
                           disabled={savingFmr}
-                          className="rounded p-1 text-green-400 hover:bg-gray-800"
+                          className="flex items-center justify-center rounded p-1 text-green-400 hover:bg-gray-800 min-w-[44px] min-h-[44px]"
                           aria-label={`Simpan FMR ${member.user.name}`}
                         >
                           {savingFmr ? (
@@ -354,7 +356,7 @@ export default function TeamMembersTab() {
                         <button
                           type="button"
                           onClick={cancelEditFmr}
-                          className="rounded p-1 text-gray-500 hover:bg-gray-800"
+                          className="flex items-center justify-center rounded p-1 text-gray-500 hover:bg-gray-800 min-w-[44px] min-h-[44px]"
                           aria-label={`Batal edit FMR ${member.user.name}`}
                         >
                           <X className="size-3.5" />
@@ -508,18 +510,18 @@ export default function TeamMembersTab() {
                           <button
                             type="button"
                             onClick={() => handleApprove(proposal)}
-                            className="rounded p-1.5 text-green-400 transition hover:bg-gray-800"
-                            title="Setujui"
+                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-green-400 transition hover:bg-gray-800"
+                            aria-label={`Setujui proposal ${proposal.member.user.name}`}
                           >
-                            <Check className="size-4" />
+                            <Check className="size-3.5" /> Setujui
                           </button>
                           <button
                             type="button"
                             onClick={() => handleReject(proposal)}
-                            className="rounded p-1.5 text-red-400 transition hover:bg-gray-800"
-                            title="Tolak"
+                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-red-400 transition hover:bg-gray-800"
+                            aria-label={`Tolak proposal ${proposal.member.user.name}`}
                           >
-                            <X className="size-4" />
+                            <X className="size-3.5" /> Tolak
                           </button>
                         </>
                       ) : null}
@@ -543,7 +545,7 @@ export default function TeamMembersTab() {
       {exitingMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/60" onClick={() => { setExitingMember(null); setExitReason(""); }} />
-          <div className="relative w-full max-w-md rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
+          <div ref={exitTrapRef} className="relative w-full max-w-md rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
             <div className="flex flex-col items-center text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
                 <LogOut className="size-6 text-red-400" />

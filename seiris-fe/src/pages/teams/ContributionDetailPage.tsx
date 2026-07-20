@@ -154,8 +154,9 @@ export default function ContributionDetailPage() {
         <button
           onClick={() => navigate(-1)}
           className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
+          aria-label="Kembali"
         >
-          <ArrowLeft className="size-4" /> Kembali
+          <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
         </button>
         <p className="text-red-400">Kontribusi tidak ditemukan.</p>
       </div>
@@ -171,8 +172,9 @@ export default function ContributionDetailPage() {
       <button
         onClick={() => navigate(-1)}
         className="animate-fade-in-up flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
+        aria-label="Kembali"
       >
-        <ArrowLeft className="size-4" /> Kembali
+        <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
       </button>
 
       {/* ── Contribution Detail ── */}

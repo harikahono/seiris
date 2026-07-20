@@ -6,6 +6,7 @@ import { formatRp } from "@/lib/constants";
 import { toast } from "sonner";
 import { Loader2, X, Upload, Plus, Trash2 } from "lucide-react";
 import type { RevenueDeduction } from "@/types";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface CreateRevenueFormProps {
   teamId: string;
@@ -21,6 +22,7 @@ interface FieldErrors extends Partial<Record<FieldKey, string>> {
 }
 
 export default function CreateRevenueForm({ teamId, projectId, open, onClose, onCreated }: CreateRevenueFormProps) {
+  const trapRef = useFocusTrap(open);
   const basePath = projectId
     ? `/teams/${teamId}/projects/${projectId}`
     : `/teams/${teamId}`;
@@ -121,10 +123,10 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/60" onClick={handleClose} />
-      <div className="relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div ref={trapRef} className="relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Catat Revenue Baru</h2>
-          <button type="button" onClick={handleClose} className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-white">
+          <button type="button" onClick={handleClose} className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-white" aria-label="Tutup">
             <X className="size-5" />
           </button>
         </div>
@@ -165,7 +167,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
                     placeholder="0" min="0"
                     className="w-28 rounded-lg border border-gray-700 bg-gray-800 px-2.5 py-1.5 text-xs text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent text-right" />
                   <button type="button" onClick={() => removeDeduction(i)}
-                    className="rounded p-1 text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition">
+                    className="rounded p-1 text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition" aria-label="Hapus potongan">
                     <Trash2 className="size-3.5" />
                   </button>
                 </div>

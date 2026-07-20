@@ -89,9 +89,10 @@ export default function TeamDetailPage() {
           type="button"
           onClick={() => navigate("/dashboard")}
           className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
+          aria-label="Kembali"
         >
           <ArrowLeft className="size-4" />
-          Kembali
+          <span className="hidden sm:inline">Kembali</span>
         </button>
         <div className="rounded-xl border border-gray-800 bg-card p-8 text-center">
           <p className="text-red-400">{error || "Tim tidak ditemukan."}</p>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Link2, Check, MessageCircle, Mail, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface Props {
   open: boolean;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function ShareInviteModal({ open, onClose, teamName, inviteCode }: Props) {
+  const trapRef = useFocusTrap(open);
   const [copiedLink, setCopiedLink] = useState(false);
 
   if (!open) return null;
@@ -41,11 +43,11 @@ export default function ShareInviteModal({ open, onClose, teamName, inviteCode }
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-sm animate-fade-in-up rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
+      <div ref={trapRef} className="w-full max-w-sm animate-fade-in-up rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
         {/* Header */}
         <div className="mb-1 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Bagikan Undangan</h2>
-          <button type="button" onClick={onClose} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white">
+          <button type="button" onClick={onClose} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white" aria-label="Tutup">
             <X className="size-4" />
           </button>
         </div>

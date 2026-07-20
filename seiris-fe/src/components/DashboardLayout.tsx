@@ -7,6 +7,7 @@ import { usePusher } from "@/hooks/usePusher";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import CreateTeamModal from "@/components/ui/CreateTeamModal";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 import Skeleton from "@/components/ui/Skeleton";
 import { 
@@ -170,6 +171,7 @@ export default function DashboardLayout() {
 
   // ── Logout ──
   const handleLogout = () => setShowLogoutModal(true);
+  const logoutTrapRef = useFocusTrap(showLogoutModal);
 
   const confirmLogout = () => {
     logout();
@@ -193,6 +195,7 @@ export default function DashboardLayout() {
             type="button"
             onClick={() => setCollapsed(!collapsed)}
             className="rounded-md p-1.5 text-gray-500 hover:bg-gray-800 hover:text-white"
+            aria-label={collapsed ? "Buka sidebar" : "Ciutkan sidebar"}
           >
             {collapsed ? <Menu className="size-4" /> : <ChevronLeft className="size-4" />}
           </button>
@@ -442,7 +445,7 @@ export default function DashboardLayout() {
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/60" onClick={() => setShowLogoutModal(false)} />
-          <div className="relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
+          <div ref={logoutTrapRef} className="relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
             <div className="flex flex-col items-center text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
                 <AlertTriangle className="size-6 text-red-400" />

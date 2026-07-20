@@ -127,9 +127,10 @@ export default function SettingsPage() {
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
+        aria-label="Kembali"
       >
         <ArrowLeft className="size-4" />
-        Kembali
+        <span className="hidden sm:inline">Kembali</span>
       </button>
 
       {/* Header */}
@@ -166,6 +167,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full border border-gray-700 bg-gray-800 text-gray-400 hover:text-white transition"
+                aria-label="Ubah foto profil"
               >
                 <Camera className="size-3" />
               </button>
@@ -279,6 +281,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={() => setShowToken(!showToken)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                  aria-label={showToken ? "Sembunyikan token" : "Tampilkan token"}
                 >
                   {showToken ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
