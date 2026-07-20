@@ -9,7 +9,7 @@ import type { Contribution as ContributionType, Team } from "@/types";
 import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
 import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
-import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink, ChevronDown } from "lucide-react";
+import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink, ChevronDown, Loader2 } from "lucide-react";
 import { html } from "diff2html";
 import "diff2html/bundles/css/diff2html.min.css";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,7 @@ export default function ContributionDetailPage() {
   const navigate = useNavigate();
   const [contribution, setContribution] = useState<ContributionType | null>(null);
   const [showDiff, setShowDiff] = useState(false);
+  const [diffLoading, setDiffLoading] = useState(false);
   const [showProof, setShowProof] = useState(false);
   const [diffFiles, setDiffFiles] = useState<any[]>([]);
   const [expandedFiles, setExpandedFiles] = useState<Set<number>>(new Set([0]));
@@ -69,6 +70,7 @@ export default function ContributionDetailPage() {
   // Load GitHub diff for this contribution
   const loadDiff = async () => {
     if (!teamId || !contributionId) return;
+    setDiffLoading(true);
     try {
       const res = await api.get<{ files: any[] }>(`/teams/${teamId}/contributions/${contributionId}/github-diff`);
       setDiffFiles(res.data.files ?? []);
@@ -76,6 +78,8 @@ export default function ContributionDetailPage() {
       setShowDiff(true);
     } catch (e) {
       toast.error('Gagal mengambil diff dari GitHub');
+    } finally {
+      setDiffLoading(false);
     }
   };
 
@@ -210,9 +214,9 @@ export default function ContributionDetailPage() {
                   </button>
                 )}
                 {contribution.source_url && (
-                  <button onClick={loadDiff} className="flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent">
-                    <ChevronDown className="size-4" />
-                    Lihat Perubahan Kode
+                  <button onClick={loadDiff} disabled={diffLoading} className="flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent disabled:cursor-not-allowed disabled:opacity-50">
+                    {diffLoading ? <Loader2 className="size-4 animate-spin" /> : <ChevronDown className="size-4" />}
+                    {diffLoading ? "Memuat..." : "Lihat Perubahan Kode"}
                   </button>
                 )}
               </div>

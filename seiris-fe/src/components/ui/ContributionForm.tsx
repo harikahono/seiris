@@ -86,6 +86,14 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
     setErrors({});
     if (!type) return;
 
+    // Client-side validation: GitHub link format
+    if (sourceUrl.trim() && !/^https:\/\/github\.com\/.+\/.+\/(pull\/\d+|commit\/[a-f0-9]{40})$/i.test(sourceUrl.trim())) {
+      setErrors({ source_url: "Link harus berupa PR GitHub (github.com/.../pull/123) atau commit (github.com/.../commit/abc123)" });
+      toast.error("Link GitHub tidak valid");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       // always use FormData to support file upload & source_url
@@ -249,7 +257,8 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
                 {/* Source URL */}
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-300">Link GitHub PR/Commit</label>
-                  <input type="url" placeholder="https://github.com/.../pull/123" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1" />
+                  <input type="url" placeholder="https://github.com/.../pull/123" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} className={`w-full rounded-lg border bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 ${errors.source_url ? 'border-red-500' : 'border-gray-700 focus:border-accent'}`} />
+                  {errors.source_url && <p className="mt-1 text-xs text-red-500">{errors.source_url}</p>}
                 </div>
               </>)}
 

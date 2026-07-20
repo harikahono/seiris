@@ -83,6 +83,13 @@ export default function SettingsPage() {
   // ── GitHub token ──
   const handleTokenSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    // Client validation: pastikan format GitHub PAT
+    if (!/^(ghp_|github_pat_|gho_|ghu_|ghr_)/.test(githubToken.trim())) {
+      toast.error("Format token tidak valid. Gunakan GitHub Personal Access Token (mulai dengan ghp_ atau github_pat_)");
+      return;
+    }
+
     setTokenLoading(true);
     try {
       const res = await api.patch("/users/me/github-token", {
@@ -265,15 +272,15 @@ export default function SettingsPage() {
         {!hasToken ? (
           <form onSubmit={handleTokenSubmit} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-300">
-                Masukkan GitHub Token
+                <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                GitHub Personal Access Token
               </label>
               <div className="relative">
                 <input
                   type={showToken ? "text" : "password"}
                   value={githubToken}
                   onChange={(e) => setGithubToken(e.target.value)}
-                  placeholder="ghp_..."
+                  placeholder="ghp_... atau github_pat_..."
                   className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1"
                   required
                 />

@@ -20,7 +20,7 @@ class StoreContributionRequest extends FormRequest
             'contribution_date' => ['required', 'date', 'before_or_equal:today'],
             // optional proof file (≤5 MB) and GitHub link
             'proof' => ['nullable','file','mimes:pdf,jpg,png','max:5120'],
-            'source_url' => ['nullable','url','regex:/^https:\/\/github\.com\/[^\/]+\/[^\/]+\/(pull\/\d+|commit\/[a-f0-9]+)$/'],
+            'source_url' => ['nullable','url','regex:/^https:\/\/github\.com\/[^\/]+\/[^\/]+\/(pull\/\d+|commit\/[a-f0-9]+)$/i'],
         ];
 
         // Rules tambahan per tipe

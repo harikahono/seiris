@@ -134,7 +134,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'github_token' => ['nullable', 'string', 'max:255'],
+            'github_token' => ['nullable', 'string', 'max:255', 'regex:/^(ghp_|github_pat_|gho_|ghu_|ghr_)/'],
         ]);
 
         $user->update([
