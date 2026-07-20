@@ -21,7 +21,19 @@ export default function ShareInviteModal({ open, onClose, teamName, inviteCode }
 
   const copyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(inviteUrl);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(inviteUrl);
+      } else {
+        // Fallback: textarea + execCommand buat browser non-HTTPS / lama
+        const ta = document.createElement("textarea");
+        ta.value = inviteUrl;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
       setCopiedLink(true);
       toast.success("Tautan disalin");
       setTimeout(() => setCopiedLink(false), 2000);

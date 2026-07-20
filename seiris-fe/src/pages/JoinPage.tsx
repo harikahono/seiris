@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTeamContext } from "@/contexts/TeamContext";
 import api from "@/api/axios";
 import { isAxiosError } from "axios";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ type PageState =
 export default function JoinPage() {
   const { inviteCode } = useParams<{ inviteCode: string }>();
   const { user, isLoading: authLoading } = useAuth();
+  const { setCurrentTeam, refreshTeams } = useTeamContext();
   const navigate = useNavigate();
   const [state, setState] = useState<PageState>({ type: "loading" });
   const [joining, setJoining] = useState(false);
@@ -52,8 +54,10 @@ export default function JoinPage() {
     try {
       const res = await api.post("/teams/join", { invite_code: inviteCode.toUpperCase() });
       const teamId: string = res.data?.data?.team_id ?? res.data?.data?.id;
+      setCurrentTeam(teamId);
+      refreshTeams();
       toast.success("Berhasil bergabung ke tim!");
-      navigate(`/teams/${teamId}`, { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       if (isAxiosError(err) && err.response) {
         const msg = err.response.data?.message ?? "Gagal bergabung.";
