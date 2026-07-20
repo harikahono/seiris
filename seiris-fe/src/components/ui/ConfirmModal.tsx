@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
@@ -35,7 +36,7 @@ export default function ConfirmModal({
     ? "bg-red-500 hover:bg-red-600 text-white"
     : "bg-accent hover:bg-accent-hover text-black";
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/60" onClick={onClose} />
       <div ref={trapRef} className="relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
@@ -71,6 +72,7 @@ export default function ConfirmModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
