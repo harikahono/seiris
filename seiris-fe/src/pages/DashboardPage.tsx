@@ -14,8 +14,10 @@ import EmptyState from "@/components/ui/EmptyState";
 import EquityPieCard from "@/components/ui/EquityPieCard";
 import UserAvatar from "@/components/ui/UserAvatar";
 import MemberContributionRadar from "@/components/ui/MemberContributionRadar";
+import ShareInviteModal from "@/components/ui/ShareInviteModal";
 import {
-  Copy, Check, ChevronRight,
+  Share2,
+  ChevronRight,
   TrendingUp, FileText, UserCheck, PieChart, ClipboardList, Users,
 } from "lucide-react";
 
@@ -122,7 +124,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
   const [totalDistributed, setTotalDistributed] = useState(0);
   const [totalContribCount, setTotalContribCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const fetchData = useCallback(() => {
     return Promise.all([
@@ -162,38 +164,6 @@ function TeamDashboard({ teamId }: { teamId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
 
-  const copyInviteCode = async () => {
-    if (!team) return;
-    const code = team.invite_code;
-    const copy = async (): Promise<boolean> => {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(code);
-        return true;
-      }
-      // ponytail: HTTP (VPS) gak punya navigator.clipboard → fallback execCommand
-      const ta = document.createElement("textarea");
-      ta.value = code;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      const copied = document.execCommand("copy");
-      document.body.removeChild(ta);
-      return copied;
-    };
-    try {
-      if (await copy()) {
-        setCopied(true);
-        toast.success("Kode undangan disalin");
-        setTimeout(() => setCopied(false), 2000);
-      } else {
-        toast.error("Gagal menyalin kode undangan");
-      }
-    } catch {
-      toast.error("Gagal menyalin kode undangan");
-    }
-  };
-
   const myMember = team?.members?.find((m) => m.user.id === user?.id);
   const myEquity = myMember
     ? equity?.equity_map?.find((e) => e.member_id === myMember.id)
@@ -219,15 +189,12 @@ function TeamDashboard({ teamId }: { teamId: string }) {
               <p className="mt-1 text-sm text-gray-500">{team.description || "Tidak ada deskripsi."}</p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <code className="hidden rounded-lg border border-gray-700/50 bg-gray-800/50 px-3 py-1.5 font-mono text-sm tracking-widest text-accent backdrop-blur-sm lg:block">
-                {team.invite_code}
-              </code>
               <button
                 type="button"
-                onClick={copyInviteCode}
+                onClick={() => setShareOpen(true)}
                 className="rounded-lg border border-gray-700/50 p-2 text-gray-400 transition hover:border-accent hover:text-accent"
               >
-                {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+                <Share2 className="size-4" />
               </button>
             </div>
           </div>
@@ -437,6 +404,13 @@ function TeamDashboard({ teamId }: { teamId: string }) {
           )}
         </div>
       </div>
+
+      <ShareInviteModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        teamName={team.name}
+        inviteCode={team.invite_code}
+      />
     </div>
   );
 }
