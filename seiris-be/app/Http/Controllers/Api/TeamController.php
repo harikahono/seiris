@@ -156,13 +156,23 @@ class TeamController extends Controller
             return response()->json(['message' => 'Undangan tidak valid atau sudah kadaluwarsa.'], 404);
         }
 
+        $user = auth('sanctum')->user();
+        $isMember = $user
+            ? TeamMember::where('team_id', $team->id)
+                ->where('user_id', $user->id)
+                ->where('status', 'active')
+                ->exists()
+            : false;
+
         return response()->json([
             'data' => [
+                'team_id'       => (string) $team->id,
                 'name'          => $team->name,
                 'description'   => $team->description,
                 'members_count' => $team->activeMembers()->count(),
                 'owner_name'    => $team->owner?->name ?? '—',
                 'created_at'    => $team->created_at?->toISOString(),
+                'is_member'     => $isMember,
             ],
         ]);
     }

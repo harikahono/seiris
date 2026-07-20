@@ -8,11 +8,13 @@ import { toast } from "sonner";
 import { Loader2, XCircle, Users, Calendar, ShieldAlert } from "lucide-react";
 
 interface TeamPreview {
+  team_id: string;
   name: string;
   description: string | null;
   members_count: number;
   owner_name: string;
   created_at: string;
+  is_member: boolean;
 }
 
 type PageState =
@@ -144,8 +146,58 @@ export default function JoinPage() {
           </div>
         )}
 
-        {/* Confirm card */}
-        {state.type === "confirm" && (
+        {/* Confirm card — udah member */}
+        {state.type === "confirm" && state.preview.is_member && (
+          <div className="rounded-xl border border-gray-800 bg-card p-8 shadow-2xl">
+            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-emerald-500/15 text-xl font-bold text-emerald-400">
+              {initials}
+            </div>
+
+            <h1 className="text-center text-xl font-bold text-white">{state.preview.name}</h1>
+            {state.preview.description && (
+              <p className="mt-2 text-center text-sm text-gray-400 leading-relaxed">{state.preview.description}</p>
+            )}
+
+            <div className="mx-auto mt-5 flex items-center justify-center gap-5 text-xs text-gray-500">
+              <span className="flex items-center gap-1.5">
+                <Users className="size-3.5" />
+                {state.preview.members_count} anggota
+              </span>
+              <span className="flex items-center gap-1.5">
+                <ShieldAlert className="size-3.5" />
+                {state.preview.owner_name}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Calendar className="size-3.5" />
+                {new Date(state.preview.created_at).getFullYear()}
+              </span>
+            </div>
+
+            <div className="mt-6 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-center">
+              <p className="text-sm font-medium text-emerald-400">
+                Kamu sudah bergabung di tim ini
+              </p>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <Link
+                to={`/teams/${state.preview.team_id}/members`}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover"
+              >
+                Ke Tim
+              </Link>
+              <Link
+                to="/dashboard"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-800 hover:text-white"
+              >
+                Dashboard
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Confirm card — join */}
+        {state.type === "confirm" && !state.preview.is_member && (
           <div className="rounded-xl border border-gray-800 bg-card p-8 shadow-2xl">
             {/* Avatar tim */}
             <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-accent/15 text-xl font-bold text-accent">
