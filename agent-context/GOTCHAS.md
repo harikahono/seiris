@@ -1,6 +1,6 @@
 # GOTCHAS — SEIRIS
 
-> Trap yang sudah bikin bug / salah asumsi. Diambil dari `CLAIMS_V2.md` (caveats) + `AGENTS.md` quirks + temuan sesi 2026-07-14. Baca ini SEBELUM ngubah kode.
+> Trap yang sudah bikin bug / salah asumsi. Diambil dari `CLAIMS_V2.md` (caveats) + `AGENTS.md` quirks + temuan sesi 2026-07-14 s.d. 2026-07-20. Baca ini SEBELUM ngubah kode. Untuk isu UI/UX affordance selain trap di sini, baca `UI_AUDIT.md`.
 
 ## Database & Deploy
 - **PostgreSQL wajib di produksi.** Migrasi pakai `gen_random_uuid()` & `lockForUpdate()` (row-level lock) — **gagal di MySQL/SQLite**. SQLite hanya untuk test (`:memory:`). Jangan deploy ke SQLite.
@@ -60,3 +60,24 @@
 - **`FieldErrors` type** di frontend: pas proof/source_url validasi error, key-nya `proof` dan `source_url` — sesuai field name, bukan `proof_path`/`source_url` (BE pakai nama field yang sama).
 - **Lihat Diff** tombol hanya muncul jika `source_url` terisi dan feature flag aktif. Guard di `ContributionDetailPage.tsx`.
 - **Syntax coloring** diff: `+` lines green, `-` lines red, `@@` lines cyan. Style inline di komponen (tidak pakai library eksternal).
+
+## Invite & Join flow traps
+- **`GET /teams/invite/{inviteCode}` publik** — endpoint TANPA auth. Response terbatas (tanpa invite_code, tanpa data sensitif). Tapi tetap bisa dipakai enumerasi invite code valid → rate limiter mungkin perlu dipertimbangkan.
+- **Invite code uppercase** — BE normalisasi `strtoupper()`, FE juga kirim `inviteCode.toUpperCase()`. Keduanya harus sinkron. Jangan lupa strip spasi.
+- **Redirect loop** — Guard di `JoinPage`: `if (!inviteCode) return navigate('/dashboard')`. AuthPage redirect balik setelah login. Pastikan tidak ada circular redirect (JoinPage → /login → /join → ...). Saat ini aman karena guard `!inviteCode` dulu baru `!user`.
+- **`TeamPreview` local type** — JoinPage define `interface TeamPreview` secara lokal (bukan di `types/index.ts`). YAGNI: hanya dipakai 1 tempat. Jangan diekstrak tanpa alasan.
+- **`animate-fade-in-up` bukan Tailwind built-in** — didefinisikan di `src/styles/globals.css` sebagai custom utility via `@layer utilities`. Kalau dihapus, animasi di JoinPage, DashboardPage, RevenueDetailPage, ContributionDetailPage, ShareInviteModal akan silent fail. Pastikan migrasi Tailwind v5 masih support pattern ini.
+
+## UserAvatar traps
+- **Jangan import `UserAvatar` dari path salah** — lokasi: `@/components/ui/UserAvatar`. File sudah ada.
+- **`profile_photo_url` nullable** — `UserAvatar` handle null via `imgError` state. Tapi kalau BE kirim string kosong (`""`) bukan `null`, `img` tetap render dan trigger `onError` → fallback inisial. Aman, tapi boros 1 extra render.
+- **`profile_photo_url` di equity_map** — ada di 2 tempat di `EquityController`: saat snapshot kosong (baris 49) dan saat snapshot ada (baris 69). Keduanya wajib diisi. Jangan tambah equity logic tanpa isi field ini.
+
+## Share modal traps
+- **`ShareInviteModal` pakai `createPortal`** — modal dirender di `document.body`. Kalau di-wrap `AnimatePresence`, pastikan `portal` container stabil.
+- **Staggered animation** — 4 elemen dalam modal punya `animationDelay` bertahap (0ms, 80ms, 160ms, 240ms). Jumlah elemen hardcoded. Kalau tambah opsi share, delay perlu disesuaikan.
+- **WA link tidak pakai International format validation** — `wa.me` API akan gagal silencenya kalau nomor tidak ada. Saat ini WA share kirim teks saja via `wa.me/?text=...` tanpa nomor — aman.
+
+## RevenueDetailPage traps
+- **Hanya team scope** — `RevenueDetailPage` fetch `GET /teams/{team}/revenues/{revenue}` (team scope). Tidak ada route untuk project-scoped revenue detail. Kalau user buka detail revenue dari project, data akan tetap tampil (karena endpoint team scope mencakup semua revenue tim). Tapi path URL tidak mencerminkan scope project.
+

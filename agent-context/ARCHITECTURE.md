@@ -1,6 +1,6 @@
 # ARCHITECTURE — SEIRIS
 
-> Diambil dari kode per 2026-07-14. Untuk detail bisnis baca `DOMAIN_LOGIC.md`, untuk endpoint baca `API_CONTRACTS.md`.
+> Diambil dari kode per 2026-07-20. Untuk detail bisnis baca `DOMAIN_LOGIC.md`, untuk endpoint baca `API_CONTRACTS.md`, untuk audit UI baca `UI_AUDIT.md`.
 
 ## Stack
 
@@ -32,11 +32,19 @@ seiris-be/
 
 seiris-fe/
   src/
-    components/        # ui/ (primitives) + teams/ (tabs)
+    components/
+      ui/              # primitives (UserAvatar, ShareInviteModal, Skeleton, dll)
+      teams/           # tabs (TeamMembersTab, ContributionsTab, RevenueTab, dll)
     contexts/          # Auth, Team, Project, Realtime
     hooks/usePusher.ts
     types/index.ts     # semua interface FE
     lib/{api,constants}.ts
+    pages/
+      teams/           # TeamDetailPage, ContributionDetailPage, RevenueDetailPage
+      JoinPage.tsx     # join via invite (public)
+      AuthPage.tsx     # login/register + ?redirect= support
+      DashboardPage.tsx
+      SettingsPage.tsx
     App.tsx            # route table
 ```
 
@@ -54,6 +62,29 @@ FE component
   -> FE Context / state -> re-render
 Pusher event (equity.updated / contribution.created / team.updated)
   -> usePusher -> RealtimeContext.triggerRefresh() -> semua tab re-fetch
+
+## Invite & Share Flow
+
+### Public preview — tanpa auth
+```
+User (belum login) -> GET /teams/invite/{inviteCode} (public)
+  -> TeamController@previewInvite -> {name, description, members_count, owner_name}
+User (belum login) -> diarahkan ke /login?redirect=/join/{inviteCode}
+  -> AuthPage baca redirect param -> login -> redirect balik
+```
+
+### Join — setelah login
+```
+JoinPage -> GET /teams/invite/{inviteCode} (preview)
+  -> tampilkan konfirmasi card (Discord-style)
+  -> POST /teams/join {invite_code} -> redirect ke /teams/{teamId}
+```
+
+### Share — dari dashboard
+```
+DashboardPage -> tombol Share2 (lucide)
+  -> ShareInviteModal (portal, 3 opsi: Copy/WA/Gmail)
+  -> wa.me URL, mailto: URL, clipboard API
 ```
 
 ## Slicing Pie Beranak (nested pie)

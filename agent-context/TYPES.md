@@ -1,6 +1,6 @@
 # TYPES — SEIRIS
 
-> Diambil dari kode per 2026-07-14. FE = `seiris-fe/src/types/index.ts`; BE = `seiris-be/app/Models/*` + `app/Http/Resources/*`.
+> Diambil dari kode per 2026-07-20. FE = `seiris-fe/src/types/index.ts`; BE = `seiris-be/app/Models/*` + `app/Http/Resources/*`.
 
 ## FE interfaces (`src/types/index.ts`)
 
@@ -15,7 +15,7 @@ Semua type ada di satu file. Yang sering dipakai:
 | `Contribution` | id, **project_id** (`string\|null`), type (`ContributionType`), description, value, multiplier (`string`), total_slices, status (`"PENDING"\|"APPROVED"\|"REJECTED"`), contribution_date, deal_value/estimated_value/commission_rate (SALES), member, approvals[], approvals_count, hours?, **proof_url** (`string\|null`), **source_url** (`string\|null`) |
 | `ContributionApproval` | id, vote (`"APPROVE"\|"REJECT"`), note, member, voted_at |
 | `EquityData` | snapshot_id, **project_id** (`string\|null`), total_slices, equity_map (`EquityMemberEntry[]`), slices_by_type, is_frozen, calculated_at |
-| `EquityMemberEntry` | member_id, name, role, slices, equity_pct |
+| `EquityMemberEntry` | member_id, name, role, slices, equity_pct, **profile_photo_url** (`string\|null`) |
 | `Revenue` | id, **project_id** (`string\|null`), **distributable?** (`boolean`), description, amount, distributable_amount, deductions[], proof_url, revenue_date, status (`"pending"\|"distribute_requested"\|"distributed"`), is_distributed, distributed_at, recorded_by, distributions (`RevenueDistribution[]`) |
 | `RevenueDistribution` | member, equity_pct, amount |
 | `RevenueDeduction` | for, amount |
@@ -55,6 +55,20 @@ Payload types: `LoginPayload`, `RegisterPayload`, `CreateTeamPayload`, `CreateCo
 | `ProjectResource` | id, team_id, name, description, is_frozen, frozen_at, created_at, updated_at |
 
 > **TIDAK ADA `EquitySnapshotResource`** — endpoint equity (`EquityController`) balikin array inline, bukan resource.
+
+## FE inline type (tidak di types/index.ts)
+
+JoinPage punya `interface TeamPreview` lokal (digunakan untuk response `GET /teams/invite/{inviteCode}`):
+
+| Field | Type |
+|-------|------|
+| name | `string` |
+| description | `string\|null` |
+| members_count | `number` |
+| owner_name | `string` |
+| created_at | `string` |
+
+> Tidak perlu diekstrak ke `types/index.ts` selama cuma dipakai 1 tempat (YAGNI).
 
 ## Mapping nama FE <-> BE (GANTI biar gak bingung)
 

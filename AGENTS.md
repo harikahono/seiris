@@ -1,6 +1,6 @@
 # SEIRIS — Agent Guide
 
-> **Dokumentasi lengkap ada di folder `agent-context/`** (diturunkan & diverifikasi dari kode per 2026-07-18). File ini cuma entry point + setup cepat. Baca `agent-context/` untuk arsitektur, tipe, logic domain, kontrak API, keputusan, dan gotchas.
+> **Dokumentasi lengkap ada di folder `agent-context/`** (diturunkan & diverifikasi dari kode per 2026-07-20). File ini cuma entry point + setup cepat. Baca `agent-context/` untuk arsitektur, tipe, logic domain, kontrak API, keputusan, gotchas, dan UI audit.
 
 ## Docs Index (baca ini)
 - `agent-context/ARCHITECTURE.md` — stack, folder convention, data flow, Slicing Pie Beranak, realtime, deploy note.
@@ -9,6 +9,7 @@
 - `agent-context/API_CONTRACTS.md` — semua endpoint (termasuk subtree project + broadcasting/auth) lengkap & terverifikasi.
 - `agent-context/DECISIONS.md` — ADR (kenapa X bukan Y).
 - `agent-context/GOTCHAS.md` — trap & caveats yang sudah bikin bug. **Baca sebelum ngubah kode.**
+- `agent-context/UI_AUDIT.md` — hasil audit affordance UI/UX (false hover, missing tooltip, icon vs text, dll).
 
 ## Project Structure
 - `seiris-be/` — Laravel 12 backend (PHP 8.2+, **PostgreSQL di produksi**, SQLite untuk test)
@@ -41,8 +42,10 @@ pnpm lint         # ESLint
 | Path | Component |
 |------|-----------|
 | `/` | `LandingPage` (public) |
-| `/login` `/register` | `AuthPage` (public) |
-| `/dashboard` | `DashboardPage` (protected) |
+| `/login` `/register` | `AuthPage` (public, support `?redirect=` param) |
+| `/join/:inviteCode` | `JoinPage` (public — Discord-style join confirmation) |
+| `/dashboard` | `DashboardPage` (protected, punya share button `ShareInviteModal`) |
+| `/settings` | `SettingsPage` (protected — profile, foto, password, GitHub token) |
 | `/teams/:teamId` | `TeamDetailPage` (outlet, tab — **Pengaturan hanya untuk owner**) |
 | `/teams/:teamId/members` | `TeamMembersTab` |
 | `/teams/:teamId/contributions` | `ContributionsTab` |
@@ -50,7 +53,7 @@ pnpm lint         # ESLint
 | `/teams/:teamId/audit` | `AuditLogTab` |
 | `/teams/:teamId/settings` | `TeamSettingsTab` |
 | `/teams/:teamId/contributions/:contributionId` | `ContributionDetailPage` |
-| `/settings` | `SettingsPage` |
+| `/teams/:teamId/revenues/:revenueId` | `RevenueDetailPage` |
 
 ## Catatan penting (ringkas — lengkap di GOTCHAS.md)
 - **Models = 12** (bukan 10): ada `Project` + `ProjectMember` (Slicing Pie Beranak).
@@ -63,3 +66,6 @@ pnpm lint         # ESLint
 - **Endpoint baru**: `PATCH /users/me/github-token`, `PATCH /users/me/profile`, `GET /config`, proof & github-diff routes (team & project scope).
 - **Settings pribadi**: semua user bisa akses `/settings` (nama, email, password, foto, GitHub token).
 - **Team Settings** di sidebar hanya tampil untuk owner.
+- **Invite flow**: `GET /teams/invite/{inviteCode}` publik (tanpa auth). JoinPage di `/join/:inviteCode`. AuthPage dukung `?redirect=` untuk post-login redirect.
+- **Share modal**: `ShareInviteModal` (portal) di dashboard, 3 opsi: Copy link, WhatsApp, Gmail.
+- **UserAvatar**: komponen reusable `@/components/ui/UserAvatar` untuk semua foto anggota — fallback inisial jika `profile_photo_url` null/error.

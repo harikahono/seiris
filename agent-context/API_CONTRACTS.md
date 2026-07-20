@@ -1,6 +1,6 @@
 # API_CONTRACTS — SEIRIS
 
-> Diambil dari `routes/api.php` (asli) per 2026-07-14. Ini versi **koreksi** — AGENTS.md kehilangan seluruh subtree project + `/api/broadcasting/auth`. Base prefix: `/api`. Semua route (kecuali `/ping`, auth) butuh `Authorization: Bearer <token>`.
+> Diambil dari `routes/api.php` (asli) per 2026-07-20. Ini versi **koreksi** — AGENTS.md kehilangan seluruh subtree project + `/api/broadcasting/auth`. Base prefix: `/api`. Semua route (kecuali `/ping`, invite preview, auth) butuh `Authorization: Bearer <token>`.
 
 ## Konvensi
 - Pagination: `{ data[], meta:{ current_page, last_page, total } }` (kecuali disebutkan).
@@ -12,6 +12,9 @@
 | Method | Path | Keterangan |
 |--------|------|------------|
 | GET | `/ping` | health check (`{status:'ok', app, time}`) |
+| GET | `/teams/invite/{inviteCode}` | preview undangan (tanpa auth) → `{data:{name,description,members_count,owner_name,created_at}}` / 404 |
+
+> `inviteCode` di-normalize ke uppercase via `strtoupper()` di controller. FE juga kirim uppercase (`inviteCode.toUpperCase()`).
 
 ## Auth
 | Method | Path | Throttle | Body | Res |
@@ -70,10 +73,11 @@
 |--------|------|----------|------|-------------|
 | POST | `/contributions/{contribution}/vote` | write | vote(APPROVE\|REJECT), note? | 200 `{message, data}` / 403 bukan member/self-vote/bukan roster / 409 not PENDING / frozen / already voted |
 
-## Revenues (`team.member` untuk index/store; distribute/request TANPA team.member)
+## Revenues (`team.member` untuk index/show/store; distribute/request TANPA team.member)
 | Method | Path | Throttle | Body | Res / Error |
 |--------|------|----------|------|-------------|
 | GET | `/teams/{team}/revenues` | — | `page` | paginasi RevenueResource |
+| GET | `/teams/{team}/revenues/{revenue}` | — | — | `{data:RevenueResource}` (detail — dipakai `RevenueDetailPage`) |
 | POST | `/teams/{team}/revenues` | write | description, amount, distributable_amount?, revenue_date, proof?(pdf/jpg/png max 5120KB), deductions?[] | 201 `{message, data}` / 403 bukan owner / 422 |
 | POST | `/revenues/{revenue}/request-distribute` | write | — | 200 `{message, data}` / 403 / 409 already distributed / already requested |
 | POST | `/revenues/{revenue}/distribute` | write | — | 200 `{message, data:RevenueResource(distributions)}` / 403 bukan owner / 409 distributed / 422 no equity snapshot |
