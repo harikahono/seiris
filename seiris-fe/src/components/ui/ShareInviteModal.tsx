@@ -42,15 +42,23 @@ export default function ShareInviteModal({ open, onClose, teamName, inviteCode }
     }
   };
 
+  const openLink = (url: string) => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.click();
+  };
+
   const shareWA = () => {
     const msg = `Ayo gabung tim "${teamName}" di SEIRIS!\nKode undangan: ${inviteCode}\n${inviteUrl}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+    openLink(`https://wa.me/?text=${encodeURIComponent(msg)}`);
   };
 
   const shareGmail = () => {
     const subject = `Gabung tim "${teamName}" di SEIRIS`;
     const body = `Ayo gabung tim "${teamName}" di SEIRIS!\n\nKode undangan: ${inviteCode}\n${inviteUrl}`;
-    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, "_blank");
+    openLink(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
   };
 
   return createPortal(
