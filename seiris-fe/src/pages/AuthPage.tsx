@@ -8,12 +8,13 @@ export default function AuthPage() {
   const navigate = useNavigate();
 
   const mode = window.location.pathname === "/register" ? "signup" : "signin";
+  const redirect = new URLSearchParams(window.location.search).get("redirect") || "/dashboard";
 
   useEffect(() => {
     if (!isLoading && user) {
-      navigate("/dashboard", { replace: true });
+      navigate(redirect, { replace: true });
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, navigate, redirect]);
 
   if (isLoading) return null;
 

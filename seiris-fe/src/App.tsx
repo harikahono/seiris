@@ -18,6 +18,7 @@ import ContributionDetailPage from "@/pages/teams/ContributionDetailPage";
 import RevenueDetailPage from "@/pages/teams/RevenueDetailPage";
 import LandingPage from "@/pages/LandingPage";
 import SettingsPage from "@/pages/SettingsPage";
+import JoinPage from "@/pages/JoinPage";
 import { CheckCircle2, XCircle, Info, AlertTriangle } from "lucide-react";
 
 function ProjectProviderRoute() {
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage />} />
+            <Route path="/join/:inviteCode" element={<JoinPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<RealtimeProvider><DashboardLayout /></RealtimeProvider>}>
               <Route path="/dashboard" element={<DashboardPage />} />

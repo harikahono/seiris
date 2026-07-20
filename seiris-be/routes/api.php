@@ -28,6 +28,9 @@ Route::prefix('auth')->group(function () {
     Route::post('login',    [AuthController::class, 'login'])->middleware('throttle:auth');
 });
 
+// ── Public: Preview undangan tim ──────────────────────────────
+Route::get('teams/invite/{inviteCode}', [TeamController::class, 'previewInvite']);
+
 // ── Authenticated Routes ───────────────────────────────────────
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 

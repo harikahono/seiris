@@ -145,6 +145,29 @@ class TeamController extends Controller
     }
 
     /**
+     * GET /api/teams/invite/{inviteCode}
+     * Public preview tim — ngga perlu auth, informasinya terbatas
+     */
+    public function previewInvite(string $inviteCode): JsonResponse
+    {
+        $team = Team::where('invite_code', strtoupper($inviteCode))->first();
+
+        if (!$team) {
+            return response()->json(['message' => 'Undangan tidak valid atau sudah kadaluwarsa.'], 404);
+        }
+
+        return response()->json([
+            'data' => [
+                'name'          => $team->name,
+                'description'   => $team->description,
+                'members_count' => $team->activeMembers()->count(),
+                'owner_name'    => $team->owner?->name ?? '—',
+                'created_at'    => $team->created_at?->toISOString(),
+            ],
+        ]);
+    }
+
+    /**
      * POST /api/teams/join
      * Join tim via kode undangan 8 karakter
      */
