@@ -121,3 +121,59 @@ Added **bukti kontribusi** feature: file upload + GitHub link/source_url + diff 
 - `password` field nullable — skip if empty
 - Old profile photo auto-deleted on replacement (`Storage::disk('public')->delete`)
 - Validation: email unique (ignore self), image max 5MB JPG/PNG/WebP
+
+---
+
+## V2.4 — Foto Profil, Undangan Tim, & Share Modal (2026-07-20)
+
+### What Changed
+- **Foto Profil** tampil di semua avatar anggota (UserAvatar reusable component — fallback inisial).
+- **Undangan Tim** lewat link publik: preview tim sebelum join + Discord-style confirmation page.
+- **Share Modal** YouTube-style: Copy link, WhatsApp, Gmail — portal, staggered animation.
+- **Revenue Detail Page** halaman terpisah untuk detail revenue (konsisten dengan ContributionDetailPage).
+- **UI/UX Audit** dan **WCAG 2.2 compliance mapping** terdokumentasi.
+
+### New Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/teams/invite/{inviteCode}` | **Public** (tanpa auth) — preview info tim: nama, deskripsi, jumlah anggota, owner |
+| GET | `/api/teams/{team}/revenues/{revenue}` | Detail revenue per-item |
+
+### Frontend Changes
+| Komponen | File | Fungsi |
+|----------|------|--------|
+| `UserAvatar` | `@/components/ui/UserAvatar.tsx` | Reusable avatar: img → fallback inisial (8 lokasi) |
+| `ShareInviteModal` | `@/components/ui/ShareInviteModal.tsx` | Modal 3 opsi (Copy/WA/Gmail), portal + staggered animation |
+| `JoinPage` | `@/pages/JoinPage.tsx` | Halaman publik konfirmasi join (Discord-style) |
+| `AuthPage` | `@/pages/AuthPage.tsx` | Dukung `?redirect=` param untuk post-login redirect |
+| `RevenueDetailPage` | `@/pages/teams/RevenueDetailPage.tsx` | Halaman detail revenue (stat box, distribusi, bukti) |
+
+### Backend Changes
+| File | Change |
+|------|--------|
+| `TeamController.php` | New `previewInvite()` — public, return preview data |
+| `EquityController.php` | Equity_map sekarang include `profile_photo_url` per entry |
+| `routes/api.php` | `GET /teams/invite/{inviteCode}` (public) + `GET /teams/{team}/revenues/{revenue}` |
+
+### Types changes (`types/index.ts`)
+- `EquityMemberEntry` — added `profile_photo_url: string | null`
+
+### Documentation
+| Doc | Status |
+|-----|--------|
+| `agent-context/UI_AUDIT.md` | **NEW** — UI affordance audit + WCAG 2.2 breakdown (P0–P3 priorities) |
+| `agent-context/*.md` | 6 docs updated to 2026-07-20, aligned with codebase |
+
+### Bug Fixes
+| ID | Issue | Fix |
+|----|-------|-----|
+| U1 | Duplicate ` ``` ` in ARCHITECTURE.md after invite flow section | Removed extra backtick |
+
+### Known WCAG Violations (unfixed in this patch)
+| Level | Issue | Severity |
+|-------|-------|----------|
+| A | ~15 icon buttons without `aria-label` | P0 |
+| A | 5 modals without focus trap | P0 |
+| AA | Approve/reject FMR 3 inconsistent styles | P1 |
+| AA | 2 icon buttons below 24px minimum touch target | P1 |
+| — | Several usability/debt items (false hover, visual inconsistency) | P2-P3 |

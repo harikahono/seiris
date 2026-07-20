@@ -21,8 +21,8 @@ Implementasi sistem distribusi ekuitas tim berdasarkan prinsip **Slicing Pie**, 
 ## Struktur
 
 ```
-seiris-be/   → Backend Laravel (10 models, ~25 API endpoints)
-seiris-fe/   → Frontend React (5 pages, 21 UI components)
+seiris-be/   → Backend Laravel (12 models, ~35 API endpoints)
+seiris-fe/   → Frontend React (10 pages, 25+ UI components)
 ```
 
 ---
@@ -69,7 +69,7 @@ cd seiris-be
 composer run test            # config:clear → php artisan test (PHPUnit, SQLite :memory:)
 ```
 
-> **Catatan:** Hanya 2 stub test bawaan Laravel. Skrip JMeter dan testing SUS belum tersedia.
+> **Catatan:** Hanya 2 stub test bawaan Laravel (PHPUnit, SQLite `:memory:`). Skrip JMeter dan testing SUS belum tersedia.
 
 ---
 
@@ -77,7 +77,7 @@ composer run test            # config:clear → php artisan test (PHPUnit, SQLit
 
 - Prefix: `/api`
 - Auth: Bearer token dari `POST /api/auth/login`
-- Rate limit: **120 req/min** (`throttle:api` middleware)
+- Rate limit: **120 req/min** (`throttle:api`), **30 req/min** (`throttle:write`), **5/email + 60/IP** (`throttle:auth`)
 - Validation: 422 with Indonesian messages
 - Pagination: `{ data, meta: { current_page, last_page, total } }`
 
@@ -85,11 +85,17 @@ composer run test            # config:clear → php artisan test (PHPUnit, SQLit
 
 | Method | Path | Auth |
 |--------|------|------|
-| POST | `/api/auth/register` | Public |
-| POST | `/api/auth/login` | Public |
+| POST | `/api/auth/register` | Public (`throttle:auth`) |
+| POST | `/api/auth/login` | Public (`throttle:auth`) |
 | GET | `/api/ping` | Public |
+| GET | `/api/teams/invite/{inviteCode}` | **Public** (preview undangan) |
 | POST | `/api/auth/logout` | Sanctum |
 | GET | `/api/auth/me` | Sanctum |
+| GET | `/api/config` | Sanctum (feature flags) |
+| POST | `/api/broadcasting/auth` | Sanctum (Pusher) |
+| PATCH | `/api/users/me/profile` | Sanctum (multipart) |
+| PATCH | `/api/users/me/github-token` | Sanctum |
+| GET | `/api/my-dashboard` | Sanctum |
 | POST | `/api/teams` | Sanctum |
 | GET | `/api/teams` | Sanctum |
 | POST | `/api/teams/join` | Sanctum |
@@ -101,8 +107,11 @@ composer run test            # config:clear → php artisan test (PHPUnit, SQLit
 | GET | `/api/teams/{team}/contributions` | Team member |
 | POST | `/api/teams/{team}/contributions` | Team member |
 | GET | `/api/teams/{team}/contributions/{contribution}` | Team member |
+| POST | `/api/teams/{team}/contributions/{contribution}/proof` | Team member¹ |
+| GET | `/api/teams/{team}/contributions/{contribution}/github-diff` | Team member¹ |
 | POST | `/api/contributions/{contribution}/vote` | Team member |
 | GET | `/api/teams/{team}/revenues` | Team member |
+| GET | `/api/teams/{team}/revenues/{revenue}` | Team member |
 | POST | `/api/teams/{team}/revenues` | Owner only |
 | POST | `/api/revenues/{revenue}/distribute` | Owner only |
 | POST | `/api/revenues/{revenue}/request-distribute` | Team member |
@@ -114,7 +123,13 @@ composer run test            # config:clear → php artisan test (PHPUnit, SQLit
 | GET | `/api/teams/{team}/equity/history` | Team member |
 | GET | `/api/teams/{team}/equity/export` | Team member |
 | GET | `/api/teams/{team}/audit-logs` | Team member |
-| GET | `/api/my-dashboard` | Sanctum |
+| GET/POST | `/api/teams/{team}/projects` | Team member / Owner |
+| GET/POST | `/api/teams/{team}/projects/{project}/contributions` | Project member |
+| GET/POST | `/api/teams/{team}/projects/{project}/revenues` | Project member |
+| GET | `/api/teams/{team}/projects/{project}/equity` | Project member |
+| POST/DELETE | `/api/teams/{team}/projects/{project}/members` | Owner only |
+
+> ¹ = Guarded by feature flag `contribution_proof`. All project-scoped routes also available under `teams/{team}/projects/{project}/...`.
 
 ---
 
@@ -135,7 +150,7 @@ composer run test            # config:clear → php artisan test (PHPUnit, SQLit
 | CASH | ×4 | `amount` |
 | TIME / IDEA / NETWORK | ×2 | `hours × FMR` |
 | FACILITY | ×2 | `amount` |
-| REVENUE | ×2 | *legacy – removed (use `proof` on Revenue)* |
+| SALES | ×2 | `(deal - estimated) × commission_rate%` |
 
 - Equity % = `(member_slices / total_team_slices) × 100`
 - **FMR** (Fair Market Rate) cap: `MAX_STUDENT_FMR=150000` IDR/jam
@@ -175,6 +190,7 @@ Client: `usePusher()` hook di `DashboardLayout` handle 3 events + presence membe
 
 - User, Team, TeamMember, Contribution, ContributionApproval
 - EquitySnapshot, Revenue, ProfitDistribution, FmrProposal, AuditLog
+- Project, ProjectMember (Slicing Pie Beranak — nested pies)
 
 ### Status Enums
 
@@ -191,8 +207,12 @@ Client: `usePusher()` hook di `DashboardLayout` handle 3 events + presence membe
 - `QUEUE_CONNECTION=database` di `.env.example` — butuh `queue:listen` jalan.
 - `composer run dev` pake `npm` legacy. Frontend tetep `pnpm` — jalanin manual kalo script gagal.
 - Migrations pake `gen_random_uuid()` (PostgreSQL native). Gagal di MySQL.
-- Storage link: `php artisan storage:link` untuk proof uploads (bukti kontribusi/revenue).
+- Storage link: `php artisan storage:link` untuk proof uploads (bukti kontribusi/revenue) dan foto profil.
+- **Invite flow**: `GET /api/teams/invite/{inviteCode}` **publik** (tanpa auth). Info terbatas (nama, deskripsi, jumlah anggota, owner). FE JoinPage di `/join/:inviteCode` + AuthPage dukung `?redirect=`.
+- **Share modal**: `ShareInviteModal` (portal) di dashboard — Copy link, WhatsApp, Gmail.
+- **UserAvatar**: komponen reusable `@/components/ui/UserAvatar` — fallback inisial jika `profile_photo_url` null/error.
+- **Feature flag**: `config.seiris.features.contribution_proof` — guard proof/diff routes + FE UI.
 
 ---
 
-*Terakhir diupdate: Juli 2026 — sinkron dengan codebase.*
+*Terakhir diupdate: 2026-07-20 — sinkron dengan codebase.*

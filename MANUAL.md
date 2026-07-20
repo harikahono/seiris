@@ -1,7 +1,7 @@
 # SEIRIS v2 — User Manual
 **Equity & Cap-Table Platform for Founding Teams**
 
-*Document version: v2.0 · For end users and external parties (investors, advisors)*
+*Document version: v2.4 · For end users and external parties (investors, advisors)*
 
 ---
 
@@ -55,6 +55,17 @@ For investors, the key advantage is that every equity change leaves an **immutab
 After login, you can access **Pengaturan Akun** from the sidebar:
 - **Profil**: update nama, email, password (opsional), dan foto profil (JPG/PNG/WebP, maks 5 MB).
 - **GitHub Token**: optional personal access token (classic, with `repo` scope) used to fetch private repo diffs for contribution proof. You can show/hide the token or clear it.
+- **Profile photo**: uploaded photo appears across the app — on member lists, contribution cards, equity tables, revenue distributions, and the dashboard. If no photo is set, a colored initial fallback is shown.
+
+### 3.2 Join Team via Invite Link
+Instead of manually entering an invite code, you can now join a team through a shareable link:
+
+1. **Receive a link** like `https://seiris.app/join/ABC123` from a team owner.
+2. **Open the link** — you'll see a **preview card** with the team name, description, member count, and owner name (no login required).
+3. **If you're not logged in**, you'll be redirected to login. After login, you'll return to the join page automatically.
+4. **Click "Terima Undangan"** — you're instantly added and redirected to the team dashboard.
+
+> The invite link is public but only reveals limited info (name, description, member count, owner). The actual join requires authentication and a valid invite code.
 
 > **Team Settings** (Pengaturan Tim) hanya terlihat oleh **owner** tim pada sidebar. Anggota biasa tidak melihat menu tersebut.
 
@@ -68,9 +79,17 @@ Main screen after login:
 
 ## 5. Teams: Create, Join, Invite
 - **Create Team** → you become the **Owner** (full rights).
-- **Join Team** → enter the `invite_code` (6–8 characters) from the owner.
-- **Invite members** → owner shares the `invite_code`; members join on their own (no automatic email invite).
+- **Join Team** → enter the `invite_code` or click a shareable invite link (`/join/{inviteCode}`). You'll see a team preview first, then confirm.
+- **Invite members** (owner only):
+  1. Open the Dashboard.
+  2. Click the **Share** button (📤 icon) on any team card.
+  3. Choose from **3 options**:
+     - **Copy Link** — copies the invite URL to clipboard.
+     - **WhatsApp** — opens WhatsApp with a pre-filled message.
+     - **Gmail** — opens Gmail compose with the link.
 - **Roles**: `owner` (one person) and `member`.
+
+> The invite preview (`GET /api/teams/invite/{inviteCode}`) is a **public endpoint** — no login required to see team info. This means anyone with the link can see the team name and member count. The actual join still requires authentication and a valid invite code.
 
 ## 6. Members & FMR
 FMR determines the value of time-based contributions. Rules:
@@ -156,6 +175,7 @@ Freeze only locks the **split %**. Money (revenue) can still come in and be dist
 2. **Request Distribution** (member): requests from the owner.
 3. **Approve & Distribute** (owner): profit split by equity % (latest snapshot).
 4. Each distribution is recorded **append-only** (cannot be edited or deleted) → clean audit trail for investors.
+5. **Revenue Detail**: click any revenue entry to open its detail page — shows full stats (amount, distributable, scope, date), deduction breakdown, proof preview, and distribution list.
 
 ## 11. Audit Log
 The Audit tab shows the **full history of actions** (immutable): contributions, votes, freezes, distributions, FMR changes, etc. Read-only — full transparency.
