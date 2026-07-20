@@ -58,7 +58,7 @@ export default function ShareInviteModal({ open, onClose, teamName, inviteCode }
   const shareGmail = () => {
     const subject = `Gabung tim "${teamName}" di SEIRIS`;
     const body = `Ayo gabung tim "${teamName}" di SEIRIS!\n\nKode undangan: ${inviteCode}\n${inviteUrl}`;
-    openLink(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    openLink(`https://mail.google.com/mail/u/0/?tf=cm&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
   };
 
   return createPortal(
