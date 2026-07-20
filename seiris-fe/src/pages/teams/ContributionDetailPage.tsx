@@ -14,6 +14,7 @@ import { html } from "diff2html";
 import "diff2html/bundles/css/diff2html.min.css";
 import { cn } from "@/lib/utils";
 import Skeleton from "@/components/ui/Skeleton";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { toast } from "sonner";
 
 export default function ContributionDetailPage() {
@@ -183,8 +184,9 @@ export default function ContributionDetailPage() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">{contribution.type}</h1>
-              <p className="text-xs text-gray-500">
-                Oleh {contribution.member.user.name} &middot;{" "}
+              <p className="flex items-center gap-1.5 text-xs text-gray-500">
+                <UserAvatar user={contribution.member.user} size="xs" />
+                {contribution.member.user.name} &middot;{" "}
                 {new Date(contribution.contribution_date).toLocaleDateString("id-ID")}
               </p>
             </div>
@@ -363,6 +365,7 @@ export default function ContributionDetailPage() {
                 )}>
                   {a.vote === "APPROVE" ? <ThumbsUp className="size-3.5" /> : <ThumbsDown className="size-3.5" />}
                 </div>
+                <UserAvatar user={a.member.user} size="sm" />
                 <span className="text-sm text-white">{a.member.user.name}</span>
                 {a.note && (
                   <span className="hidden text-xs text-gray-500 sm:inline">&ldquo;{a.note}&rdquo;</span>

@@ -1,4 +1,5 @@
 import type { EquityMemberEntry } from "@/types";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 interface MemberEquityTableProps {
   members: EquityMemberEntry[];
@@ -34,9 +35,7 @@ export default function MemberEquityTable({ members }: MemberEquityTableProps) {
                   <span className={`w-5 text-sm font-bold tabular-nums ${rankColor}`}>
                     #{rank}
                   </span>
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
-                    {m.name.charAt(0).toUpperCase()}
-                  </div>
+                  <UserAvatar user={{ name: m.name, profile_photo_url: m.profile_photo_url }} size="md" />
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-white">{m.name}</p>
                     <p className="text-[11px] text-gray-500">

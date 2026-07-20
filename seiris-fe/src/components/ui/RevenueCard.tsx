@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { formatRp } from "@/lib/constants";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import UserAvatar from "@/components/ui/UserAvatar";
 import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
 import RevenueStatusBadge from "@/components/ui/RevenueStatusBadge";
 
@@ -42,9 +43,7 @@ function DistributionTable({ revenue }: { revenue: Revenue }) {
                 <tr key={d.member.id} className="border-b border-gray-800/50 last:border-0">
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <div className="flex size-6 items-center justify-center rounded-full bg-accent/20 text-[9px] font-bold text-accent">
-                        {d.member.user.name.charAt(0).toUpperCase()}
-                      </div>
+                      <UserAvatar user={d.member.user} size="xs" />
                       <span className="text-gray-300">{d.member.user.name}</span>
                       {d.member.role === "owner" && (
                         <span className="rounded bg-accent/20 px-1.5 py-0.5 text-[9px] font-medium text-accent">

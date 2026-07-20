@@ -7,6 +7,7 @@ import { useProjectContext } from "@/contexts/ProjectContext";
 import type { TeamMember, FmrProposal } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { toast } from "sonner";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut, Info, Lock, ShieldAlert } from "lucide-react";
 
 export default function TeamMembersTab() {
@@ -305,9 +306,7 @@ export default function TeamMembersTab() {
           <div key={member.id}>
             <div className="flex items-center justify-between px-5 py-4 transition hover:bg-gray-800/20">
               <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-accent/15 text-sm font-bold text-accent">
-                  {member.user.name.charAt(0).toUpperCase()}
-                </div>
+                <UserAvatar user={member.user} size="lg" />
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-white">{member.user.name}</p>
@@ -482,9 +481,7 @@ export default function TeamMembersTab() {
                     className="flex items-center justify-between gap-3 rounded-lg border border-gray-800 bg-card/50 p-3"
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-800 text-xs font-bold text-gray-400">
-                        {proposal.member.user.name.charAt(0).toUpperCase()}
-                      </div>
+                      <UserAvatar user={proposal.member.user} size="md" />
                       <div className="min-w-0">
                         <p className="truncate text-sm text-gray-300">
                           {proposal.member.user.name}

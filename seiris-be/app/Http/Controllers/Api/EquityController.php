@@ -41,11 +41,12 @@ class EquityController extends Controller
                 'data' => [
                     'total_slices'   => 0,
                     'equity_map'     => $members->map(fn($m) => [
-                        'member_id'  => $m->id,
-                        'name'       => $m->user->name,
-                        'role'       => $m->role,
-                        'slices'     => 0,
-                        'equity_pct' => 0,
+                        'member_id'        => $m->id,
+                        'name'             => $m->user->name,
+                        'role'             => $m->role,
+                        'slices'           => 0,
+                        'equity_pct'       => 0,
+                        'profile_photo_url' => $m->user->profile_photo_url,
                     ])->values()->toArray(),
                     'slices_by_type' => $slicesByType,
                     'is_frozen'      => $team->is_frozen,
@@ -60,11 +61,12 @@ class EquityController extends Controller
         foreach ($snapshot->equity_map as $memberId => $data) {
             $member = $members->get($memberId);
             $enriched[] = [
-                'member_id'  => $memberId,
-                'name'       => $member?->user?->name ?? 'Unknown',
-                'role'       => $member?->role ?? 'member',
-                'slices'     => $data['slices'],
-                'equity_pct' => $data['equity_pct'],
+                'member_id'        => $memberId,
+                'name'             => $member?->user?->name ?? 'Unknown',
+                'role'             => $member?->role ?? 'member',
+                'slices'           => $data['slices'],
+                'equity_pct'       => $data['equity_pct'],
+                'profile_photo_url' => $member?->user?->profile_photo_url,
             ];
         }
 

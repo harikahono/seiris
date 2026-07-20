@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
 import EquityPieCard from "@/components/ui/EquityPieCard";
+import UserAvatar from "@/components/ui/UserAvatar";
 import MemberContributionRadar from "@/components/ui/MemberContributionRadar";
 import {
   Copy, Check, ChevronRight,
@@ -324,14 +325,18 @@ function TeamDashboard({ teamId }: { teamId: string }) {
                       const isMe = myMember?.id === entry.member_id;
                       return (
                         <div key={entry.member_id} className="flex items-center gap-3">
-                          <span
-                            className={cn(
-                              "flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-                              isMe ? "bg-accent text-black" : "bg-gray-800 text-gray-400"
-                            )}
-                          >
-                            {entry.name.charAt(0).toUpperCase()}
-                          </span>
+                          {entry.profile_photo_url ? (
+                            <UserAvatar user={{ name: entry.name, profile_photo_url: entry.profile_photo_url }} size="sm" />
+                          ) : (
+                            <span
+                              className={cn(
+                                "flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                                isMe ? "bg-accent text-black" : "bg-gray-800 text-gray-400"
+                              )}
+                            >
+                              {entry.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
                           <div className="flex-1">
                             <div className="flex items-center justify-between text-sm">
                               <span className={cn(isMe ? "font-medium text-accent" : "text-gray-300")}>
@@ -407,10 +412,11 @@ function TeamDashboard({ teamId }: { teamId: string }) {
                   className="flex items-center justify-between gap-4 px-1 py-3 text-sm transition hover:opacity-80"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
-                    {/* Avatar */}
-                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-gray-800 text-[10px] font-bold text-gray-500">
-                      {c.member?.user?.name?.charAt(0).toUpperCase() ?? "?"}
-                    </span>
+                    {c.member?.user ? (
+                      <UserAvatar user={c.member.user} size="sm" />
+                    ) : (
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-gray-800 text-[10px] font-bold text-gray-500">?</span>
+                    )}
                     <div className="min-w-0">
                       <p className="truncate text-gray-300">{c.description}</p>
                       <p className="text-xs text-gray-500">

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Contribution } from "@/types";
 import { StatusBadge, TypeIcon } from "@/components/ui/StatusBadge";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 const STATUS_DOT: Record<string, string> = {
   APPROVED: "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]",
@@ -49,9 +50,7 @@ export default function ContributionCard({
 
       <div className="mt-1.5 flex items-center gap-3 text-xs text-gray-600">
         <span className="flex items-center gap-1">
-          <span className="flex size-4 items-center justify-center rounded-full bg-gray-800 text-[6px] font-bold text-gray-500">
-            {contribution.member.user.name.charAt(0).toUpperCase()}
-          </span>
+          <UserAvatar user={contribution.member.user} size="xs" />
           {contribution.member.user.name}
         </span>
         <span>·</span>

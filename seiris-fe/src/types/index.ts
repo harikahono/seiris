@@ -185,6 +185,7 @@ export interface EquityMemberEntry {
   role: TeamRole;
   slices: number;
   equity_pct: number;
+  profile_photo_url: string | null;
 }
 
 export interface EquityData {
