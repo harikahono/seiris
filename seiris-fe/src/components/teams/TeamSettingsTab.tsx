@@ -105,8 +105,7 @@ export default function TeamSettingsTab() {
     );
 
   const thresholds: { value: ApprovalThreshold; label: string }[] = [
-    { value: "50", label: "50% — Mayoritas Sederhana" },
-    { value: "75", label: "75% — Mayoritas Super" },
+    { value: "50", label: "50+1 — Mayoritas" },
     { value: "100", label: "100% — Sepakat Bulat" },
   ];
 
@@ -175,7 +174,7 @@ export default function TeamSettingsTab() {
         <button
           type="submit"
           disabled={saving}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving && <Loader2 className="size-4 animate-spin" />}
           {saving ? "Menyimpan..." : "Simpan Perubahan"}
@@ -205,7 +204,7 @@ export default function TeamSettingsTab() {
           type="button"
           onClick={() => setFreezeConfirmOpen(true)}
           disabled={freezing || team.is_frozen || activeProjectsCount > 0}
-          className="flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-400 transition-colors active:scale-[0.97] hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {freezing ? (
             <Loader2 className="size-4 animate-spin" />
@@ -265,7 +264,7 @@ export default function TeamSettingsTab() {
                       setProjectFreezing(null);
                     }
                   }}
-                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-yellow-500/30 px-3 py-1.5 text-xs text-yellow-400 transition hover:bg-yellow-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-yellow-500/30 px-3 py-1.5 text-xs text-yellow-400 transition-colors active:scale-[0.97] hover:bg-yellow-500/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {projectFreezing === p.id ? (
                     <Loader2 className="size-3.5 animate-spin" />

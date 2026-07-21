@@ -35,7 +35,7 @@ function EquityHero({
 
   if (!hasEquity) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-gray-800 bg-card p-10 text-center">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-subtle bg-white/[0.02] p-10 text-center">
         <PieChart className="mb-3 size-8 text-gray-600" />
         <p className="text-sm text-gray-500">Belum ada equity. Buat kontribusi untuk mulai.</p>
       </div>
@@ -43,7 +43,7 @@ function EquityHero({
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-accent/5 p-8 transition-all duration-500 hover:to-accent/10">
+    <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-accent/5 p-8 transition-[background] duration-500 hover:to-accent/10">
       {/* Glow */}
       <div className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-accent/5 blur-3xl transition-opacity duration-500 group-hover:opacity-60" />
       <div className="pointer-events-none absolute -bottom-10 -left-10 size-40 rounded-full bg-accent/3 blur-2xl" />
@@ -78,7 +78,7 @@ function EquityHero({
 
         <div className="mt-6 h-1 w-full overflow-hidden rounded-full bg-gray-800">
           <div
-            className="h-full rounded-full bg-accent transition-all delay-75 duration-700"
+            className="h-full rounded-full bg-accent transition-[width] delay-75 duration-300 var(--ease-out)"
             style={{ width: `${Math.max(myPct, 2)}%` }}
           />
         </div>
@@ -102,9 +102,9 @@ function StatCard({
   clickable?: boolean;
 }) {
   return (
-    <div className={cn("rounded-xl border border-gray-800 bg-card p-4 transition-all duration-200", clickable ? "group hover:border-gray-700 hover:-translate-y-0.5" : "")}>
+    <div className={cn("rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-[border-color,transform] duration-200 var(--ease-out) hover:bg-white/[0.04]", clickable ? "group hover:-translate-y-0.5" : "")}>
       <div className="flex items-center gap-2">
-        <div className="flex size-8 items-center justify-center rounded-full bg-gray-800">
+        <div className="flex size-8 items-center justify-center rounded-full bg-gray-800/60">
           <Icon className="size-4 text-gray-400" />
         </div>
         <span className="text-xs text-gray-500">{label}</span>
@@ -194,7 +194,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
               <button
                 type="button"
                 onClick={() => setShareOpen(true)}
-                className="rounded-lg border border-gray-700/50 p-2 text-gray-400 transition hover:border-accent hover:text-accent"
+                className="rounded-lg border border-gray-700/50 p-2 text-gray-400 transition-colors hover:border-accent hover:text-accent active:scale-[0.97]"
                 aria-label="Bagikan undangan"
               >
                 <Share2 className="size-4" />
@@ -246,33 +246,31 @@ function TeamDashboard({ teamId }: { teamId: string }) {
           </div>
 
           {/* Revenue — full-width below the 2×2 grid */}
-          <div className="animate-fade-in-up sm:col-span-2" style={{ animationDelay: "240ms" }}>
-            <div className="group rounded-xl border border-gray-800 bg-card p-4 transition-all duration-200 hover:border-gray-700 hover:-translate-y-0.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex size-8 items-center justify-center rounded-full bg-gray-800">
-                    <TrendingUp className="size-4 text-gray-400" />
-                  </div>
-                  <span className="text-xs text-gray-500">Total Revenue</span>
+          <div className="animate-fade-in-up sm:col-span-2 border-t border-subtle pt-5" style={{ animationDelay: "240ms" }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex size-8 items-center justify-center rounded-full bg-gray-800/60">
+                  <TrendingUp className="size-4 text-gray-400" />
                 </div>
-                <Link
-                  to={`/teams/${teamId}/revenue`}
-                  className="flex items-center gap-1 text-xs text-accent hover:text-accent-hover"
-                  aria-label="Lihat detail revenue"
-                >
-                  Detail <ChevronRight className="size-3" />
-                </Link>
+                <span className="text-xs text-gray-500">Total Revenue</span>
               </div>
-              <div className="mt-2 flex items-baseline gap-3">
-                <p className="text-2xl font-bold text-white">
-                  {formatRp(totalRevenue)}
-                </p>
-                {totalDistributed > 0 && (
-                  <span className="text-xs text-gray-500">
-                    {((totalDistributed / totalRevenue) * 100).toFixed(0)}% didistribusi
-                  </span>
-                )}
-              </div>
+              <Link
+                to={`/teams/${teamId}/revenue`}
+                className="flex items-center gap-1 text-xs text-accent hover:text-accent-hover"
+                aria-label="Lihat detail revenue"
+              >
+                Detail <ChevronRight className="size-3" />
+              </Link>
+            </div>
+            <div className="mt-2 flex items-baseline gap-3">
+              <p className="text-2xl font-bold text-white">
+                {formatRp(totalRevenue)}
+              </p>
+              {totalDistributed > 0 && (
+                <span className="text-xs text-gray-500">
+                  {((totalDistributed / totalRevenue) * 100).toFixed(0)}% didistribusi
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -284,12 +282,11 @@ function TeamDashboard({ teamId }: { teamId: string }) {
               {/* Left: equity bars + contribution type radar */}
               <div className="flex flex-col gap-4">
                 {/* Equity distribution bars */}
-                <div className="rounded-xl border border-gray-800 bg-card p-5">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-white">Distribusi Equity</h3>
-                    <span className="text-xs text-gray-500">
-                      {equity.equity_map.length} anggota
-                    </span>
+                <div className="border-t border-subtle pt-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-4 w-0.5 rounded-full bg-accent/50" />
+                    <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-500">Distribusi Equity</h3>
+                    <span className="text-[11px] text-gray-600">{equity.equity_map.length} anggota</span>
                   </div>
                   <div className="space-y-3">
                     {equity.equity_map.map((entry) => {
@@ -321,7 +318,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
                             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
                               <div
                                 className={cn(
-                                  "h-full rounded-full transition-all duration-500",
+                                  "h-full rounded-full transition-[width] duration-300 var(--ease-out)",
                                   isMe ? "bg-accent" : "bg-gray-600"
                                 )}
                                 style={{ width: `${Math.max(entry.equity_pct, 2)}%` }}
@@ -358,12 +355,13 @@ function TeamDashboard({ teamId }: { teamId: string }) {
         </div>
 
         {/* ── Recent Contributions ── */}
-        <div className="animate-fade-in-up rounded-xl border border-gray-800 bg-card p-5" style={{ animationDelay: "400ms" }}>
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white">Kontribusi Terbaru</h3>
+        <div className="animate-fade-in-up border-t border-subtle pt-5" style={{ animationDelay: "400ms" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-4 w-0.5 rounded-full bg-accent/50" />
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-500">Kontribusi Terbaru</h3>
             <Link
               to={`/teams/${teamId}/contributions`}
-              className="flex items-center gap-1 text-xs text-accent hover:text-accent-hover"
+              className="flex items-center gap-1 text-[11px] text-accent hover:text-accent-hover ml-auto"
             >
               Lihat semua <ChevronRight className="size-3" />
             </Link>
@@ -442,8 +440,8 @@ function TeamDashboardSkeleton() {
         <Skeleton className="h-28 sm:col-span-2 rounded-xl" />
       </div>
       {/* Bottom sections */}
-      <Skeleton className="h-56 rounded-xl" />
-      <Skeleton className="h-64 rounded-xl" />
+      <Skeleton className="h-56" />
+      <Skeleton className="h-64" />
     </div>
   );
 }

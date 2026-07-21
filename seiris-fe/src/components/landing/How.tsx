@@ -11,18 +11,18 @@ if (typeof window !== "undefined") {
 const steps = [
   {
     num: '01',
-    title: 'Log Contributions',
-    desc: 'Every team member logs their contributions: TIME, CASH, IDEA, NETWORK, FACILITY, or SALES. The system tracks everything securely from day one.',
+    title: 'Catat Kontribusi',
+    desc: 'Setiap anggota tim mencatat kontribusinya: waktu, dana, ide, relasi, fasilitas, atau penjualan. Semua tersimpan rapi sejak hari pertama.',
   },
   {
     num: '02',
-    title: 'Team Vote Approval',
-    desc: 'Subjective contributions like IDEA and NETWORK require team voting. A 75% approval threshold ensures fairness and prevents abuse of the cap table.',
+    title: 'Vote Persetujuan Tim',
+    desc: 'Kontribusi subjektif seperti ide dan relasi memerlukan persetujuan tim. Ambang batas 75% menjaga keadilan dan mencegah penyalahgunaan cap table.',
   },
   {
     num: '03',
-    title: 'Equity Auto-Calculate',
-    desc: 'The system calculates equity dynamically based on the Slicing Pie algorithm. Every approved contribution instantly updates the equity breakdown.',
+    title: 'Equity Terupdate Otomatis',
+    desc: 'Sistem menghitung equity secara dinamis berdasarkan algoritma Slicing Pie. Setiap kontribusi yang disetujui langsung mengubah porsi equity.',
   },
 ];
 
@@ -68,11 +68,11 @@ export function How() {
         <div className="hiw-sticky-col">
           <div className="hiw-sticky-content">
             <h2 className="hiw-title">
-              Fair equity distribution in <br />
-              <span className="hiw-title-accent">three simple steps</span>
+              Bagi equity secara adil <br />
+              <span className="hiw-title-accent">dalam tiga langkah sederhana</span>
             </h2>
             <p className="hiw-subtitle">
-              No complex legal jargon required. Set up your startup's cap table dynamically in minutes, not weeks.
+              Tidak perlu dokumen hukum yang rumit. Atur cap table startup Anda secara dinamis dalam hitungan menit.
             </p>
           </div>
 

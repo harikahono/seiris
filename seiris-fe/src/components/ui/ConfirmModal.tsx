@@ -39,7 +39,7 @@ export default function ConfirmModal({
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/60" onClick={(e) => { e.stopPropagation(); onClose(); }} />
-      <div ref={trapRef} className="relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
+      <div ref={trapRef} className="modal-enter relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
         <div className="flex flex-col items-center text-center">
           {icon ?? (
             <div className={`flex size-12 items-center justify-center rounded-full ${isDanger ? "bg-red-500/10" : "bg-accent/10"}`}>
@@ -58,7 +58,7 @@ export default function ConfirmModal({
             type="button"
             onClick={(e) => { e.stopPropagation(); onClose(); }}
             disabled={loading}
-            className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition hover:bg-gray-800 hover:text-white disabled:opacity-50"
+            className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:bg-gray-800 hover:text-white disabled:opacity-50"
           >
             {cancelText}
           </button>
@@ -66,7 +66,7 @@ export default function ConfirmModal({
             type="button"
             onClick={(e) => { e.stopPropagation(); onConfirm(); }}
             disabled={loading}
-            className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${btnClass}`}
+            className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97] ${btnClass}`}
           >
             {loading ? <Loader2 className="mx-auto size-4 animate-spin" /> : confirmText}
           </button>

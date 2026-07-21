@@ -65,29 +65,29 @@ const footerLinkGroups: FooterLinkGroup[] = [
   {
     label: 'SEIRIS',
     links: [
-      { title: 'About SEIRIS',  href: '#tentang'      },
-      { title: 'How it Works',  href: '#cara-kerja'   },
-      { title: 'Features',      href: '#fitur'        },
-      { title: 'Register Now',  href: '#register'     },
+      { title: 'Tentang SEIRIS',  href: '#tentang'      },
+      { title: 'Cara Kerja',      href: '#cara-kerja'   },
+      { title: 'Fitur',           href: '#fitur'        },
+      { title: 'Daftar Sekarang', href: '#register'     },
     ],
   },
   {
     label: 'Platform',
     links: [
-      { title: 'Equity Dashboard',   href: '#' },
-      { title: 'Log Contributions',  href: '#' },
-      { title: 'Approval System',    href: '#' },
-      { title: 'Revenue Distribution', href: '#' },
-      { title: 'Freeze Equity',      href: '#' },
+      { title: 'Dashboard Equity',     href: '#' },
+      { title: 'Catat Kontribusi',     href: '#' },
+      { title: 'Sistem Approval',      href: '#' },
+      { title: 'Distribusi Revenue',   href: '#' },
+      { title: 'Freeze Equity',        href: '#' },
     ],
   },
   {
-    label: 'Institution',
+    label: 'Institusi',
     links: [
-      { title: 'Indonesia Institute of Technology', href: 'https://www.iti.ac.id'  },
-      { title: 'IT Study Program',                  href: 'https://www.iti.ac.id'  },
-      { title: 'ITI Library',                       href: 'https://lib.iti.ac.id'  },
-      { title: 'Contact Us',                        href: 'mailto:sekr@iti.ac.id' },
+      { title: 'Institut Teknologi Indonesia', href: 'https://www.iti.ac.id'  },
+      { title: 'Program Studi IT',             href: 'https://www.iti.ac.id'  },
+      { title: 'Perpustakaan ITI',             href: 'https://lib.iti.ac.id'  },
+      { title: 'Hubungi Kami',                 href: 'mailto:sekr@iti.ac.id' },
     ],
   },
 ];
@@ -164,8 +164,7 @@ export function Footer() {
                 <span className="footer-logo-text">EIRIS</span>
               </div>
               <p className="footer-tagline">
-                Startup equity distribution platform based on the Slicing Pie model. 
-                Track contributions, vote for approvals, and calculate equity in real-time.
+                Platform equity startup berbasis Slicing Pie. Catat kontribusi, vote, dan hitung equity secara real-time.
               </p>
               <div className="footer-socials">
                 {socialLinks.map((link) => (
@@ -206,8 +205,8 @@ export function Footer() {
 
           {/* Bottom bar */}
           <div className="footer-bottom">
-            <p>© {new Date().getFullYear()} SEIRIS — Final Project, Institut Teknologi Indonesia.</p>
-            <p>Built by @harikahono.</p>
+            <p>© {new Date().getFullYear()} SEIRIS — Tugas Akhir, Institut Teknologi Indonesia.</p>
+            <p>Dibuat oleh @harikahono.</p>
           </div>
 
         </div>

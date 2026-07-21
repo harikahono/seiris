@@ -133,14 +133,13 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
     );
 
   const thresholds: { value: ApprovalThreshold; label: string }[] = [
-    { value: "50", label: "50% (Mayoritas Sederhana)" },
-    { value: "75", label: "75% (Mayoritas Super)" },
+    { value: "50", label: "50+1 (Mayoritas)" },
     { value: "100", label: "100% (Sepakat Bulat)" },
   ];
 
   const tabClass = (t: Tab) =>
     cn(
-      "flex-1 rounded-lg py-2 text-sm font-medium transition-all",
+      "flex-1 rounded-lg py-2 text-sm font-medium transition-colors",
       tab === t
         ? "bg-accent text-black"
         : "text-gray-400 hover:text-white"
@@ -148,7 +147,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div ref={trapRef} className="w-full max-w-md rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
+      <div ref={trapRef} className="modal-enter w-full max-w-md rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
         {/* ── Header + Tabs ── */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex flex-1 gap-2">
@@ -162,7 +161,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
           <button
             type="button"
             onClick={handleClose}
-            className="ml-2 rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white"
+            className="ml-2 rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]"
             aria-label="Tutup"
           >
             <X className="size-4" />
@@ -209,7 +208,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
                   <label
                     key={t.value}
                     className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition",
+                      "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition-colors",
                       approvalThreshold === t.value
                         ? "border-accent bg-accent/5"
                         : "border-gray-700 hover:border-gray-600"
@@ -247,7 +246,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
             <button
               type="submit"
               disabled={loadingCreate}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
             >
               {loadingCreate && <Loader2 className="size-4 animate-spin" />}
               {loadingCreate ? "Menyimpan..." : "Buat Tim"}
@@ -290,7 +289,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
             <button
               type="submit"
               disabled={loadingJoin || inviteCode.trim().length !== 8}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
             >
               {loadingJoin ? (
                 <Loader2 className="size-4 animate-spin" />

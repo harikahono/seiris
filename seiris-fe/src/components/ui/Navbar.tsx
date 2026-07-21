@@ -73,20 +73,20 @@ export function Navbar() {
             <div className="menu-content-wrapper">
               <ul className="menu-list">
                 <li className="menu-list-item">
-                  <a href="#problem" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-                    <p className="nav-link-text">The Reality</p>
+                  <a href="#tentang" className="nav-link" onClick={() => setIsMenuOpen(false)}>
+                    <p className="nav-link-text">Realita</p>
                     <div className="nav-link-hover-bg"></div>
                   </a>
                 </li>
                 <li className="menu-list-item">
                   <a href="#cara-kerja" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-                    <p className="nav-link-text">How It Works</p>
+                    <p className="nav-link-text">Cara Kerja</p>
                     <div className="nav-link-hover-bg"></div>
                   </a>
                 </li>
                 <li className="menu-list-item">
                   <a href="#fitur" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-                    <p className="nav-link-text">Features</p>
+                    <p className="nav-link-text">Fitur</p>
                     <div className="nav-link-hover-bg"></div>
                   </a>
                 </li>
@@ -98,14 +98,14 @@ export function Navbar() {
                     </Link>
                   ) : (
                     <Link to="/login" className="nav-link" onClick={() => setIsMenuOpen(false)}>
-                      <p className="nav-link-text">Login</p>
+                      <p className="nav-link-text">Masuk</p>
                       <div className="nav-link-hover-bg"></div>
                     </Link>
                   )}
                 </li>
                 <li className="menu-list-item">
                   <Link to="/register" className="nav-link cta-link" onClick={() => setIsMenuOpen(false)}>
-                    <p className="nav-link-text">Register Now</p>
+                    <p className="nav-link-text">Daftar Gratis</p>
                     <div className="nav-link-hover-bg"></div>
                   </Link>
                 </li>

@@ -265,7 +265,7 @@ export default function TeamMembersTab() {
                     type="button"
                     onClick={handleProposeFmr}
                     disabled={submittingProposal}
-                    className="rounded p-1.5 text-green-400 hover:bg-gray-800 transition disabled:opacity-50"
+                    className="rounded p-1.5 text-green-400 hover:bg-gray-800 transition-colors active:scale-[0.97] disabled:opacity-50"
                     title="Kirim proposal"
                     aria-label="Kirim proposal FMR"
                   >
@@ -281,7 +281,7 @@ export default function TeamMembersTab() {
                       setProposingFmr(false);
                       setProposedFmrValue("");
                     }}
-                    className="rounded p-1.5 text-gray-500 hover:bg-gray-800 transition"
+                    className="rounded p-1.5 text-gray-500 hover:bg-gray-800 transition-colors active:scale-[0.97]"
                     aria-label="Batal ajukan proposal"
                   >
                   <X className="size-4" />
@@ -291,7 +291,7 @@ export default function TeamMembersTab() {
               <button
                 type="button"
                 onClick={() => setProposingFmr(true)}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-accent/30 bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent transition hover:bg-accent/15"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-accent/30 bg-accent/5 px-3 py-1.5 text-xs font-medium text-accent transition-colors active:scale-[0.97] hover:bg-accent/15"
               >
                 <Send className="size-3.5" />
                 Ajukan FMR
@@ -302,11 +302,16 @@ export default function TeamMembersTab() {
       )}
 
       {/* ── Daftar Anggota ── */}
-      <h2 className="text-lg font-semibold text-white">Anggota</h2>
-      <div className="rounded-xl border border-gray-800/50 bg-card overflow-hidden">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="h-4 w-0.5 rounded-full bg-accent/50" />
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">Anggota</h2>
+        <span className="text-[11px] text-gray-600">({activeMembers.length})</span>
+      </div>
+
+      <div>
         {activeMembers.map((member, i) => (
           <div key={member.id}>
-            <div className="flex items-center justify-between px-5 py-4 cursor-default">
+            <div className="flex items-center justify-between px-0 py-4 cursor-default">
               <div className="flex items-center gap-3">
                 <UserAvatar user={member.user} size="lg" />
                 <div>
@@ -382,7 +387,7 @@ export default function TeamMembersTab() {
                           <button
                             type="button"
                             onClick={() => startEditFmr(member)}
-                            className="rounded p-1.5 text-gray-500 hover:text-accent transition"
+                            className="rounded p-1.5 text-gray-500 hover:text-accent transition-colors active:scale-[0.97]"
                             aria-label={`Edit FMR ${member.user.name}`}
                           >
                             <Pencil className="size-3.5" />
@@ -407,7 +412,7 @@ export default function TeamMembersTab() {
                   <button
                     type="button"
                     onClick={() => setExitingMember(member)}
-                    className="rounded px-2 py-1 text-xs text-red-400 transition hover:bg-red-500/10"
+                    className="rounded px-2 py-1 text-xs text-red-400 transition-colors active:scale-[0.97] hover:bg-red-500/10"
                   >
                     Keluarkan
                   </button>
@@ -427,7 +432,7 @@ export default function TeamMembersTab() {
                         type="button"
                         onClick={() => handleRemoveFromProject(member)}
                         disabled={managingProject === member.id}
-                        className="rounded px-2 py-1 text-xs text-yellow-400 transition hover:bg-yellow-500/10 disabled:opacity-50"
+                        className="rounded px-2 py-1 text-xs text-yellow-400 transition-colors active:scale-[0.97] hover:bg-yellow-500/10 disabled:opacity-50"
                       >
                         {managingProject === member.id ? (
                           <Loader2 className="size-3.5 animate-spin" />
@@ -438,7 +443,7 @@ export default function TeamMembersTab() {
                         type="button"
                         onClick={() => handleAddToProject(member)}
                         disabled={managingProject === member.id}
-                        className="rounded px-2 py-1 text-xs text-green-400 transition hover:bg-green-500/10 disabled:opacity-50"
+                        className="rounded px-2 py-1 text-xs text-green-400 transition-colors active:scale-[0.97] hover:bg-green-500/10 disabled:opacity-50"
                       >
                         {managingProject === member.id ? (
                           <Loader2 className="size-3.5 animate-spin" />
@@ -449,7 +454,7 @@ export default function TeamMembersTab() {
                 )}
               </div>
             </div>
-            {i < activeMembers.length - 1 && <div className="mx-5 border-t border-gray-800/40" />}
+            {i < activeMembers.length - 1 && <div className="border-t border-subtle" />}
           </div>
         ))}
       </div>
@@ -460,7 +465,7 @@ export default function TeamMembersTab() {
           <button
             type="button"
             onClick={() => setProposalsOpen(!proposalsOpen)}
-            className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-gray-300 transition hover:text-white"
+            className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-gray-300 transition-colors hover:text-white"
           >
             <span>
               Proposal FMR{" "}
@@ -510,7 +515,7 @@ export default function TeamMembersTab() {
                           <button
                             type="button"
                             onClick={() => handleApprove(proposal)}
-                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-green-400 transition hover:bg-gray-800"
+                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-green-400 transition-colors active:scale-[0.97] hover:bg-gray-800"
                             aria-label={`Setujui proposal ${proposal.member.user.name}`}
                           >
                             <Check className="size-3.5" /> Setujui
@@ -518,7 +523,7 @@ export default function TeamMembersTab() {
                           <button
                             type="button"
                             onClick={() => handleReject(proposal)}
-                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-red-400 transition hover:bg-gray-800"
+                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-red-400 transition-colors active:scale-[0.97] hover:bg-gray-800"
                             aria-label={`Tolak proposal ${proposal.member.user.name}`}
                           >
                             <X className="size-3.5" /> Tolak
@@ -598,7 +603,7 @@ export default function TeamMembersTab() {
                 type="button"
                 onClick={() => { setExitingMember(null); setExitReason(""); }}
                 disabled={exitingLoading}
-                className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition hover:bg-gray-800 hover:text-white disabled:opacity-50"
+                className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:bg-gray-800 hover:text-white disabled:opacity-50"
               >
                 Batal
               </button>
@@ -606,7 +611,7 @@ export default function TeamMembersTab() {
                 type="button"
                 onClick={handleExit}
                 disabled={exitingLoading}
-                className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition-colors active:scale-[0.97] hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {exitingLoading ? <Loader2 className="mx-auto size-4 animate-spin" /> : "Keluarkan"}
               </button>

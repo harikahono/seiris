@@ -105,7 +105,7 @@ export default function JoinPage() {
             <p className="mb-6 text-sm text-gray-400">{state.message}</p>
             <Link
               to="/dashboard"
-              className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover"
             >
               Ke Dashboard
             </Link>
@@ -124,13 +124,13 @@ export default function JoinPage() {
               <button
                 type="button"
                 onClick={() => setState({ type: "loading" })}
-                className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 transition hover:bg-gray-800"
+                className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 transition-colors hover:bg-gray-800"
               >
                 Coba Lagi
               </button>
               <Link
                 to="/dashboard"
-                className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-accent-hover"
+                className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover"
               >
                 Dashboard
               </Link>
@@ -182,13 +182,13 @@ export default function JoinPage() {
             <div className="mt-4 space-y-2">
               <Link
                 to={`/teams/${state.preview.team_id}/members`}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover"
               >
                 Ke Tim
               </Link>
               <Link
                 to="/dashboard"
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-800 hover:text-white"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
               >
                 Dashboard
               </Link>
@@ -231,7 +231,7 @@ export default function JoinPage() {
                 type="button"
                 onClick={handleJoin}
                 disabled={joining}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {joining ? (
                   <>
@@ -244,7 +244,7 @@ export default function JoinPage() {
               </button>
               <Link
                 to="/dashboard"
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-800 hover:text-white"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
               >
                 Batal
               </Link>
@@ -254,7 +254,7 @@ export default function JoinPage() {
 
         {/* Branding */}
         <p className="mt-6 text-center text-xs text-gray-600">
-          <Link to="/" className="hover:text-gray-400 transition">SEIRIS</Link> &mdash; Equity Management
+          <Link to="/" className="hover:text-gray-400 transition-colors">SEIRIS</Link> &mdash; Equity Management
         </p>
       </div>
     </div>

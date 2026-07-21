@@ -51,7 +51,7 @@ export default function MemberEquityTable({ members }: MemberEquityTableProps) {
               <div className="mt-2 ml-8">
                 <div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-accent to-accent/40 transition-all"
+                    className="h-full rounded-full bg-gradient-to-r from-accent to-accent/40 transition-[width]"
                     style={{ width: `${barPct}%` }}
                   />
                 </div>

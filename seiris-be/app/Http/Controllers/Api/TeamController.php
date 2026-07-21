@@ -54,7 +54,7 @@ class TeamController extends Controller
                 'name'               => $request->name,
                 'description'        => $request->description,
                 'invite_code'        => strtoupper(Str::random(8)),
-                'approval_threshold' => $request->approval_threshold ?? '75',
+                'approval_threshold' => $request->approval_threshold ?? '50',
                 'is_frozen'          => false,
             ]);
 

@@ -71,10 +71,10 @@ export default function ProjectSelector() {
             placeholder="Deskripsi (opsional)"
             className="w-44 rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-[#e07820]"
           />
-          <button onClick={createProject} className="rounded-md bg-accent px-2 py-1.5 text-sm text-black hover:bg-accent-hover">
+          <button onClick={createProject} className="rounded-md bg-accent px-2 py-1.5 text-sm text-black hover:bg-accent-hover transition-colors active:scale-[0.97]">
             Simpan
           </button>
-          <button onClick={() => setCreating(false)} className="rounded-md border border-gray-700 px-2 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-white">
+          <button onClick={() => setCreating(false)} className="rounded-md border border-gray-700 px-2 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             Batal
           </button>
         </div>
@@ -82,7 +82,7 @@ export default function ProjectSelector() {
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="flex items-center gap-1 rounded-md border border-dashed border-gray-700 px-2 py-1.5 text-sm text-gray-400 hover:border-[#e07820] hover:text-[#e07820]"
+          className="flex items-center gap-1 rounded-md border border-dashed border-gray-700 px-2 py-1.5 text-sm text-gray-400 hover:border-[#e07820] hover:text-[#e07820] transition-colors"
         >
           <Plus className="size-3.5" /> Project
         </button>

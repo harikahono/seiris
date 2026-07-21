@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->char('invite_code', 8)->unique();
-            $table->enum('approval_threshold', ['50', '75', '100'])->default('75');
+            $table->string('approval_threshold', 3)->default('50');
             $table->boolean('is_frozen')->default(false);
             $table->timestamp('frozen_at')->nullable();
             $table->timestamps();

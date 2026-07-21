@@ -33,7 +33,7 @@ export default function ProofPreviewModal({ url, open, onClose }: ProofPreviewMo
     >
       <div
         ref={trapRef}
-        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card"
+        className="modal-enter relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
@@ -51,7 +51,7 @@ export default function ProofPreviewModal({ url, open, onClose }: ProofPreviewMo
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white"
+              className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]"
               aria-label="Tutup"
             >
               <X className="size-4" />

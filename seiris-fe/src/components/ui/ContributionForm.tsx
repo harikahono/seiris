@@ -158,7 +158,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={handleClose}>
-      <div ref={trapRef} className="w-full max-w-lg rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div ref={trapRef} className="modal-enter w-full max-w-lg rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {step === "select" && (
           <>
             {fmr === 0 && (
@@ -173,7 +173,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
             )}
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Pilih Jenis Kontribusi</h2>
-              <button type="button" onClick={handleClose} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white" aria-label="Tutup">
+              <button type="button" onClick={handleClose} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup">
                 <X className="size-4" />
               </button>
             </div>
@@ -188,7 +188,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
                     disabled={disabled}
                     onClick={() => selectType(ct.value)}
                     className={cn(
-                      "flex flex-col items-center gap-2 rounded-lg border p-4 text-center transition",
+                      "flex flex-col items-center gap-2 rounded-lg border p-4 text-center transition-colors",
                       disabled
                         ? "cursor-not-allowed border-gray-800 opacity-40"
                         : "border-gray-700 hover:border-accent hover:bg-accent/5"
@@ -207,11 +207,11 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
         {step === "form" && type && (
           <>
             <div className="mb-4 flex items-center gap-2">
-              <button type="button" onClick={() => setStep("select")} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white" aria-label="Kembali ke pilih jenis">
+              <button type="button" onClick={() => setStep("select")} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Kembali ke pilih jenis">
                 <ArrowLeft className="size-4" />
               </button>
               <h2 className="text-lg font-semibold text-white">Buat Kontribusi {type}</h2>
-              <button type="button" onClick={handleClose} className="ml-auto rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white" aria-label="Tutup">
+              <button type="button" onClick={handleClose} className="ml-auto rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup">
                 <X className="size-4" />
               </button>
             </div>
@@ -247,7 +247,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
                 {/* Proof file — style sinkron dengan CreateRevenueForm */}
                 <div>
                   <label className="mb-1 block text-sm font-medium text-gray-300">Bukti (opsional)</label>
-                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-700 px-3 py-3 text-sm text-gray-500 transition hover:border-accent hover:text-accent">
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-700 px-3 py-3 text-sm text-gray-500 transition-colors hover:border-accent hover:text-accent">
                     <Upload className="size-4" />
                     {proofFile ? `${proofFile.name} (${(proofFile.size / 1024 / 1024).toFixed(1)} MB)` : "Upload file PDF / JPG / PNG (max 5MB)"}
                     <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => { const f = e.target.files?.[0] ?? null; setProofFile(f); if (f && f.size > 5 * 1024 * 1024) toast.error("Ukuran file maksimal 5MB."); }} className="hidden" />
@@ -388,7 +388,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
               <button
                 type="submit"
                 disabled={loading || !canSubmitForm}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
               >
                 {loading && <Loader2 className="size-4 animate-spin" />}
                 {loading ? "Menyimpan..." : "Buat Kontribusi"}

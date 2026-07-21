@@ -60,7 +60,7 @@ export interface TeamMember {
   joined_at: string;
 }
 
-export type ApprovalThreshold = "50" | "75" | "100";
+export type ApprovalThreshold = "50" | "100";
 
 export interface Team {
   id: string;

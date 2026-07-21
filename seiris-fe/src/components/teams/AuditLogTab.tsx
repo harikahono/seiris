@@ -108,7 +108,7 @@ export default function AuditLogTab() {
               type="button"
               onClick={() => { setFilter(f.key); setPage(1); setLogs([]); }}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
                 filter === f.key
                   ? "bg-accent text-black shadow-sm"
                   : "text-gray-500 hover:text-gray-300"

@@ -123,10 +123,10 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/60" onClick={handleClose} />
-      <div ref={trapRef} className="relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div ref={trapRef} className="modal-enter relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Catat Revenue Baru</h2>
-          <button type="button" onClick={handleClose} className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-white" aria-label="Tutup">
+          <button type="button" onClick={handleClose} className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup">
             <X className="size-5" />
           </button>
         </div>
@@ -167,7 +167,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
                     placeholder="0" min="0"
                     className="w-28 rounded-lg border border-gray-700 bg-gray-800 px-2.5 py-1.5 text-xs text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent text-right" />
                   <button type="button" onClick={() => removeDeduction(i)}
-                    className="rounded p-1 text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition" aria-label="Hapus potongan">
+                    className="rounded p-1 text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition-colors" aria-label="Hapus potongan">
                     <Trash2 className="size-3.5" />
                   </button>
                 </div>
@@ -208,7 +208,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-300">Bukti (opsional)</label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-700 px-3 py-3 text-sm text-gray-500 transition hover:border-accent hover:text-accent">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-700 px-3 py-3 text-sm text-gray-500 transition-colors hover:border-accent hover:text-accent">
               <Upload className="size-4" />
               {proof ? `${proof.name} (${(proof.size / 1024 / 1024).toFixed(1)} MB)` : "Upload file PDF / JPG / PNG (max 5MB)"}
               <input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => { const f = e.target.files?.[0] ?? null; setProof(f); if (f && f.size > 5 * 1024 * 1024) setErrors((p) => ({ ...p, proof: "Ukuran file maksimal 5MB." })); else setErrors((p) => ({ ...p, proof: undefined })); }} className="hidden" />
@@ -217,7 +217,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
           </div>
 
           <button type="submit" disabled={saving}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50">
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]">
             {saving && <Loader2 className="size-4 animate-spin" />}
             {saving ? "Menyimpan..." : "Catat Revenue"}
           </button>

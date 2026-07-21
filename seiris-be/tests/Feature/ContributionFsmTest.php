@@ -83,7 +83,11 @@ class ContributionFsmTest extends TestCase
         ]);
         $contributionId = $create->json('data.id');
 
-        // Teammate votes APPROVE (threshold 50, 1 of 2 eligible voters)
+        // Owner votes APPROVE
+        $this->actingAs($t['owner'], 'sanctum');
+        $this->postJson("/api/contributions/{$contributionId}/vote", ['vote' => 'APPROVE']);
+
+        // Teammate votes APPROVE (2/2 = 100% dengan strict majority)
         $this->actingAs($t['voter'], 'sanctum');
         $vote = $this->postJson("/api/contributions/{$contributionId}/vote", [
             'vote' => 'APPROVE',

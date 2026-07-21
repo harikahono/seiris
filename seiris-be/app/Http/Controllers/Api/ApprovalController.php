@@ -227,12 +227,16 @@ class ApprovalController extends Controller
         $approveCount = $approvals->where('vote', 'APPROVE')->count();
         $rejectCount  = $approvals->where('vote', 'REJECT')->count();
 
-        $threshold = (int) $team->approval_threshold; // 50, 75, atau 100
+        $threshold = (int) $team->approval_threshold; // 50 (50+1), 75 (deprecated), atau 100 (bulat)
         $approvePct = ($approveCount / $totalVoters) * 100;
         $rejectPct  = ($rejectCount / $totalVoters) * 100;
 
+        // 50+1 = strict majority (>50%). ≥75/100 = supermajority/unanimous (≥threshold)
+        $approved = $threshold === 50 ? $approvePct > 50 : $approvePct >= $threshold;
+        $rejected = $threshold === 50 ? $rejectPct > 50 : $rejectPct > (100 - $threshold);
+
         // Cek kondisi APPROVED
-        if ($approvePct >= $threshold) {
+        if ($approved) {
             $contribution->update(['status' => 'APPROVED']);
 
             AuditLogService::logFromRequest(
@@ -249,7 +253,7 @@ class ApprovalController extends Controller
             $this->slicingPie->recalculate($team, $contribution->id, $project);
 
         // Cek kondisi REJECTED
-        } elseif ($rejectPct > (100 - $threshold)) {
+        } elseif ($rejected) {
             $contribution->update(['status' => 'REJECTED']);
 
             AuditLogService::logFromRequest(

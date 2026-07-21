@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@phosphor-icons/react": "^2.1.10",
     "axios": "^1.17.0",
     "clsx": "^2.1.1",
     "diff2html": "^3.4.56",

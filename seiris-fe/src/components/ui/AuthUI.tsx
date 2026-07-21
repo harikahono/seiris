@@ -127,7 +127,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
               type="button"
               onClick={() => { setMode("signin"); setErrors({}); }}
               className={cn(
-                "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all",
+                "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors",
                 mode === "signin"
                   ? "bg-accent text-black shadow-sm"
                   : "text-gray-400 hover:text-white"
@@ -139,7 +139,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
               type="button"
               onClick={() => { setMode("signup"); setErrors({}); }}
               className={cn(
-                "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all",
+                "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors",
                 mode === "signup"
                   ? "bg-accent text-black shadow-sm"
                   : "text-gray-400 hover:text-white"
@@ -290,7 +290,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
             >
               {loading && <Loader2 className="size-4 animate-spin" />}
               {loading

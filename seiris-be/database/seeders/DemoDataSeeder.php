@@ -43,14 +43,14 @@ class DemoDataSeeder extends Seeder
         [
             'name'      => 'GENUI',
             'owner'     => 'kahono@z4foundation.com',
-            'threshold' => '75',
+            'threshold' => '100',
             'members'   => ['rina@example.com' => 'member', 'budi@example.com' => 'member', 'sari@example.com' => 'member'],
             'projects'  => ['Web Platform', 'Mobile App'],
         ],
         [
             'name'      => 'Karya Digital',
             'owner'     => 'adi@example.com',
-            'threshold' => '75',
+            'threshold' => '100',
             'members'   => ['kahono@z4foundation.com' => 'member', 'dian@example.com' => 'member', 'fitri@example.com' => 'member'],
             'projects'  => ['Website UMKM', 'Branding Klien'],
         ],
@@ -71,7 +71,7 @@ class DemoDataSeeder extends Seeder
         [
             'name'      => 'Dev Team',
             'owner'     => 'rizky@example.com',
-            'threshold' => '75',
+            'threshold' => '100',
             'members'   => ['putri@example.com' => 'member', 'sari@example.com' => 'member', 'adi@example.com' => 'member'],
             'projects'  => ['Internal Tools'],
         ],

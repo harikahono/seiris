@@ -39,14 +39,17 @@ class TeamManagementTest extends TestCase
     }
 
     /** Seed a team-level equity snapshot so freeze works. */
-    private function seedApprovedContribution(Team $team, User $owner, User $voter): void
+    private function seedApprovedContribution(Team $team, User $creator, User $owner, User $voter): void
     {
-        $this->actingAs($owner, 'sanctum');
+        $this->actingAs($creator, 'sanctum');
         $r = $this->postJson("/api/teams/{$team->id}/contributions", [
             'type' => 'CASH', 'description' => 'Seeded snapshot test',
             'amount' => 100000, 'contribution_date' => now()->toDateString(),
         ]);
         $contribution = Contribution::find($r->json('data.id'));
+
+        $this->actingAs($owner, 'sanctum');
+        $this->postJson("/api/contributions/{$contribution->id}/vote", ['vote' => 'APPROVE']);
 
         $this->actingAs($voter, 'sanctum');
         $this->postJson("/api/contributions/{$contribution->id}/vote", ['vote' => 'APPROVE']);
@@ -56,7 +59,7 @@ class TeamManagementTest extends TestCase
     public function test_owner_can_freeze(): void
     {
         $t = $this->makeTeam();
-        $this->seedApprovedContribution($t['team'], $t['owner'], $t['voter']);
+        $this->seedApprovedContribution($t['team'], $t['member'], $t['owner'], $t['voter']);
 
         $this->actingAs($t['owner'], 'sanctum');
         $r = $this->postJson("/api/teams/{$t['team']->id}/freeze");
@@ -70,7 +73,7 @@ class TeamManagementTest extends TestCase
     public function test_non_owner_cannot_freeze(): void
     {
         $t = $this->makeTeam();
-        $this->seedApprovedContribution($t['team'], $t['owner'], $t['voter']);
+        $this->seedApprovedContribution($t['team'], $t['member'], $t['owner'], $t['voter']);
 
         $this->actingAs($t['member'], 'sanctum');
         $r = $this->postJson("/api/teams/{$t['team']->id}/freeze");

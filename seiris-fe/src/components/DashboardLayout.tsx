@@ -180,9 +180,20 @@ export default function DashboardLayout() {
 
   return (
     <div className="flex h-screen bg-surface">
+      {/* Noise overlay — fixed, pointer-events-none */}
+      <div
+        className="fixed inset-0 z-[60] pointer-events-none"
+        style={{
+          opacity: 0.015,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: "repeat",
+          backgroundSize: "256px 256px",
+        }}
+        aria-hidden
+      />
       <aside
         className={cn(
-          "flex flex-col border-r border-gray-800 bg-[#0d0d0d] transition-all duration-200",
+          "flex flex-col border-r border-gray-800 bg-[#0d0d0d] transition-[width] duration-200 var(--ease-out)",
           collapsed ? "w-16" : "w-60"
         )}
       >
@@ -194,7 +205,7 @@ export default function DashboardLayout() {
           <button
             type="button"
             onClick={() => setCollapsed(!collapsed)}
-            className="rounded-md p-1.5 text-gray-500 hover:bg-gray-800 hover:text-white"
+            className="rounded-md p-1.5 text-gray-500 hover:bg-gray-800 hover:text-white active:scale-[0.97]"
             aria-label={collapsed ? "Buka sidebar" : "Ciutkan sidebar"}
           >
             {collapsed ? <Menu className="size-4" /> : <ChevronLeft className="size-4" />}
@@ -208,7 +219,7 @@ export default function DashboardLayout() {
             end
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition",
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                 isActive
                   ? "bg-accent/10 text-accent"
                   : "text-gray-400 hover:bg-gray-800 hover:text-white",
@@ -225,7 +236,7 @@ export default function DashboardLayout() {
             <button
               type="button"
               onClick={() => setTeamsOpen(!teamsOpen)}
-              className="flex w-full items-center gap-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 hover:text-gray-300 transition"
+              className="flex w-full items-center gap-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 hover:text-gray-300 transition-colors"
             >
               <ChevronDown
                 className={cn("size-3 transition-transform duration-200", !teamsOpen && "-rotate-90")}
@@ -246,7 +257,7 @@ export default function DashboardLayout() {
           {/* ── Team List (Discord-style) ── */}
           <div
             className={cn(
-              "transition-all duration-300 ease-in-out",
+              "transition-[grid-template-rows,opacity] duration-300 var(--ease-out)",
               collapsed
                 ? ""
                 : [
@@ -278,7 +289,7 @@ export default function DashboardLayout() {
                         navigate('/dashboard');
                       }}
                       className={cn(
-                        "group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition",
+                        "group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                         isActive
                           ? "bg-accent/10 text-accent"
                           : "text-gray-400 hover:bg-gray-800 hover:text-white",
@@ -328,7 +339,7 @@ export default function DashboardLayout() {
                   type="button"
                   onClick={handleCreateTeam}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-500 transition hover:bg-gray-800 hover:text-gray-300",
+                    "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-800 hover:text-gray-300",
                     collapsed && "justify-center px-2"
                   )}
                 >
@@ -346,7 +357,7 @@ export default function DashboardLayout() {
             <button
               type="button"
               onClick={() => setFeaturesOpen(!featuresOpen)}
-              className="flex w-full items-center gap-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 hover:text-gray-300 transition"
+              className="flex w-full items-center gap-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500 hover:text-gray-300 transition-colors"
             >
               <ChevronDown
                 className={cn("size-3 transition-transform duration-200", !featuresOpen && "-rotate-90")}
@@ -359,7 +370,7 @@ export default function DashboardLayout() {
           {/* ── Feature Buttons ── */}
           <div
             className={cn(
-              "transition-all duration-300 ease-in-out",
+              "transition-[grid-template-rows,opacity] duration-300 var(--ease-out)",
               collapsed
                 ? ""
                 : [
@@ -379,7 +390,7 @@ export default function DashboardLayout() {
                       type="button"
                       onClick={() => handleFeatureClick(feat)}
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition",
+                        "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                         isActive
                           ? "bg-accent/10 text-accent"
                           : "text-gray-400 hover:bg-gray-800 hover:text-white",
@@ -410,7 +421,7 @@ export default function DashboardLayout() {
             to="/settings"
             className={({ isActive }) =>
               cn(
-                "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition",
+                "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                 isActive
                   ? "bg-accent/10 text-accent"
                   : "text-gray-400 hover:bg-gray-800 hover:text-white",
@@ -426,7 +437,7 @@ export default function DashboardLayout() {
             type="button"
             onClick={handleLogout}
             className={cn(
-              "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-400 transition hover:bg-gray-800 hover:text-red-400",
+              "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-400 transition-colors hover:bg-gray-800 hover:text-red-400 active:scale-[0.97]",
               collapsed && "justify-center px-2"
             )}
           >
@@ -437,7 +448,7 @@ export default function DashboardLayout() {
       </aside>
 
       {/* ── Main Content ── */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto" style={{ scrollbarGutter: "stable" }}>
         <Outlet />
       </main>
 
@@ -459,14 +470,14 @@ export default function DashboardLayout() {
               <button
                 type="button"
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition hover:bg-gray-800 hover:text-white"
+                className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={confirmLogout}
-                className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-600 active:scale-[0.97]"
               >
                 Yakin
               </button>

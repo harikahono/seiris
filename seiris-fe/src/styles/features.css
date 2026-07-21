@@ -4,13 +4,13 @@
 /* ─── Section ────────────────────────────────────────────────────────────────── */
 
 .features-section {
-  padding: 8rem 1rem; /* Perlebar sedikit ruang atas bawah */
+  padding: 8rem 1.5rem;
   background-color: #111111;
-  border-top: 1px solid rgba(255, 255, 255, 0.03); /* Garis batas lebih halus */
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .features-container {
-  max-width: 56rem;
+  max-width: 72rem;
   margin: 0 auto;
 }
 
@@ -19,9 +19,9 @@
 .features-header {
   display: flex;
   flex-direction: column;
-  align-items: center; /* FIX FATAL: Paksa konten ke tengah dari level flexbox */
+  align-items: center;
   text-align: center;
-  margin-bottom: 5rem;
+  margin-bottom: 4rem;
 }
 
 .features-title {
@@ -29,190 +29,127 @@
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
-  margin: 0;
   color: #ffffff;
 }
 
 .features-subtitle {
-  margin: 1.5rem auto 0; /* Jarak dan auto-center yang bener */
-  font-size: 1.125rem; /* Gedein dikit biar kebaca jelas */
+  margin-top: 1rem;
+  font-size: 1.125rem;
   color: rgba(255, 255, 255, 0.5);
   max-width: 38rem;
   line-height: 1.6;
 }
 
-/* ─── List ───────────────────────────────────────────────────────────────────── */
+/* ─── Bento Grid ─────────────────────────────────────────────────────────────── */
 
-.features-list {
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .features-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+/* ─── Card ───────────────────────────────────────────────────────────────────── */
+
+.feature-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Kasih napas antar item */
-}
-
-/* ─── Item ───────────────────────────────────────────────────────────────────── */
-
-.feature-item-wrapper {
-  position: relative;
-}
-
-.feature-item {
-  position: relative;
+  gap: 1.25rem;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  transition:
+    border-color 0.3s ease,
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+  cursor: default;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background-color: rgba(255, 255, 255, 0.02); /* Sedikit glassmorphism */
-  backdrop-filter: blur(10px);
-  border-radius: 0.5rem; /* Tambah radius tipis biar gak terlalu kaku */
-  cursor: pointer;
-
-  height: 5.5rem;
-  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
-              border-color 0.4s ease,
-              background-color 0.4s ease, 
-              box-shadow 0.4s ease;
 }
 
-.feature-item--hovered {
-  height: 8.5rem;
-  border-color: #E07820;
-  background-color: rgba(224, 120, 32, 0.05);
-  box-shadow: 0 12px 40px rgba(224, 120, 32, 0.15);
-}
-
-.feature-item--featured {
-  height: 6rem;
-}
-
-.feature-item--featured.feature-item--hovered {
-  height: 9rem;
-}
-
-/* ─── Corner Brackets ────────────────────────────────────────────────────────── */
-
-.feature-bracket {
+.feature-card::before {
+  content: "";
   position: absolute;
-  width: 1.5rem;
-  height: 1.5rem;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(224, 120, 32, 0.04),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
   pointer-events: none;
 }
 
-.feature-bracket--tl {
-  top: 0.75rem;
-  left: 0.75rem;
+.feature-card:hover {
+  border-color: rgba(224, 120, 32, 0.3);
+  background: rgba(224, 120, 32, 0.03);
+  box-shadow: 0 8px 40px rgba(224, 120, 32, 0.08);
+  transform: translateY(-2px);
 }
 
-.feature-bracket--br {
-  bottom: 0.75rem;
-  right: 0.75rem;
+.feature-card:hover::before {
+  opacity: 1;
 }
 
-.feature-bracket-h {
-  position: absolute;
-  width: 1rem;
-  height: 2px; /* Tebelin dikit */
-  background-color: #E07820;
+/* Spotlight follower cursor target */
+.feature-card {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
 }
 
-.feature-bracket-v {
-  position: absolute;
-  width: 2px;
-  height: 1rem;
-  background-color: #E07820;
-}
+/* ─── Icon ────────────────────────────────────────────────────────────────────── */
 
-.feature-bracket--tl .feature-bracket-h { top: 0; left: 0; }
-.feature-bracket--tl .feature-bracket-v { top: 0; left: 0; }
-.feature-bracket--br .feature-bracket-h { bottom: 0; right: 0; }
-.feature-bracket--br .feature-bracket-v { bottom: 0; right: 0; }
-
-/* ─── Item Content ───────────────────────────────────────────────────────────── */
-
-.feature-item-content {
-  display: flex;
+.feature-card-icon {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  height: 100%;
-  padding: 0 2.5rem; /* Tambah padding dalam */
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  background: rgba(224, 120, 32, 0.1);
+  color: #e07820;
+  flex-shrink: 0;
 }
 
-.feature-item-text {
-  flex: 1;
+/* ─── Body ────────────────────────────────────────────────────────────────────── */
+
+.feature-card-body {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 0.5rem;
 }
 
-.feature-item-title {
-  font-size: 1.35rem;
-  font-weight: 700;
+.feature-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
-  transition: color 0.3s ease;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
-.feature-item-title--featured {
-  font-size: 1.6rem;
-}
-
-.feature-item-title--hovered {
-  color: #E07820;
-}
-
-/* Trik bungkus subtitle biar animasinya gak lompat-lompat */
-.feature-item-subtitle-wrapper {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.feature-item-subtitle-wrapper.is-open {
-  grid-template-rows: 1fr;
-}
-
-.feature-item-subtitle {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.6);
+.feature-card-desc {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.5);
   line-height: 1.6;
   margin: 0;
-  padding-top: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-5px);
-  transition: opacity 0.3s ease, transform 0.3s ease, padding-top 0.3s ease;
-}
-
-.feature-item-subtitle-wrapper.is-open .feature-item-subtitle {
-  opacity: 1;
-  transform: translateY(0);
-  padding-top: 0.5rem;
-}
-
-/* ─── Item Icon ──────────────────────────────────────────────────────────────── */
-
-.feature-item-icon {
-  color: #E07820;
-  opacity: 0;
-  transform: translateX(15px) scale(0.9);
-  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  flex-shrink: 0;
-  margin-left: 2rem;
-}
-
-.feature-item-icon--visible {
-  opacity: 1;
-  transform: translateX(0) scale(1);
-}
-
-.feature-item-icon-svg {
-  width: 2.5rem;
-  height: 2.5rem;
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
-  .features-section { padding: 5rem 1rem; }
-  .feature-item-content { padding: 0 1.5rem; }
-  .feature-item-title { font-size: 1.15rem; }
-  .feature-item-title--featured { font-size: 1.25rem; }
-  .feature-item-icon { display: none; /* Sembunyiin icon di HP biar teks gak sempit */ }
+  .features-section {
+    padding: 5rem 1rem;
+  }
+  .feature-card {
+    padding: 1.5rem;
+  }
 }

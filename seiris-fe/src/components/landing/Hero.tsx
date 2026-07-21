@@ -3,6 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { DottedBackground } from "@/components/ui/Dot";
+import HeroPreview from "@/components/landing/HeroPreview";
 import "@/styles/hero.css";
 
 if (typeof window !== "undefined") {
@@ -73,28 +74,18 @@ export function Hero() {
         {/* Title */}
         <div ref={titleRef} className="hero-title-container">
           <h1 className="hero-title">
-            Your 50/50 Split <br />
-            <span className="hero-title-accent">Is Already Wrong.</span>
+            Split 50:50 di Hari Pertama? <br />
+            <span className="hero-title-accent">Tidak Seadil yang Anda Kira.</span>
           </h1>
           <p className="hero-subtitle">
-              Static equity deals destroy startups — and friendships. SEIRIS tracks every hour, money, and resource your team contributes in real-time, so every founder gets exactly what they've earned. Powered by the Slicing Pie model.
+            Equity yang diperdebatkan lebih sering membunuh startup daripada produk yang gagal. SEIRIS mencatat kontribusi real-time — founder dapat porsi yang adil, bukan sekadar rata.
           </p>
         </div>
 
-        {/* Card 3D (TIDAK DISENTUH) */}
+        {/* Card 3D — Real Dashboard Preview */}
         <div ref={cardRef} className="hero-card">
           <div className="hero-card-inner">
-            <div className="hero-placeholder">
-              <div className="hero-placeholder-header">
-                <div className="dot red"></div>
-                <div className="dot yellow"></div>
-                <div className="dot green"></div>
-              </div>
-              <div className="hero-placeholder-content">
-                <p className="hero-placeholder-text">SEIRIS Dashboard Preview</p>
-                <div className="dummy-chart"></div>
-              </div>
-            </div>
+            <HeroPreview />
           </div>
         </div>
       </div>

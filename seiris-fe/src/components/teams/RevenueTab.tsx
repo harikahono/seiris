@@ -92,7 +92,7 @@ export default function RevenueTab() {
           <button
             type="button"
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-accent-hover"
+            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover active:scale-[0.97]"
           >
             <Plus className="size-4" />
             Catat Revenue
@@ -100,7 +100,7 @@ export default function RevenueTab() {
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="[&>*+*]:border-t [&>*+*]:border-subtle">
         {revenues.length === 0 && !loading && (
           <EmptyState
             icon={TrendingUp}
@@ -116,9 +116,9 @@ export default function RevenueTab() {
         ))}
 
         {loading && page === 1 ? (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="rounded-xl border border-gray-800/50 bg-card p-5 space-y-3">
+              <div key={i} className={i > 0 ? "border-t border-subtle pt-5" : ""}>
                 {/* Amount hero */}
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -131,7 +131,7 @@ export default function RevenueTab() {
                   </div>
                 </div>
                 {/* Meta row */}
-                <div className="flex items-center gap-3">
+                <div className="mt-4 flex items-center gap-3">
                   <Skeleton className="h-3 w-24" />
                   <Skeleton className="h-3 w-32" />
                 </div>

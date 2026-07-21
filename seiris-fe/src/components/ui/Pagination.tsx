@@ -35,7 +35,7 @@ export default function Pagination({ current, last, onChange }: PaginationProps)
         type="button"
         disabled={current <= 1}
         onClick={() => onChange(current - 1)}
-        className="rounded-md px-2 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+        className="rounded-md px-2 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
         ‹
       </button>
@@ -51,7 +51,7 @@ export default function Pagination({ current, last, onChange }: PaginationProps)
             type="button"
             onClick={() => onChange(p)}
             className={cn(
-              "min-w-[32px] rounded-md px-2 py-1 text-sm transition",
+              "min-w-[32px] rounded-md px-2 py-1 text-sm transition-colors",
               p === current
                 ? "bg-accent text-black font-semibold"
                 : "text-gray-400 hover:bg-gray-800 hover:text-white"
@@ -67,7 +67,7 @@ export default function Pagination({ current, last, onChange }: PaginationProps)
         type="button"
         disabled={current >= last}
         onClick={() => onChange(current + 1)}
-        className="rounded-md px-2 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+        className="rounded-md px-2 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
         ›
       </button>

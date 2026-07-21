@@ -157,7 +157,7 @@ export default function ContributionDetailPage() {
       <div className="mx-auto max-w-7xl px-6 pt-10 pb-8">
         <button
           onClick={() => navigate(-1)}
-          className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
+          className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
           aria-label="Kembali"
         >
           <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
@@ -175,14 +175,14 @@ export default function ContributionDetailPage() {
       {/* ── Back ── */}
       <button
         onClick={() => navigate(-1)}
-        className="animate-fade-in-up flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
+        className="animate-fade-in-up flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
         aria-label="Kembali"
       >
         <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
       </button>
 
       {/* ── Contribution Detail ── */}
-      <div className="animate-fade-in-up rounded-xl border border-gray-800 bg-card p-6 transition-all duration-200 hover:border-gray-700">
+      <div className="animate-fade-in-up rounded-xl border border-gray-800 bg-card p-6 transition-colors duration-200 hover:border-gray-700">
         <div className="mb-5 flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-full bg-accent/10">
@@ -208,13 +208,13 @@ export default function ContributionDetailPage() {
             {(contribution.proof_url || contribution.source_url) && (
               <div className="mb-5 flex flex-wrap gap-2">
                 {contribution.proof_url && (
-                  <button onClick={() => setShowProof(true)} className="flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent">
+                  <button onClick={() => setShowProof(true)} className="flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition-colors hover:bg-accent/10 hover:border-accent">
                     <ExternalLink className="size-4" />
                     Lihat Bukti
                   </button>
                 )}
                 {contribution.source_url && (
-                  <button onClick={loadDiff} disabled={diffLoading} className="flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition hover:bg-accent/10 hover:border-accent disabled:cursor-not-allowed disabled:opacity-50">
+                  <button onClick={loadDiff} disabled={diffLoading} className="flex items-center gap-1.5 rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-accent transition-colors hover:bg-accent/10 hover:border-accent disabled:cursor-not-allowed disabled:opacity-50">
                     {diffLoading ? <Loader2 className="size-4 animate-spin" /> : <ChevronDown className="size-4" />}
                     {diffLoading ? "Memuat..." : "Lihat Perubahan Kode"}
                   </button>
@@ -240,7 +240,7 @@ export default function ContributionDetailPage() {
                       <button
                         type="button"
                         onClick={() => setShowDiff(false)}
-                        className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white"
+                        className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]"
                         aria-label="Tutup"
                       >
                         <X className="size-4" />
@@ -362,7 +362,7 @@ export default function ContributionDetailPage() {
           {contribution.approvals.map((a) => (
             <div
               key={a.id}
-              className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-950/50 px-3 py-2.5 transition hover:border-gray-700"
+              className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-950/50 px-3 py-2.5 transition-colors hover:border-gray-700"
             >
               <div className="flex items-center gap-2.5">
                 <div className={cn(

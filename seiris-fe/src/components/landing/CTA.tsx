@@ -104,29 +104,28 @@ export function CTA() {
           {/* ── Kanan: Copy ── */}
           <div className="cta-content">
             <h2 className="cta-title">
-              Stop the Drama.<br />
-              <span className="cta-title--accent">Start Fair.</span>
+              Stop Drama Equity.<br />
+              <span className="cta-title--accent">Mulai dari Sekarang.</span>
             </h2>
 
             <p className="cta-subtitle">
-              Built for {' '}
-              <span className="cta-subtitle--highlight">Founders, Developers, Designers,</span>{' '}
-              and <span className="cta-subtitle--highlight">Business Devs</span>{' '}
-              who want to build startups on honest foundations —
-              before equity conflicts arise.
+              Untuk Anda — {' '}
+              <span className="cta-subtitle--highlight">founder, developer, designer, siapapun</span>{' '}
+              yang ingin membangun startup di atas fondasi yang jujur.
+              Sebelum konflik equity sempat dimulai.
             </p>
 
             <div className="cta-actions">
               <Link to="/register" className="cta-btn-primary">
-                Register Now — It's Free
+                Daftar Gratis Sekarang
                 <span className="cta-btn-arrow">→</span>
               </Link>
             </div>
 
             <p className="cta-trust">
-              <span>✓ 5-minute setup</span>
-              <span>✓ No credit card</span>
-              <span>✓ Free forever</span>
+              <span>✓ Setup 5 menit</span>
+              <span>✓ Tanpa kartu kredit</span>
+              <span>✓ Gratis selamanya</span>
             </p>
           </div>
 

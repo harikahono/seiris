@@ -67,6 +67,9 @@ export default function ContributionsTab() {
       .catch(() => { setEquity(null); toast.error("Gagal memuat equity"); });
   }, [basePath]);
 
+  // Track basePath changes (project switch) untuk reset page
+  const prevBasePath = useRef(basePath);
+
   // ── Fetch Contributions (server-side filter) ──
   const fetchContributions = useCallback(() => {
     const params: Record<string, unknown> = { page };
@@ -83,14 +86,22 @@ export default function ContributionsTab() {
       .catch(() => toast.error("Gagal memuat kontribusi"));
   }, [basePath, page, filter]);
 
-  // Initial load + page change → loading=true from initial state
+  // Mount + page/filter change → fetch data.
+  // basePath change (project switch) → reset page 1 dulu, baru fetch.
   useEffect(() => {
     setLoading(true);
     setEquityLoading(true);
-    setPage(1);
+
+    if (prevBasePath.current !== basePath) {
+      prevBasePath.current = basePath;
+      setPage(1);
+      return; // tunggu page=1 propagasi, nanti fire ulang
+    }
+
     Promise.all([fetchEquity(), fetchContributions()])
       .finally(() => { setLoading(false); setEquityLoading(false); });
-  }, [fetchEquity, fetchContributions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [basePath, page, filter]);
 
   // Background refresh dari Pusher → silent, no skeleton
   const prevRefresh = useRef(0);
@@ -123,7 +134,7 @@ export default function ContributionsTab() {
           type="button"
           onClick={() => setView("contributions")}
           className={cn(
-            "rounded-md px-5 py-2 text-sm font-medium transition-all",
+            "rounded-md px-5 py-2 text-sm font-medium transition-colors",
             view === "contributions"
               ? "bg-accent text-black shadow-sm"
               : "text-gray-500 hover:text-gray-300"
@@ -135,7 +146,7 @@ export default function ContributionsTab() {
           type="button"
           onClick={() => setView("equity")}
           className={cn(
-            "rounded-md px-5 py-2 text-sm font-medium transition-all",
+            "rounded-md px-5 py-2 text-sm font-medium transition-colors",
             view === "equity"
               ? "bg-accent text-black shadow-sm"
               : "text-gray-500 hover:text-gray-300"
@@ -162,7 +173,7 @@ export default function ContributionsTab() {
                       setLoading(true);
                     }}
                     className={cn(
-                      "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                      "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
                       filter === f.key
                         ? "bg-accent text-black shadow-sm"
                         : "text-gray-500 hover:text-gray-300"
@@ -177,7 +188,7 @@ export default function ContributionsTab() {
                 onClick={() => setShowForm(true)}
                 disabled={isProjectFrozen || (currentProjectId !== null && !isCurrentUserProjectMember)}
                 title={isProjectFrozen ? "Project sudah dikunci, kontribusi baru tidak bisa ditambah" : (!isCurrentUserProjectMember ? "Kamu bukan anggota project ini — hanya bisa melihat" : undefined)}
-                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
               >
                 <Plus className="size-4" />
                 Kontribusi

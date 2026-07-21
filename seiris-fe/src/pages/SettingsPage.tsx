@@ -2,7 +2,7 @@ import { useState, type FormEvent, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Key, Check, Eye, EyeOff, User, Camera, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Eye, EyeOff, User, Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
@@ -133,7 +133,7 @@ export default function SettingsPage() {
       {/* Back */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
+        className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
         aria-label="Kembali"
       >
         <ArrowLeft className="size-4" />
@@ -141,7 +141,7 @@ export default function SettingsPage() {
       </button>
 
       {/* Header */}
-      <div className="rounded-xl border border-gray-800 bg-card p-6">
+      <div className="animate-fade-in-up">
         <h1 className="text-2xl font-bold text-white">Pengaturan Akun</h1>
         <p className="mt-1 text-sm text-gray-500">
           Kelola data diri dan pengaturan akun Anda
@@ -149,10 +149,10 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Profile Section ── */}
-      <div className="rounded-xl border border-gray-800 bg-card p-6 space-y-4">
-        <div className="flex items-center gap-2">
-          <User className="size-5 text-accent" />
-          <h2 className="text-lg font-semibold text-white">Profil</h2>
+      <div className="animate-fade-in-up" style={{ animationDelay: "80ms" }}>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="h-4 w-0.5 rounded-full bg-accent/50" />
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">Profil</h2>
         </div>
 
         <form onSubmit={handleProfileSubmit} className="space-y-4">
@@ -173,7 +173,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full border border-gray-700 bg-gray-800 text-gray-400 hover:text-white transition"
+                className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full border border-gray-700 bg-gray-800 text-gray-400 hover:text-white transition-colors active:scale-[0.97]"
                 aria-label="Ubah foto profil"
               >
                 <Camera className="size-3" />
@@ -199,7 +199,7 @@ export default function SettingsPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1"
+              className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
               required
             />
           </div>
@@ -211,7 +211,7 @@ export default function SettingsPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1"
+              className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
               required
             />
           </div>
@@ -227,7 +227,7 @@ export default function SettingsPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Kosongkan jika tidak ingin ganti"
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1"
+                className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
               />
             </div>
             <div>
@@ -237,7 +237,7 @@ export default function SettingsPage() {
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
                 placeholder="Ulangi password baru"
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1"
+                className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
               />
             </div>
           </div>
@@ -245,7 +245,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={profileLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {profileLoading ? (
               <><Loader2 className="size-4 animate-spin" /> Menyimpan...</>
@@ -257,10 +257,10 @@ export default function SettingsPage() {
       </div>
 
       {/* ── GitHub Token Section ── */}
-      <div className="rounded-xl border border-gray-800 bg-card p-6 space-y-4">
-        <div className="flex items-center gap-2">
-          <Key className="size-5 text-accent" />
-          <h2 className="text-lg font-semibold text-white">
+      <div className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="h-4 w-0.5 rounded-full bg-accent/50" />
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">
             GitHub Personal Access Token
           </h2>
         </div>
@@ -281,13 +281,13 @@ export default function SettingsPage() {
                   value={githubToken}
                   onChange={(e) => setGithubToken(e.target.value)}
                   placeholder="ghp_... atau github_pat_..."
-                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1"
+                  className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 pr-8 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowToken(!showToken)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white active:scale-[0.97]"
                   aria-label={showToken ? "Sembunyikan token" : "Tampilkan token"}
                 >
                   {showToken ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -297,7 +297,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={tokenLoading || !githubToken.trim()}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {tokenLoading ? "Menyimpan..." : "Simpan Token"}
             </button>
@@ -313,7 +313,7 @@ export default function SettingsPage() {
             <button
               onClick={handleClearToken}
               disabled={tokenLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-500/30 bg-red-900/10 px-4 py-2.5 text-sm font-semibold text-red-400 transition hover:bg-red-900/20 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-500/30 bg-red-900/10 px-4 py-2.5 text-sm font-semibold text-red-400 transition-colors active:scale-[0.97] hover:bg-red-900/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {tokenLoading ? "Menghapus..." : "Hapus Token"}
             </button>

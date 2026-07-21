@@ -23,7 +23,7 @@ function DistributionTable({ revenue }: { revenue: Revenue }) {
       <button
         type="button"
         onClick={() => setShowBreakdown(!showBreakdown)}
-        className="text-xs text-accent hover:underline transition"
+        className="text-xs text-accent hover:underline transition-colors"
       >
         {showBreakdown ? "Sembunyikan" : "Lihat"} rincian pembagian
       </button>
@@ -162,7 +162,7 @@ export default function RevenueCard({ revenue, teamId, isOwner, hasEquity, isPro
           type="button"
           onClick={() => setConfirmAction("distribute")}
           disabled={distributing}
-          className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
         >
           {distributing ? <Loader2 className="size-4 animate-spin" /> : <SendHorizontal className="size-4" />}
           {distributing ? "Mendistribusikan..." : "Distribusikan"}
@@ -178,7 +178,7 @@ export default function RevenueCard({ revenue, teamId, isOwner, hasEquity, isPro
           type="button"
           onClick={() => setConfirmAction("distribute")}
           disabled={distributing}
-          className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
         >
           {distributing ? <Loader2 className="size-4 animate-spin" /> : <UserCheck className="size-4" />}
           {distributing ? "Mendistribusikan..." : "Setujui & Distribusikan"}
@@ -195,7 +195,7 @@ export default function RevenueCard({ revenue, teamId, isOwner, hasEquity, isPro
           type="button"
           onClick={() => setConfirmAction("request")}
           disabled={distributing}
-          className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-300 transition-all duration-200 hover:border-gray-600 hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-300 transition-colors duration-200 hover:border-gray-600 hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {distributing ? <Loader2 className="size-4 animate-spin" /> : <SendHorizontal className="size-4" />}
           {distributing ? "Mengajukan..." : "Ajukan Distribusi"}
@@ -220,7 +220,7 @@ export default function RevenueCard({ revenue, teamId, isOwner, hasEquity, isPro
     <div
       role="button"
       onClick={() => navigate(`/teams/${teamId}/revenues/${revenue.id}`)}
-      className="group cursor-pointer rounded-xl border border-gray-700/40 bg-card p-5 shadow-[0_2px_12px_rgba(0,0,0,0.25)] transition-all duration-200 hover:border-gray-600/60 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.35)]"
+      className="group cursor-pointer px-0 py-5 transition-colors hover:bg-white/[0.01]"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
