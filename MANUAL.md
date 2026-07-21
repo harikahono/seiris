@@ -1,7 +1,7 @@
 # SEIRIS v2 — User Manual
 **Equity & Cap-Table Platform for Founding Teams**
 
-*Document version: v2.4 · For end users and external parties (investors, advisors)*
+*Document version: v2.5 · For end users and external parties (investors, advisors)*
 
 ---
 
@@ -128,7 +128,7 @@ SEIRIS supports a **team with multiple projects**, each with its own pie:
 
 ### 8.3 Voting & approval
 - Only **other members** (not the creator, and must belong to the scope) may vote **Approve/Reject**.
-- **Threshold**: 50 (majority), 75 (supermajority), 100 (unanimous) — set by the owner.
+- **Threshold**: 50 (majority) or 100 (unanimous) — set by the owner. (75 supermajority was removed.)
 - **Tie-breaker**: the **Owner's** deciding vote; if the owner is the creator, falls back to the longest-tenured member.
 - Each member may vote only once (no revote).
 - An **APPROVED** contribution → the system creates a **new equity snapshot** (without overwriting the previous one).
@@ -216,6 +216,6 @@ A: Export the PDF cap table from the Equity tab (team scope).
 - **Equity %** = `slices ÷ total slices × 100`.
 - **FMR cap**: Rp 150,000/hour.
 - **Bad Leaver**: non-cash slices = 0.
-- **Voting**: threshold 50/75/100; tie-breaker owner → longest-tenured member.
+- **Voting**: threshold 50 or 100; tie-breaker owner → longest-tenured member.
 - **Immutability**: snapshots, audit log, and distributions cannot be edited or deleted.
 - **Concurrency**: the team row is locked (`lockForUpdate`) during voting/approval to prevent race conditions.
