@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/api/axios";
 import { useProjectContext } from "@/contexts/ProjectContext";
@@ -7,7 +7,7 @@ import type { Revenue } from "@/types";
 import { formatRp } from "@/lib/constants";
 import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
 import RevenueStatusBadge from "@/components/ui/RevenueStatusBadge";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileText, RefreshCw } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 
 export default function RevenueDetailPage() {
@@ -17,13 +17,15 @@ export default function RevenueDetailPage() {
   const { refreshVersion } = useRealtime();
 
   const [revenue, setRevenue] = useState<Revenue | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [showProof, setShowProof] = useState(false);
 
+  // Initial load
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    setInitialLoading(true);
     setNotFound(false);
     api
       .get<{ data: Revenue }>(`/teams/${teamId}/revenues/${revenueId}`)
@@ -34,18 +36,32 @@ export default function RevenueDetailPage() {
         if (active) setNotFound(true);
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (active) setInitialLoading(false);
       });
     return () => {
       active = false;
     };
-  }, [teamId, revenueId, refreshVersion]);
+  }, [teamId, revenueId]);
+
+  // Background refresh from Pusher — no skeleton
+  const prevRefresh = useRef(0);
+  useEffect(() => {
+    if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+    prevRefresh.current = refreshVersion;
+    setRefreshing(true);
+    api
+      .get<{ data: Revenue }>(`/teams/${teamId}/revenues/${revenueId}`)
+      .then((res) => setRevenue(res.data.data))
+      .catch(() => setNotFound(true))
+      .finally(() => setRefreshing(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshVersion]);
 
   const projectName = revenue?.project_id
     ? projects.find((p) => p.id === revenue.project_id)?.name ?? null
     : null;
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
         <Skeleton className="h-4 w-16" />
@@ -86,13 +102,21 @@ export default function RevenueDetailPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
-      <button
-        onClick={() => navigate(-1)}
-        className="animate-fade-in-up flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
-        aria-label="Kembali"
-      >
-        <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
-      </button>
+      <div className="animate-fade-in-up flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
+          aria-label="Kembali"
+        >
+          <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
+        </button>
+        {refreshing && (
+          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+            <RefreshCw className="size-3 animate-spin" />
+            Memperbarui...
+          </span>
+        )}
+      </div>
 
       {/* ── Revenue Detail ── */}
       <div className="animate-fade-in-up rounded-xl border border-gray-800 bg-card p-6 transition-colors duration-200 hover:border-gray-700">

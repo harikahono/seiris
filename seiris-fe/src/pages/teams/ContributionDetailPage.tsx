@@ -9,7 +9,7 @@ import type { Contribution as ContributionType, Team } from "@/types";
 import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
 import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
-import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink, ChevronDown, Loader2 } from "lucide-react";
+import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink, ChevronDown, Loader2, RefreshCw } from "lucide-react";
 import { html } from "diff2html";
 import "diff2html/bundles/css/diff2html.min.css";
 import { cn } from "@/lib/utils";
@@ -28,13 +28,14 @@ export default function ContributionDetailPage() {
   const [diffFiles, setDiffFiles] = useState<any[]>([]);
   const [expandedFiles, setExpandedFiles] = useState<Set<number>>(new Set([0]));
   const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [isProjectMember, setIsProjectMember] = useState(true);
   const [featureEnabled, setFeatureEnabled] = useState(true);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isBackground = false) => {
     if (!teamId || !contributionId) return;
-    setLoading(true);
+    if (isBackground) setRefreshing(true);
 
     try {
       const contribRes = await api.get<{ data: ContributionType }>(`/teams/${teamId}/contributions/${contributionId}`);
@@ -54,11 +55,12 @@ export default function ContributionDetailPage() {
     } catch {
       toast.error("Gagal memuat detail kontribusi");
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
+      setRefreshing(false);
     }
   }, [teamId, contributionId, user]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]); // initial mount
 
   // Check feature flag
   useEffect(() => {
@@ -98,11 +100,11 @@ export default function ContributionDetailPage() {
   useEffect(() => {
     if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
     prevRefresh.current = refreshVersion;
-    fetchData();
+    fetchData(true); // true = background, jangan unmount skeleton
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
         {/* Back button */}
@@ -173,13 +175,21 @@ export default function ContributionDetailPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-6 pt-10 pb-8">
       {/* ── Back ── */}
-      <button
-        onClick={() => navigate(-1)}
-        className="animate-fade-in-up flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
-        aria-label="Kembali"
-      >
-        <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
-      </button>
+      <div className="animate-fade-in-up flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
+          aria-label="Kembali"
+        >
+          <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
+        </button>
+        {refreshing && (
+          <span className="flex items-center gap-1.5 text-xs text-gray-500">
+            <RefreshCw className="size-3 animate-spin" />
+            Memperbarui...
+          </span>
+        )}
+      </div>
 
       {/* ── Contribution Detail ── */}
       <div className="animate-fade-in-up rounded-xl border border-gray-800 bg-card p-6 transition-colors duration-200 hover:border-gray-700">

@@ -53,14 +53,14 @@ export default function RevenueTab() {
       .catch(() => setEquitySlices(null));
   }, [basePath]);
 
-  // Initial load + page/scope change → reset page + loading
+  // Initial load + page/scope/filter change → fetch
   useEffect(() => {
-    setPage(1);
     setRevenues([]);
     setEquitySlices(null);
+    setLoading(true);
     Promise.all([fetchRevenues(), fetchEquity()]).finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [basePath]);
+  }, [basePath, page]);
 
   // Page change → loading + fetch with new page
   const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
@@ -159,6 +159,7 @@ export default function RevenueTab() {
         onCreated={() => {
           setPage(1);
           setRevenues([]);
+          fetchRevenues();
         }}
       />
     </div>

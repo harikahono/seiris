@@ -71,8 +71,10 @@ export default function ContributionsTab() {
   const prevBasePath = useRef(basePath);
 
   // ── Fetch Contributions (server-side filter) ──
-  const fetchContributions = useCallback(() => {
-    const params: Record<string, unknown> = { page };
+  // ponytail: overridePage param biar gak perlu nunggu setPage propagate
+  const fetchContributions = useCallback((overridePage?: number) => {
+    const p = overridePage ?? page;
+    const params: Record<string, unknown> = { page: p };
     if (filter !== 'all') params.status = filter;
     return api
       .get<{ data: Contribution[]; meta: { current_page: number; last_page: number } }>(
@@ -84,21 +86,20 @@ export default function ContributionsTab() {
         setLastPage(res.data.meta.last_page);
       })
       .catch(() => toast.error("Gagal memuat kontribusi"));
-  }, [basePath, page, filter]);
+  }, [basePath, filter]); // ponytail: sengaja gak include page — dipake via overridePage
 
   // Mount + page/filter change → fetch data.
-  // basePath change (project switch) → reset page 1 dulu, baru fetch.
+  // basePath change (project switch) → pake page 1 langsung, gak nunggu propagasi.
   useEffect(() => {
     setLoading(true);
     setEquityLoading(true);
 
-    if (prevBasePath.current !== basePath) {
-      prevBasePath.current = basePath;
-      setPage(1);
-      return; // tunggu page=1 propagasi, nanti fire ulang
-    }
+    const isNewScope = prevBasePath.current !== basePath;
+    prevBasePath.current = basePath;
+    if (isNewScope) setPage(1);
+    const targetPage = isNewScope ? 1 : page;
 
-    Promise.all([fetchEquity(), fetchContributions()])
+    Promise.all([fetchEquity(), fetchContributions(targetPage)])
       .finally(() => { setLoading(false); setEquityLoading(false); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basePath, page, filter]);
