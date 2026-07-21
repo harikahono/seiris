@@ -1,6 +1,6 @@
 # ARCHITECTURE — SEIRIS
 
-> Diambil dari kode per 2026-07-20. Untuk detail bisnis baca `DOMAIN_LOGIC.md`, untuk endpoint baca `API_CONTRACTS.md`, untuk audit UI baca `UI_AUDIT.md`.
+> Diambil dari kode per 2026-07-21. Untuk detail bisnis baca `DOMAIN_LOGIC.md`, untuk endpoint baca `API_CONTRACTS.md`, untuk audit UI baca `UI_AUDIT.md`.
 
 ## Stack
 
@@ -12,7 +12,7 @@
 **Frontend** (`seiris-fe/`) — React 19 + Vite 8 + TypeScript 6 + Tailwind 4, package manager **pnpm**.
 - `@/` → `src/` (vite alias).
 - State: `AuthContext`, `TeamContext`, `ProjectContext`, `RealtimeContext`.
-- API client: `src/lib/api.ts` (base URL `VITE_API_BASE_URL`, default `http://localhost:8000/api`).
+- API client: `src/api/axios.ts` (base URL `VITE_API_BASE_URL`, default `http://localhost:8000/api`).
 
 ## Folder convention
 
@@ -33,12 +33,13 @@ seiris-be/
 seiris-fe/
   src/
     components/
-      ui/              # primitives (UserAvatar, ShareInviteModal, Skeleton, dll)
-      teams/           # tabs (TeamMembersTab, ContributionsTab, RevenueTab, dll)
+      ui/              # 30 shared components (UserAvatar, ConfirmModal, VotePanel, Skeleton, ContributionForm, RevenueCard, Pagination, dll)
+      teams/           # 8 tab components (TeamMembersTab, ContributionsTab, RevenueTab, TeamSettingsTab, dll)
     contexts/          # Auth, Team, Project, Realtime
-    hooks/usePusher.ts
+    hooks/             # usePusher.ts, useFocusTrap.ts
+    api/axios.ts       # Axios instance + interceptors (Bearer token)
     types/index.ts     # semua interface FE
-    lib/{api,constants}.ts
+    lib/{constants,utils,parseErrors,contribution}.ts
     pages/
       teams/           # TeamDetailPage, ContributionDetailPage, RevenueDetailPage
       JoinPage.tsx     # join via invite (public)
@@ -52,7 +53,7 @@ seiris-fe/
 
 ```
 FE component
-  -> src/lib/api.ts (Bearer token)
+  -> src/api/axios.ts (Bearer token)
   -> Laravel route (routes/api.php)
       -> middleware auth:sanctum + throttle + team.member / project.member
       -> Controller (validasi FormRequest)
@@ -102,8 +103,47 @@ Detail formula & FSM -> `DOMAIN_LOGIC.md`.
 
 - Channel: `PresenceChannel('team.{teamId}')` (FE subscribe `presence-team.{teamId}` — prefix `presence-` otomatis dari Pusher).
 - 3 event: `equity.updated`, `contribution.created`, `team.updated`.
-- `DashboardLayout` consume -> `triggerRefresh()` + toast; presence members -> `onlineCount`.
+- `DashboardLayout` consume -> `RealtimeContext.triggerRefresh()` (increment `refreshVersion`) + toast; presence members -> `onlineCount`.
 - Butuh env `VITE_PUSHER_*` + `BROADCAST_CONNECTION=pusher` + `queue:listen` jalan (event `ShouldBroadcastNow`).
+
+### Pola Refresh Version (standard)
+
+Setiap tab/detail page yang perlu re-fetch data saat realtime event:
+
+```ts
+const { refreshVersion } = useRealtime();
+const prevRefresh = useRef(0);
+useEffect(() => {
+  if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+  prevRefresh.current = refreshVersion;
+  fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [refreshVersion]);
+```
+
+### Pola Split Loading (detail pages — ContributionDetailPage, RevenueDetailPage)
+
+Pisah efek initial load (skeleton) dari efek realtime refresh (spinner saja) — jangan unmount komponen saat user sedang interaksi:
+
+```ts
+// Initial load — skeleton mount
+const [initialLoading, setInitialLoading] = useState(true);
+useEffect(() => { fetchData().finally(() => setInitialLoading(false)); }, [teamId, id]);
+
+// Realtime refresh — no skeleton, just spinner/overlay
+const [refreshing, setRefreshing] = useState(false);
+const prevRefresh = useRef(0);
+useEffect(() => {
+  if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
+  prevRefresh.current = refreshVersion;
+  setRefreshing(true);
+  fetchData().finally(() => setRefreshing(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [refreshVersion]);
+
+// Render: if (initialLoading) return <Skeleton />;
+//        else return <><Spinner visible={refreshing} /><Content /></>;
+```
 
 ## Deploy note (penting)
 

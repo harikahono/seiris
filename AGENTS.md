@@ -1,6 +1,6 @@
 # SEIRIS — Agent Guide
 
-> **Dokumentasi lengkap ada di folder `agent-context/`** (diturunkan & diverifikasi dari kode per 2026-07-20). File ini cuma entry point + setup cepat. Baca `agent-context/` untuk arsitektur, tipe, logic domain, kontrak API, keputusan, gotchas, dan UI audit.
+> **Dokumentasi lengkap ada di folder `agent-context/`** (diverifikasi dari kode per 2026-07-21). File ini cuma entry point + setup cepat. Baca `agent-context/` untuk arsitektur, tipe, logic domain, kontrak API, keputusan, gotchas, dan UI audit.
 
 ## Docs Index (baca ini)
 - `agent-context/ARCHITECTURE.md` — stack, folder convention, data flow, Slicing Pie Beranak, realtime, deploy note.
@@ -10,10 +10,13 @@
 - `agent-context/DECISIONS.md` — ADR (kenapa X bukan Y).
 - `agent-context/GOTCHAS.md` — trap & caveats yang sudah bikin bug. **Baca sebelum ngubah kode.**
 - `agent-context/UI_AUDIT.md` — hasil audit affordance UI/UX (false hover, missing tooltip, icon vs text, dll).
+- `FE_REFACTOR_PLAN.md` — rencana refaktor frontend 5 fase (services layer, UI component library, hook standardisasi).
 
 ## Project Structure
 - `seiris-be/` — Laravel 12 backend (PHP 8.2+, **PostgreSQL di produksi**, SQLite untuk test)
 - `seiris-fe/` — React 19 + Vite 8 + TypeScript 6 + Tailwind 4 (pnpm)
+- `FE_REFACTOR_PLAN.md` — rencana refaktor frontend 5 fase
+- `agent-context/` — dokumentasi arsitektur, tipe, logic domain, API, gotchas
 
 ## Setup & Commands
 

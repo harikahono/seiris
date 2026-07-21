@@ -1,6 +1,6 @@
 # GOTCHAS — SEIRIS
 
-> Trap yang sudah bikin bug / salah asumsi. Diambil dari `CLAIMS_V2.md` (caveats) + `AGENTS.md` quirks + temuan sesi 2026-07-14 s.d. 2026-07-20. Baca ini SEBELUM ngubah kode. Untuk isu UI/UX affordance selain trap di sini, baca `UI_AUDIT.md`.
+> Trap yang sudah bikin bug / salah asumsi. Diambil dari `CLAIMS_V2.md` (caveats) + `AGENTS.md` quirks + temuan sesi 2026-07-14 s.d. 2026-07-21. Baca ini SEBELUM ngubah kode. Untuk isu UI/UX affordance selain trap di sini, baca `UI_AUDIT.md`.
 
 ## Database & Deploy
 - **PostgreSQL wajib di produksi.** Migrasi pakai `gen_random_uuid()` & `lockForUpdate()` (row-level lock) — **gagal di MySQL/SQLite**. SQLite hanya untuk test (`:memory:`). Jangan deploy ke SQLite.
@@ -80,4 +80,10 @@
 
 ## RevenueDetailPage traps
 - **Hanya team scope** — `RevenueDetailPage` fetch `GET /teams/{team}/revenues/{revenue}` (team scope). Tidak ada route untuk project-scoped revenue detail. Kalau user buka detail revenue dari project, data akan tetap tampil (karena endpoint team scope mencakup semua revenue tim). Tapi path URL tidak mencerminkan scope project.
+
+## Realtime refresh traps (added 2026-07-21)
+- **Jangan unmount komponen di realtime refresh** — Detail pages (ContributionDetailPage, RevenueDetailPage) dulunya render loading skeleton di setiap realtime event → skeleton unmount VotePanel/RevenueDetail, user kehilangan input. **Fix:** split jadi 2 state — `initialLoading` (skeleton, hanya untuk first fetch) + `refreshing` (spinner overlay, tidak unmount children). Lihat ARCHITECTURE.md pola split loading.
+- **useEffect deps wajib include `page`** — RevenueTab pagination gak pernah fetch halaman >1 karena `page` absen dari dep array. Hook cuma liat perubahan `basePath`/`filter`, tapi `page` berubah tanpa trigger re-fetch. **Rule:** setiap state yang dipake dalam fetch callback harus di dep array — atau pake `useRef` kalau emang gak perlu re-fetch.
+- **Scope change = reset ke page 1 sebelum fetch** — ContributionsTab dulunya pakai side-effect `prevBasePath` yang double-render dan stuck. **Fix:** fetch function terima `overridePage` parameter, effect tentuin `targetPage = isNewScope ? 1 : page` langsung, tanpa side-effect. **Rule:** kalau butuh reset state + fetch di perubahan dependency, pass target value langsung ke fetch function, jangan via side-effect setState.
+- **`onCreated` callback harus explicit panggil fetch** — RevenueTab punya handler `onCreated` yang cuma close modal + toast, tapi lupa panggil `fetchRevenues()`. List tidak refresh tanpa navigasi manual. **Rule:** tiap mutation handler (create/update/delete), panggil fetch ulang data yang terdampak.
 
