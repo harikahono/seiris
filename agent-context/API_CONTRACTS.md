@@ -42,7 +42,7 @@
 ## Teams (tanpa {team})
 | Method | Path | Throttle | Body | Res |
 |--------|------|----------|------|-----|
-| POST | `/teams` | write | name, description?, approval_threshold?(50/75/100), fmr?(0..MAX) | 201 `{message, data:TeamResource}` |
+| POST | `/teams` | write | name, description?, approval_threshold?(50/100), fmr?(0..MAX) | 201 `{message, data:TeamResource}` |
 | GET | `/teams` | — | — | `{data:TeamResource[]}` (tidak paginasi) |
 | POST | `/teams/join` | write | invite_code(8) | 201 `{message, data:TeamMemberResource}` / 404 / 403 frozen / 409 already member |
 

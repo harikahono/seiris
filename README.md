@@ -139,7 +139,7 @@ composer run test            # config:clear → php artisan test (PHPUnit, SQLit
 
 - Kontribusi langsung `PENDING` (tanpa DRAFT)
 - Hanya **anggota lain** yang bisa vote (creator gak bisa vote klaim sendiri)
-- Threshold: `team.approval_threshold` (50=mayoritas sederhana, 75=supermayoritas, 100=bulat)
+- Threshold: `team.approval_threshold` (50=mayoritas sederhana, 100=bulat; 75 dihapus)
 - **Tie-breaker:** Suara owner menang. Jika owner adalah creator, fallback ke anggota aktif dengan **tenure terlama** (`created_at`)
 - Status `APPROVED` → `SlicingPieService::recalculate()` insert `EquitySnapshot` baru
 

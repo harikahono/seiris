@@ -9,7 +9,7 @@ Semua type ada di satu file. Yang sering dipakai:
 | Interface | Field penting |
 |-----------|---------------|
 | `User` | id, name, email, avatar, created_at, **has_github_token** (`boolean\|undefined`), **profile_photo_url** (`string\|null`) |
-| `Team` | id, name, description, invite_code, approval_threshold (`"50"\|"75"\|"100"`), is_frozen, frozen_at, owner, members[], members_count |
+| `Team` | id, name, description, invite_code, approval_threshold (`"50"\|"100"`), is_frozen, frozen_at, owner, members[], members_count |
 | `TeamMember` | id, role (`"owner"\|"member"`), fmr, **project_fmr** (`number\|null`, per-project FMR), status (`"active"\|"exited"`), exited_at, user, joined_at |
 | `ProjectItem` | id, team_id, name, description, is_frozen, frozen_at, created_at, updated_at |
 | `Contribution` | id, **project_id** (`string\|null`), type (`ContributionType`), description, value, multiplier (`string`), total_slices, status (`"PENDING"\|"APPROVED"\|"REJECTED"`), contribution_date, deal_value/estimated_value/commission_rate (SALES), member, approvals[], approvals_count, hours?, **proof_url** (`string\|null`), **source_url** (`string\|null`) |
@@ -29,7 +29,7 @@ Payload types: `LoginPayload`, `RegisterPayload`, `CreateTeamPayload`, `CreateCo
 | Model | Kolom kunci | Status / enum | Catatan |
 |-------|-------------|---------------|---------|
 | `User` | name, email, password | — | |
-| `Team` | owner_id, name, invite_code (8 char), approval_threshold (default 75), is_frozen, frozen_at | — | `activeMembers()` scope |
+| `Team` | owner_id, name, invite_code (8 char), approval_threshold (default 50), is_frozen, frozen_at | — | `activeMembers()` scope |
 | `TeamMember` | team_id, user_id, role, fmr, status, exited_at, leaver_type (`good\|bad\|null`), exit_reason | role `owner\|member`, status `active\|exited` | helper isGoodLeaver/isBadLeaver/isOwner/isActive |
 | `Project` | team_id, name, description, is_frozen, frozen_at | — | `members()` BelongsToMany TeamMember via `project_members` (pivot `fmr`) |
 | `ProjectMember` | project_id, team_member_id, fmr | — | pivot murni, unique [project_id, team_member_id] |
