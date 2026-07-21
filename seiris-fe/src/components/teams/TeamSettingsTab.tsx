@@ -9,7 +9,7 @@ import type { ApprovalThreshold } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Loader2, Snowflake, FolderKanban, AlertTriangle } from "lucide-react";
+import { Loader2, Snowflake, FolderKanban, AlertTriangle, Info, CheckCircle } from "lucide-react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface FieldErrors {
@@ -17,6 +17,18 @@ interface FieldErrors {
   description?: string;
   approval_threshold?: string;
 }
+
+function SectionHeader({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      <div className="h-4 w-0.5 rounded-full bg-accent/50" />
+      <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">{label}</h2>
+    </div>
+  );
+}
+
+const inputBase =
+  "w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0";
 
 export default function TeamSettingsTab() {
   const { team, isOwner, fetchTeam } = useOutletContext<TeamContext>();
@@ -26,12 +38,11 @@ export default function TeamSettingsTab() {
   const [saving, setSaving] = useState(false);
   const [freezing, setFreezing] = useState(false);
   const [freezeConfirmOpen, setFreezeConfirmOpen] = useState(false);
-  const [projectFreezing, setProjectFreezing] = useState<string | null>(null); // project id being frozen
+  const [projectFreezing, setProjectFreezing] = useState<string | null>(null);
   const { projects, refreshProjects } = useProjectContext();
   const activeProjectsCount = projects.filter((p) => !p.is_frozen).length;
   const [errors, setErrors] = useState<FieldErrors>({});
 
-  // ── Realtime: refresh team data on Pusher event ──
   const { refreshVersion } = useRealtime();
   const prevRefresh = useRef(0);
   useEffect(() => {
@@ -96,13 +107,8 @@ export default function TeamSettingsTab() {
     }
   };
 
-  const inputClass = (field: keyof FieldErrors) =>
-    cn(
-      "w-full rounded-lg border bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1",
-      errors[field]
-        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-        : "border-gray-700 focus:border-accent focus:ring-accent"
-    );
+  const errClass = (field: keyof FieldErrors) =>
+    errors[field] ? "border-red-500" : "border-white/10";
 
   const thresholds: { value: ApprovalThreshold; label: string }[] = [
     { value: "50", label: "50+1 — Mayoritas" },
@@ -110,110 +116,141 @@ export default function TeamSettingsTab() {
   ];
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSave} className="space-y-4 rounded-lg border border-gray-800 bg-card p-5">
-        <h2 className="text-lg font-semibold text-white">Informasi Tim</h2>
+    <div className="space-y-8">
+      {/* ── Informasi Tim ── */}
+      <section className="animate-fade-in-up">
+        <SectionHeader label="Informasi Tim" />
+        <form onSubmit={handleSave} className="space-y-5">
+          <div>
+            <label htmlFor="settings-name" className="mb-1.5 block text-sm font-medium text-gray-300">
+              Nama Tim
+            </label>
+            <input
+              id="settings-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className={cn(inputBase, errClass("name"))}
+            />
+            {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+          </div>
 
-        <div>
-          <label htmlFor="settings-name" className="mb-1.5 block text-sm font-medium text-gray-300">
-            Nama Tim
-          </label>
-          <input
-            id="settings-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className={inputClass("name")}
-          />
-          {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
-        </div>
+          <div>
+            <label htmlFor="settings-desc" className="mb-1.5 block text-sm font-medium text-gray-300">
+              Deskripsi <span className="text-gray-500">(opsional)</span>
+            </label>
+            <textarea
+              id="settings-desc"
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className={cn(inputBase, "resize-none", errClass("description"))}
+            />
+          </div>
 
-        <div>
-          <label htmlFor="settings-desc" className="mb-1.5 block text-sm font-medium text-gray-300">
-            Deskripsi
-          </label>
-          <textarea
-            id="settings-desc"
-            rows={2}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className={inputClass("description")}
-          />
-        </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-300">
+              Threshold Persetujuan
+            </label>
+            <p className="mb-3 text-xs text-gray-500">
+              Berapa banyak suara setuju yang dibutuhkan untuk menyetujui kontribusi.
+            </p>
+            <div className="space-y-2">
+              {thresholds.map((t) => (
+                <label
+                  key={t.value}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 transition",
+                    approvalThreshold === t.value
+                      ? "border-accent bg-accent/5"
+                      : "border-gray-700 hover:border-gray-600"
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="settings-threshold"
+                    value={t.value}
+                    checked={approvalThreshold === t.value}
+                    onChange={() => setApprovalThreshold(t.value)}
+                    className="accent-accent"
+                  />
+                  <span className="text-sm text-gray-300">{t.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-300">
-            Threshold Persetujuan
-          </label>
-          <div className="space-y-2">
-            {thresholds.map((t) => (
-              <label
-                key={t.value}
-                className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition",
-                  approvalThreshold === t.value
-                    ? "border-accent bg-accent/5"
-                    : "border-gray-700 hover:border-gray-600"
+          <div className="!mt-6 flex items-center justify-end gap-3 border-t border-white/5 pt-5">
+            {team.is_frozen && (
+              <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                <Info className="size-3.5" />
+                Tim sedang freeze — hanya nama &amp; deskripsi yang bisa diubah
+              </span>
+            )}
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving && <Loader2 className="size-4 animate-spin" />}
+              {saving ? "Menyimpan..." : "Simpan Perubahan"}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      {/* ── Freeze Equity ── */}
+      <section className="animate-fade-in-up" style={{ animationDelay: "80ms" }}>
+        <SectionHeader label="Freeze Equity" />
+
+        <div className="rounded-lg border border-red-500/20 bg-red-500/[0.03] p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-red-500/10">
+              <Snowflake className="size-4 text-red-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-white">Freeze Seluruh Tim</h3>
+              <p className="mt-1 text-xs text-gray-500 leading-relaxed">
+                Ketika tim di-freeze, semua perubahan equity akan dihentikan. Aksi ini tidak bisa dibatalkan.
+                Freeze masing-masing project dulu sebelum freeze tim.
+              </p>
+
+              {activeProjectsCount > 0 && (
+                <div className="mt-3 flex items-start gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-300">
+                  <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+                  <span>
+                    Masih ada <strong>{activeProjectsCount}</strong> project aktif. Freeze semua project
+                    dulu supaya cap table tidak kehilangan slices project tersebut.
+                  </span>
+                </div>
+              )}
+
+              <div className="mt-4 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFreezeConfirmOpen(true)}
+                  disabled={freezing || team.is_frozen || activeProjectsCount > 0}
+                  className="flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-400 transition-colors active:scale-[0.97] hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {freezing ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Snowflake className="size-4" />
+                  )}
+                  {team.is_frozen ? "Sudah di-Freeze" : "Freeze Equity"}
+                </button>
+                {team.is_frozen && (
+                  <span className="flex items-center gap-1.5 text-xs text-green-400">
+                    <CheckCircle className="size-3.5" />
+                    Equity sudah di-freeze
+                  </span>
                 )}
-              >
-                <input
-                  type="radio"
-                  name="settings-threshold"
-                  value={t.value}
-                  checked={approvalThreshold === t.value}
-                  onChange={() => setApprovalThreshold(t.value)}
-                  className="accent-accent"
-                />
-                <span className="text-sm text-gray-300">{t.label}</span>
-              </label>
-            ))}
+              </div>
+            </div>
           </div>
         </div>
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {saving && <Loader2 className="size-4 animate-spin" />}
-          {saving ? "Menyimpan..." : "Simpan Perubahan"}
-        </button>
-      </form>
-
-      <div className="space-y-4 rounded-lg border border-red-500/20 bg-red-500/5 p-5">
-        <div className="flex items-center gap-2">
-          <Snowflake className="size-4 text-red-400" />
-          <h2 className="text-lg font-semibold text-white">Freeze Equity</h2>
-        </div>
-        <p className="text-xs text-gray-500">
-          Ketika tim di-freeze, semua perubahan equity akan dihentikan. Aksi ini tidak bisa dibatalkan.
-        </p>
-
-        {activeProjectsCount > 0 && (
-          <div className="flex items-start gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-300">
-            <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-            <span>
-              Masih ada {activeProjectsCount} project yang belum di-freeze. Freeze semua project dulu
-              sebelum freeze tim (supaya cap table tidak kehilangan slices project aktif).
-            </span>
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={() => setFreezeConfirmOpen(true)}
-          disabled={freezing || team.is_frozen || activeProjectsCount > 0}
-          className="flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-400 transition-colors active:scale-[0.97] hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {freezing ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Snowflake className="size-4" />
-          )}
-          {team.is_frozen ? "Sudah di-freeze" : "Freeze Equity"}
-        </button>
-      </div>
+      </section>
 
       <ConfirmModal
         open={freezeConfirmOpen}
@@ -228,55 +265,76 @@ export default function TeamSettingsTab() {
 
       {/* ── Freeze Project ── */}
       {projects.length > 0 && (
-        <div className="space-y-4 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-5">
-          <div className="flex items-center gap-2">
-            <FolderKanban className="size-4 text-yellow-400" />
-            <h2 className="text-lg font-semibold text-white">Freeze Project</h2>
-          </div>
-          <p className="text-xs text-gray-500">
-            Ketika project selesai, freeze Pie-nya. Equity project akan disimpan dan diagregasi ke tim induk.
-          </p>
-          <div className="space-y-2">
-            {projects.map((p) => (
-              <div key={p.id} className="flex items-center justify-between rounded-lg border border-gray-700 bg-gray-900/50 px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-white">{p.name}</p>
-                  {p.description && <p className="text-xs text-gray-500 truncate">{p.description}</p>}
-                </div>
-                <button
-                  type="button"
-                  disabled={p.is_frozen || projectFreezing === p.id}
-                  onClick={async () => {
-                    setProjectFreezing(p.id);
-                    try {
-                      await api.post(`/teams/${team.id}/projects/${p.id}/freeze`);
-                      toast.success(`Project "${p.name}" berhasil di-freeze`);
-                      refreshProjects();
-                    } catch (err) {
-                      if (isAxiosError(err) && err.response?.status === 409) {
-                        toast.error(`Project "${p.name}" sudah di-freeze`);
-                      } else if (isAxiosError(err) && err.response?.status === 422) {
-                        toast.error(err.response.data?.message || "Gagal freeze project");
-                      } else {
-                        toast.error("Gagal freeze project");
-                      }
-                    } finally {
-                      setProjectFreezing(null);
-                    }
-                  }}
-                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-yellow-500/30 px-3 py-1.5 text-xs text-yellow-400 transition-colors active:scale-[0.97] hover:bg-yellow-500/10 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {projectFreezing === p.id ? (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  ) : (
-                    <Snowflake className="size-3.5" />
-                  )}
-                  {p.is_frozen ? "Sudah di-freeze" : "Freeze"}
-                </button>
+        <section className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
+          <SectionHeader label="Freeze Project" />
+          <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/[0.03] p-5">
+            <div className="flex items-start gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-yellow-500/10">
+                <FolderKanban className="size-4 text-yellow-400" />
               </div>
-            ))}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-white">Project Aktif</h3>
+                <p className="mt-1 text-xs text-gray-500 leading-relaxed">
+                  Ketika project selesai, freeze Pie-nya. Equity project akan disimpan dan diagregasi ke tim induk.
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 space-y-2">
+              {projects.map((p) => (
+                <div
+                  key={p.id}
+                  className={cn(
+                    "flex items-center justify-between rounded-lg border px-4 py-3 transition-colors",
+                    p.is_frozen
+                      ? "border-gray-700/50 bg-gray-900/30 opacity-60"
+                      : "border-gray-700 bg-gray-900/50 hover:border-gray-600"
+                  )}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white">{p.name}</p>
+                    {p.description && <p className="text-xs text-gray-500 truncate">{p.description}</p>}
+                    {p.is_frozen && (
+                      <span className="mt-1 inline-flex items-center gap-1 text-xs text-green-400/70">
+                        <CheckCircle className="size-3" />
+                        Sudah di-freeze
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    disabled={p.is_frozen || projectFreezing === p.id}
+                    onClick={async () => {
+                      setProjectFreezing(p.id);
+                      try {
+                        await api.post(`/teams/${team.id}/projects/${p.id}/freeze`);
+                        toast.success(`Project "${p.name}" berhasil di-freeze`);
+                        refreshProjects();
+                      } catch (err) {
+                        if (isAxiosError(err) && err.response?.status === 409) {
+                          toast.error(`Project "${p.name}" sudah di-freeze`);
+                        } else if (isAxiosError(err) && err.response?.status === 422) {
+                          toast.error(err.response.data?.message || "Gagal freeze project");
+                        } else {
+                          toast.error("Gagal freeze project");
+                        }
+                      } finally {
+                        setProjectFreezing(null);
+                      }
+                    }}
+                    className="flex shrink-0 items-center gap-1.5 rounded-lg border border-yellow-500/30 px-3 py-1.5 text-xs text-yellow-400 transition-colors active:scale-[0.97] hover:bg-yellow-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {projectFreezing === p.id ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Snowflake className="size-3.5" />
+                    )}
+                    {p.is_frozen ? "Done" : "Freeze"}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
       )}
     </div>
   );
