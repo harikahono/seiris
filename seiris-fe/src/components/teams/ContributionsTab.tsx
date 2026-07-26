@@ -154,27 +154,59 @@ export default function ContributionsTab() {
           <span>Project ini sudah dikunci — seluruh perubahan sudah tidak bisa dilakukan.</span>
         </div>
       )}
-      {/* ── Toolbar: scope selalu muncul; search/filter/button hanya di kontribusi ── */}
+      {/* ── Toolbar: scope + search ── */}
       <div className="flex flex-wrap items-center gap-2">
         <ProjectSelector inline isOwner={isOwner} />
         {view === "contributions" && (
-          <>
-            <div className="relative flex-1 min-w-[160px] max-w-xs">
-              <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                placeholder="Cari deskripsi atau anggota..."
-                className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
-              />
-              {search && (
-                <button onClick={() => { setSearch(""); setPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
-                  <X className="size-3.5" />
-                </button>
-              )}
-            </div>
+          <div className="relative flex-1 min-w-[160px] max-w-xs">
+            <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Cari deskripsi atau anggota..."
+              className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
+            />
+            {search && (
+              <button onClick={() => { setSearch(""); setPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
+                <X className="size-3.5" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
 
+      {/* ── Toggle row: view switch + filter + add (kontribusi only) ── */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
+          <button
+            type="button"
+            onClick={() => setView("contributions")}
+            className={cn(
+              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
+              view === "contributions"
+                ? "bg-accent text-black shadow-sm"
+                : "text-gray-500 hover:text-gray-300"
+            )}
+          >
+            Kontribusi
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("equity")}
+            className={cn(
+              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
+              view === "equity"
+                ? "bg-accent text-black shadow-sm"
+                : "text-gray-500 hover:text-gray-300"
+            )}
+          >
+            Equity
+          </button>
+        </div>
+
+        {view === "contributions" && (
+          <>
             {/* Filter toggle with active badge */}
             <button
               type="button"
@@ -220,36 +252,6 @@ export default function ContributionsTab() {
             </button>
           </>
         )}
-      </div>
-
-      {/* ── Toggle: Kontribusi / Equity — always visible, left aligned ── */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
-          <button
-            type="button"
-            onClick={() => setView("contributions")}
-            className={cn(
-              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
-              view === "contributions"
-                ? "bg-accent text-black shadow-sm"
-                : "text-gray-500 hover:text-gray-300"
-            )}
-          >
-            Kontribusi
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("equity")}
-            className={cn(
-              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
-              view === "equity"
-                ? "bg-accent text-black shadow-sm"
-                : "text-gray-500 hover:text-gray-300"
-            )}
-          >
-            Equity
-          </button>
-        </div>
       </div>
 
       {/* ── Kontribusi View ── */}
