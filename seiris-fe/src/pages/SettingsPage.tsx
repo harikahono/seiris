@@ -1,13 +1,11 @@
 import { useState, type FormEvent, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Check, Eye, EyeOff, User, Camera, Loader2 } from "lucide-react";
+import { Check, Eye, EyeOff, User, Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
   const { user, setUser } = useAuth();
-  const navigate = useNavigate();
 
   // ── Profile form state ──
   const [name, setName] = useState(user?.name ?? "");
@@ -129,27 +127,18 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 px-6 pt-10 pb-8">
-      {/* Back */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
-        aria-label="Kembali" title="Kembali"
-      >
-        <ArrowLeft className="size-4" />
-        <span className="hidden sm:inline">Kembali</span>
-      </button>
-
+    <div className="mx-auto max-w-7xl px-6 pt-10 pb-8">
       {/* Header */}
-      <div className="animate-fade-in-up">
-        <h1 className="text-2xl font-bold text-white">Pengaturan Akun</h1>
+      <div className="animate-fade-in-up mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Pengaturan Akun</h1>
         <p className="mt-1 text-sm text-gray-500">
           Kelola data diri dan pengaturan akun Anda
         </p>
+        <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
       </div>
 
       {/* ── Profile Section ── */}
-      <div className="animate-fade-in-up" style={{ animationDelay: "80ms" }}>
+      <div className="animate-fade-in-up mb-8">
         <div className="flex items-center gap-2 mb-4">
           <div className="h-4 w-0.5 rounded-full bg-accent/50" />
           <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">Profil</h2>
@@ -257,7 +246,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ── GitHub Token Section ── */}
-      <div className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
+      <div className="animate-fade-in-up">
         <div className="flex items-center gap-2 mb-4">
           <div className="h-4 w-0.5 rounded-full bg-accent/50" />
           <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">
