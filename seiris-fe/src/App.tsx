@@ -16,6 +16,7 @@ import ContributionsTab from "@/components/teams/ContributionsTab";
 import TeamSettingsTab from "@/components/teams/TeamSettingsTab";
 import ContributionDetailPage from "@/pages/teams/ContributionDetailPage";
 import RevenueDetailPage from "@/pages/teams/RevenueDetailPage";
+import MemberDetailPage from "@/pages/teams/MemberDetailPage";
 import LandingPage from "@/pages/LandingPage";
 import SettingsPage from "@/pages/SettingsPage";
 import JoinPage from "@/pages/JoinPage";
@@ -55,6 +56,7 @@ export default function App() {
                 </Route>
                 <Route path="/teams/:teamId/contributions/:contributionId" element={<ContributionDetailPage />} />
                 <Route path="/teams/:teamId/revenues/:revenueId" element={<RevenueDetailPage />} />
+                <Route path="/teams/:teamId/members/:memberId" element={<MemberDetailPage />} />
               </Route>
               </Route>
             </Route>

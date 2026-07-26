@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
@@ -15,6 +15,7 @@ import { useModalAnimation } from "@/hooks/useModalAnimation";
 
 export default function TeamMembersTab() {
   const { team, currentUserId, fetchTeam } = useOutletContext<TeamContext>();
+  const navigate = useNavigate();
   const [editingFmr, setEditingFmr] = useState<string | null>(null);
   const [fmrValue, setFmrValue] = useState("");
   const [savingFmr, setSavingFmr] = useState(false);
@@ -322,9 +323,9 @@ export default function TeamMembersTab() {
 
       <div>
         {activeMembers.map((member, i) => (
-          <div key={member.id}>
-            <div className="flex items-center justify-between px-0 py-4 cursor-default">
-              <div className="flex items-center gap-3">
+            <div key={member.id}>
+            <div className="flex items-center justify-between px-0 py-4">
+              <div className="flex items-center gap-3 cursor-pointer transition-colors rounded-lg -ml-1 px-1 py-0.5 hover:bg-gray-900/50" onClick={() => navigate(`/teams/${team.id}/members/${member.id}`)}>
                 <UserAvatar user={member.user} size="lg" />
                 <div>
                   <div className="flex items-center gap-2">
