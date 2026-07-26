@@ -32,43 +32,45 @@ class FmrProposalController extends Controller
 
         $member = $request->teamMember;
 
-        $proposal = DB::transaction(function () use ($request, $team, $member) {
-            // F-1: LOCK row tim + check PENDING di DALEM transaction
-            // (cegah TOCTOU race — 2 request bareng bikin 2 proposal PENDING)
-            DB::table('teams')
-                ->where('id', $team->id)
-                ->lockForUpdate()
-                ->first();
+        try {
+            $proposal = DB::transaction(function () use ($request, $team, $member) {
+                // F-1: LOCK row tim + check PENDING di DALEM transaction
+                // (cegah TOCTOU race — 2 request bareng bikin 2 proposal PENDING)
+                DB::table('teams')
+                    ->where('id', $team->id)
+                    ->lockForUpdate()
+                    ->first();
 
-            $pendingExists = FmrProposal::where('team_id', $team->id)
-                ->where('member_id', $member->id)
-                ->where('status', 'PENDING')
-                ->exists();
+                $pendingExists = FmrProposal::where('team_id', $team->id)
+                    ->where('member_id', $member->id)
+                    ->where('status', 'PENDING')
+                    ->exists();
 
-            if ($pendingExists) {
-                throw new \RuntimeException('DUPLICATE_PENDING');
-            }
+                if ($pendingExists) {
+                    throw new \RuntimeException('DUPLICATE_PENDING');
+                }
 
-            $proposal = FmrProposal::create([
-                'team_id'      => $team->id,
-                'member_id'    => $member->id,
-                'proposed_fmr' => $request->proposed_fmr,
-                'status'       => 'PENDING',
-            ]);
-
-            AuditLogService::logFromRequest(
-                request:     $request,
-                teamId:      $team->id,
-                action:      'fmr.proposed',
-                subjectType: FmrProposal::class,
-                subjectId:   $proposal->id,
-                payload:     [
-                    'proposed_fmr' => $request->proposed_fmr,
+                $proposal = FmrProposal::create([
+                    'team_id'      => $team->id,
                     'member_id'    => $member->id,
-                ],
-            );
+                    'proposed_fmr' => $request->proposed_fmr,
+                    'status'       => 'PENDING',
+                ]);
 
-            return $proposal;
+                AuditLogService::logFromRequest(
+                    request:     $request,
+                    teamId:      $team->id,
+                    action:      'fmr.proposed',
+                    subjectType: FmrProposal::class,
+                    subjectId:   $proposal->id,
+                    payload:     [
+                        'proposed_fmr' => $request->proposed_fmr,
+                        'member_id'    => $member->id,
+                    ],
+                );
+
+                return $proposal;
+            });
         } catch (\RuntimeException $e) {
             if ($e->getMessage() === 'DUPLICATE_PENDING') {
                 return response()->json([
