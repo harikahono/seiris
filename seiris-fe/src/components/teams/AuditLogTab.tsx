@@ -53,7 +53,6 @@ export default function AuditLogTab() {
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-  const [total, setTotal] = useState(0);
   // A4: search & date range
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -89,7 +88,6 @@ export default function AuditLogTab() {
       .then((res) => {
         setLogs(res.data.data);
         setLastPage(res.data.meta.last_page);
-        setTotal(res.data.meta.total);
       })
       .catch(() => toast.error("Gagal memuat audit log"))
       .finally(() => setLoading(false));
@@ -115,11 +113,6 @@ export default function AuditLogTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">Audit Log</h2>
-        <span className="text-xs text-gray-500">{total} log</span>
-      </div>
-
       {/* B: top bar — search selalu kelihatan */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[160px] max-w-xs">

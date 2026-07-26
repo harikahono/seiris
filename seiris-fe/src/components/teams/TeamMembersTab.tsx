@@ -314,13 +314,6 @@ export default function TeamMembersTab() {
         </div>
       )}
 
-      {/* ── Daftar Anggota ── */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className="h-4 w-0.5 rounded-full bg-accent/50" />
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">Anggota</h2>
-        <span className="text-[11px] text-gray-600">({activeMembers.length})</span>
-      </div>
-
       <div>
         {activeMembers.map((member, i) => (
             <div key={member.id}>

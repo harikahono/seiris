@@ -153,15 +153,8 @@ export default function ContributionsTab() {
           <span>Project ini sudah dikunci — seluruh perubahan sudah tidak bisa dilakukan.</span>
         </div>
       )}
-      {/* ── Header: title + toggle + add button ── */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-white">Kontribusi</h2>
-          {view === "contributions" && (
-            <p className="text-xs text-gray-500">{contributions.length} kontribusi</p>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
+      {/* ── Header: toggle + add button ── */}
+      <div className="flex flex-wrap items-center gap-2">
           {/* ── Toggle: Kontribusi / Equity ── */}
           <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
             <button
@@ -203,7 +196,6 @@ export default function ContributionsTab() {
               Kontribusi
             </button>
           )}
-        </div>
       </div>
 
       {/* ── Toolbar: search + filter (contributions only) ── */}

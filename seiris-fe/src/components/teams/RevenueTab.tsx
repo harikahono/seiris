@@ -96,17 +96,9 @@ export default function RevenueTab() {
 
   const hasEquity = equitySlices !== null && equitySlices > 0;
 
-  const totalAmount = revenues.reduce((s, r) => s + r.amount, 0);
-
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-white">Revenue</h2>
-          <p className="text-xs text-gray-500">
-            {revenues.length} revenue · {totalAmount.toLocaleString("id-ID")} total
-          </p>
-        </div>
+      <div className="flex flex-wrap items-center justify-end gap-3">
         {isOwner && (
           <button
             type="button"
