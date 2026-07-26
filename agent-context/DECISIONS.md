@@ -49,3 +49,9 @@
 - **ADR-036 Revenue/distribusi butuh min 2 anggota tim** — Revenue store + distribute diblokir 422 kalau `activeMembers()->count() < 2`. Owner sendiri boleh kontribusi, tapi gak bisa catat revenue atau distribusi. ✅
 - **ADR-037 Exit member lock** — `TeamController::exitMember()` pindahin check `status !== 'exited'` ke DALEM transaction + `lockForUpdate` pada `team_members` row. Cegah double-exit race. ✅
 - **ADR-038 Modal unification** — 9 modals diseragamkan: `bg-black/60 backdrop-blur-sm z-50`, card `bg-card border-gray-700 shadow-2xl`. Semua pakai `useModalAnimation` (150ms exit scale-down). 3 inline modal di-portal ke `document.body`. Click-outside close di modal tanpa tombol X yang jelas. `useFocusTrap` dipanggil dengan `show` (bukan `open`) agar trap aktif selama exit animation. ✅
+- **ADR-039 TypeScript build gotchas** — Error umum `pnpm build` yang selalu terulang dan cara cegahnya:
+  - **Unused import (TS6133)**: Jangan biarkan import `Loader2`, `Plus`, `cn`, dll menganggur. Hapus sebelum commit, atau jangan import dulu sampai benar-benar dipakai.
+  - **Duplicate JSX attribute (TS17001)**: Saat nambah `title` ke elemen yang udah punya `title`, cek dulu apakah atribut udah ada. Ganti yang lama, jangan tambah baru.
+  - **`title` di Lucide icon (TS2322)**: `title` bukan prop valid untuk komponen SVG Lucide (`LucideProps`). Kalau perlu tooltip, bungkus `<span title="...">` di luar ikon, jangan langsung di `<Lock>`, `<X>`, dll.
+  - **Prop `size` invalid (TS2322)**: `UserAvatar` cuma nerima `xs | sm | md | lg`. Jangan pake `xl`. Kalau butuh lebih besar, pake `lg` + CSS.
+  - **Dead code refactor**: Saat hapus state variable (misal `team`), cek juga semua panggilan `setTeam(...)` di body — hapus atau ganti. Jangan tinggalin dangling reference. ✅
