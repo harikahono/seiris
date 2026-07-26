@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDebounceValue } from "@/hooks/useDebounceValue";
 import type { Revenue } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
+import ProjectSelector from "@/components/teams/ProjectSelector";
 import { Loader2, Plus, TrendingUp, Search, X } from "lucide-react";
 import RevenueCard from "@/components/ui/RevenueCard";
 import CreateRevenueForm from "@/components/ui/CreateRevenueForm";
@@ -98,23 +99,9 @@ export default function RevenueTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-end gap-3">
-        {isOwner && (
-          <button
-            type="button"
-            onClick={() => setShowForm(true)}
-            disabled={team.members_count < 2}
-            title={team.members_count < 2 ? "Minimal 2 anggota tim aktif" : undefined}
-            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
-          >
-            <Plus className="size-4" />
-            Catat Revenue
-          </button>
-        )}
-      </div>
-
-      {/* A3: search & date filter */}
-      <div className="mb-3 flex flex-wrap items-center gap-2">
+      {/* ── Toolbar: scope + search + date + button ── */}
+      <div className="flex flex-wrap items-center gap-2">
+        <ProjectSelector inline isOwner={isOwner} />
         <div className="relative flex-1 min-w-[160px] max-w-xs">
           <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
           <input
@@ -144,6 +131,18 @@ export default function RevenueTab() {
           className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
           title="Sampai tanggal"
         />
+        {isOwner && (
+          <button
+            type="button"
+            onClick={() => setShowForm(true)}
+            disabled={team.members_count < 2}
+            title={team.members_count < 2 ? "Minimal 2 anggota tim aktif" : undefined}
+            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
+          >
+            <Plus className="size-4" />
+            Catat Revenue
+          </button>
+        )}
       </div>
 
       <div className="[&>*+*]:border-t [&>*+*]:border-subtle">

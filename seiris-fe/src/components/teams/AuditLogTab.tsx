@@ -6,8 +6,8 @@ import { useProjectContext } from "@/contexts/ProjectContext";
 import { useDebounceValue } from "@/hooks/useDebounceValue";
 import type { AuditLogItem } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
-import { cn } from "@/lib/utils";
-import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings, ClipboardList, Search, X, SlidersHorizontal } from "lucide-react";
+import ProjectSelector from "@/components/teams/ProjectSelector";
+import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings, ClipboardList, Search, X, ChevronDown } from "lucide-react";
 import AuditLogEntry from "@/components/ui/AuditLogEntry";
 import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
@@ -45,7 +45,7 @@ function groupByDate(logs: AuditLogItem[]): Map<string, AuditLogItem[]> {
 }
 
 export default function AuditLogTab() {
-  const { team } = useOutletContext<TeamContext>();
+  const { team, isOwner } = useOutletContext<TeamContext>();
   const { currentProjectId } = useProjectContext();
   const teamId = team.id;
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
@@ -58,9 +58,7 @@ export default function AuditLogTab() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const debouncedSearch = useDebounceValue(search, 300);
-  const [showFilters, setShowFilters] = useState(false);
 
-  // B: active filter count buat badge
   const activeFilterCount = (filter ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
 
   const clearFilters = () => {
@@ -113,8 +111,9 @@ export default function AuditLogTab() {
 
   return (
     <div className="space-y-4">
-      {/* B: top bar — search selalu kelihatan */}
+      {/* ── Toolbar: scope + search + filter dropdown + date ── */}
       <div className="flex flex-wrap items-center gap-2">
+        <ProjectSelector inline isOwner={isOwner} />
         <div className="relative flex-1 min-w-[160px] max-w-xs">
           <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
           <input
@@ -131,27 +130,41 @@ export default function AuditLogTab() {
           )}
         </div>
 
-        {/* Filter toggle with active badge */}
-        <button
-          type="button"
-          onClick={() => setShowFilters(!showFilters)}
-          className={cn(
-            "flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors",
-            showFilters || activeFilterCount > 0
-              ? "border-accent/50 text-accent"
-              : "border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white"
-          )}
-          title={showFilters ? "Sembunyikan filter" : "Tampilkan filter"}
-        >
-          <SlidersHorizontal className="size-4" />
-          {activeFilterCount > 0 && (
-            <span className="flex size-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold leading-none text-black">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
+        {/* Filter dropdown — replaces 8 pills */}
+        <div className="relative">
+          <select
+            value={filter}
+            onChange={(e) => { setFilter(e.target.value); setPage(1); setLogs([]); }}
+            className="appearance-none rounded-md border border-gray-700 bg-gray-900 py-1.5 pl-2 pr-7 text-xs text-white outline-none focus:border-accent"
+          >
+            <option value="">Semua</option>
+            <option value="contribution">Kontribusi</option>
+            <option value="vote">Voting</option>
+            <option value="equity">Equity</option>
+            <option value="revenue">Revenue</option>
+            <option value="profit">Profit</option>
+            <option value="member">Anggota</option>
+            <option value="team">Tim</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3 -translate-y-1/2 text-gray-500" />
+        </div>
 
-        {/* Clear filters — muncul kalo ada yg aktif */}
+        <input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLogs([]); }}
+          className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+          title="Dari tanggal"
+        />
+        <input
+          type="date"
+          value={dateTo}
+          onChange={(e) => { setDateTo(e.target.value); setPage(1); setLogs([]); }}
+          className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+          title="Sampai tanggal"
+        />
+
+        {/* Clear button — muncul kalo ada filter aktif */}
         {activeFilterCount > 0 && (
           <button
             type="button"
@@ -159,52 +172,8 @@ export default function AuditLogTab() {
             className="flex items-center gap-1 text-xs text-gray-500 hover:text-white transition-colors"
           >
             <X className="size-3" />
-            Hapus filter
           </button>
         )}
-      </div>
-
-      {/* B: collapsible filter panel */}
-      {(showFilters || activeFilterCount > 0) && (
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLogs([]); }}
-            className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
-            title="Dari tanggal"
-          />
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => { setDateTo(e.target.value); setPage(1); setLogs([]); }}
-            className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
-            title="Sampai tanggal"
-          />
-        </div>
-      )}
-
-      {/* B: category filter pills — always visible, compact */}
-      <div className="flex flex-wrap gap-1">
-        {FILTERS.map((f) => {
-          const Icon = f.icon;
-          return (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => { setFilter(f.key); setPage(1); setLogs([]); }}
-              className={cn(
-                "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",
-                filter === f.key
-                  ? "bg-accent text-black shadow-sm"
-                  : "text-gray-500 hover:text-gray-300"
-              )}
-            >
-              <Icon className="size-3" />
-              {f.label}
-            </button>
-          );
-        })}
       </div>
 
       {logs.length === 0 && !loading && (

@@ -9,12 +9,13 @@ import type { TeamMember, FmrProposal } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { toast } from "sonner";
 import UserAvatar from "@/components/ui/UserAvatar";
+import ProjectSelector from "@/components/teams/ProjectSelector";
 import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut, Info, Lock, ShieldAlert } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useModalAnimation } from "@/hooks/useModalAnimation";
 
 export default function TeamMembersTab() {
-  const { team, currentUserId, fetchTeam } = useOutletContext<TeamContext>();
+  const { team, currentUserId, fetchTeam, isOwner } = useOutletContext<TeamContext>();
   const navigate = useNavigate();
   const [editingFmr, setEditingFmr] = useState<string | null>(null);
   const [fmrValue, setFmrValue] = useState("");
@@ -33,7 +34,6 @@ export default function TeamMembersTab() {
   const { refreshVersion } = useRealtime();
   const { currentProjectId, projects } = useProjectContext();
   const isProjectFrozen = !!currentProjectId && (projects.find((p) => p.id === currentProjectId)?.is_frozen ?? false);
-  const isOwner = team.owner.id === currentUserId;
   const activeMembers = team.members.filter((m) => m.status === "active");
   const currentMember = activeMembers.find((m) => m.user.id === currentUserId);
   const hasProjectScope = !!currentProjectId;
@@ -239,6 +239,11 @@ export default function TeamMembersTab() {
 
   return (
     <div className="space-y-4">
+      {/* ── Toolbar: scope ── */}
+      <div className="flex flex-wrap items-center gap-2">
+        <ProjectSelector inline isOwner={isOwner} />
+      </div>
+
       {/* ── Ajukan FMR (hanya untuk non-owner) ── */}
       {!isOwner && currentMember && (
         <div className="rounded-lg border border-gray-800 bg-card p-4">

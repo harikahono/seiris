@@ -15,6 +15,7 @@ import ContributionTypeBar from "@/components/ui/ContributionTypeBar";
 import MemberEquityTable from "@/components/ui/MemberEquityTable";
 import ExportPdfButton from "@/components/ui/ExportPdfButton";
 import Pagination from "@/components/ui/Pagination";
+import ProjectSelector from "@/components/teams/ProjectSelector";
 import { Plus, Loader2, ListChecks, Lock, Search, X, ChevronDown, SlidersHorizontal } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
@@ -31,7 +32,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 ];
 
 export default function ContributionsTab() {
-  const { team, fmr } = useOutletContext<TeamContext>();
+  const { team, fmr, isOwner } = useOutletContext<TeamContext>();
   const teamId = team.id;
   const { currentProjectId, projects } = useProjectContext();
   const { refreshVersion } = useRealtime();
@@ -153,54 +154,10 @@ export default function ContributionsTab() {
           <span>Project ini sudah dikunci — seluruh perubahan sudah tidak bisa dilakukan.</span>
         </div>
       )}
-      {/* ── Header: toggle + add button ── */}
-      <div className="flex flex-wrap items-center gap-2">
-          {/* ── Toggle: Kontribusi / Equity ── */}
-          <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
-            <button
-              type="button"
-              onClick={() => setView("contributions")}
-              className={cn(
-                "rounded-md px-5 py-2 text-sm font-medium transition-colors",
-                view === "contributions"
-                  ? "bg-accent text-black shadow-sm"
-                  : "text-gray-500 hover:text-gray-300"
-              )}
-            >
-              Kontribusi
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("equity")}
-              className={cn(
-                "rounded-md px-5 py-2 text-sm font-medium transition-colors",
-                view === "equity"
-                  ? "bg-accent text-black shadow-sm"
-                  : "text-gray-500 hover:text-gray-300"
-              )}
-            >
-              Equity
-            </button>
-          </div>
-
-          {/* Add button — only in contributions view */}
-          {view === "contributions" && (
-            <button
-              type="button"
-              onClick={() => setShowForm(true)}
-              disabled={team.members_count < 2 || isProjectFrozen || (currentProjectId !== null && !isCurrentUserProjectMember)}
-              title={team.members_count < 2 ? "Minimal 2 anggota tim aktif" : isProjectFrozen ? "Project sudah dikunci, kontribusi baru tidak bisa ditambah" : (!isCurrentUserProjectMember ? "Kamu bukan anggota project ini — hanya bisa melihat" : undefined)}
-              className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
-            >
-              <Plus className="size-4" />
-              Kontribusi
-            </button>
-          )}
-      </div>
-
-      {/* ── Toolbar: search + filter (contributions only) ── */}
+      {/* ── Toolbar: scope + search + filter + button (contributions only) ── */}
       {view === "contributions" && (
         <div className="flex flex-wrap items-center gap-2">
+          <ProjectSelector inline isOwner={isOwner} />
           <div className="relative flex-1 min-w-[160px] max-w-xs">
             <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
             <input
@@ -248,8 +205,50 @@ export default function ContributionsTab() {
               Hapus filter
             </button>
           )}
+
+          {/* Add button */}
+          <button
+            type="button"
+            onClick={() => setShowForm(true)}
+            disabled={team.members_count < 2 || isProjectFrozen || (currentProjectId !== null && !isCurrentUserProjectMember)}
+            title={team.members_count < 2 ? "Minimal 2 anggota tim aktif" : isProjectFrozen ? "Project sudah dikunci, kontribusi baru tidak bisa ditambah" : (!isCurrentUserProjectMember ? "Kamu bukan anggota project ini — hanya bisa melihat" : undefined)}
+            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
+          >
+            <Plus className="size-4" />
+            Kontribusi
+          </button>
         </div>
       )}
+
+      {/* ── Toggle: Kontribusi / Equity — always visible, left aligned ── */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
+          <button
+            type="button"
+            onClick={() => setView("contributions")}
+            className={cn(
+              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
+              view === "contributions"
+                ? "bg-accent text-black shadow-sm"
+                : "text-gray-500 hover:text-gray-300"
+            )}
+          >
+            Kontribusi
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("equity")}
+            className={cn(
+              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
+              view === "equity"
+                ? "bg-accent text-black shadow-sm"
+                : "text-gray-500 hover:text-gray-300"
+            )}
+          >
+            Equity
+          </button>
+        </div>
+      </div>
 
       {/* ── Kontribusi View ── */}
       {view === "contributions" && (

@@ -1,10 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useParams, useNavigate, useLocation, Outlet } from "react-router-dom";
+import { useParams, useNavigate, Outlet } from "react-router-dom";
 import api from "@/api/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRealtime } from "@/contexts/RealtimeContext";
 import { useProjectContext } from "@/contexts/ProjectContext";
-import ProjectSelector from "@/components/teams/ProjectSelector";
 import type { Team } from "@/types";
 import { ArrowLeft } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
@@ -20,12 +19,10 @@ export interface TeamContext {
 
 export default function TeamDetailPage() {
   const { teamId } = useParams<{ teamId: string }>();
-  const { pathname } = useLocation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { currentProjectId } = useProjectContext();
   const { refreshVersion } = useRealtime();
-  const isSettings = pathname.endsWith("/settings");
   const [team, setTeam] = useState<Team | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState("");
@@ -128,8 +125,6 @@ export default function TeamDetailPage() {
         <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
       </div>
 
-      {/* ── Project Scope Selector (Slicing Pie Beranak) — disembunyiin di Settings (team-level) ── */}
-      {!isSettings && <ProjectSelector isOwner={isOwner} />}
       {/* ── Tab Content ── */}
       <Outlet context={context} />
     </div>
