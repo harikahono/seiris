@@ -16,7 +16,7 @@
 | Node | 22 | Build frontend |
 | pnpm | 11 | Package manager FE |
 | Composer | latest | Package manager BE |
-| Database | SQLite (dev) / MySQL (prod) | Lihat `.env` |
+| Database | PostgreSQL (prod) / SQLite (test) | Wajib PostgreSQL — `gen_random_uuid`, `lockForUpdate` |
 
 > ⚠️ **Upload limit — baca sebelum deploy ulang.**
 > Backend jalan di **CLI SAPI** (`php artisan serve`), bukan PHP-FPM. Atur batas upload di **`/etc/php/8.4/cli/php.ini`** (`upload_max_filesize`, `post_max_size`), lalu `sudo systemctl restart seiris-backend`. Mengubah `fpm/php.ini` **tidak berpengaruh**. Nilai harus ≥ batas Laravel (`StoreRevenueRequest`: max 5MB untuk `proof`).
