@@ -3,6 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
 import { useProjectContext } from "@/contexts/ProjectContext";
+import { useDebounceValue } from "@/hooks/useDebounceValue";
 import type { AuditLogItem } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -57,6 +58,7 @@ export default function AuditLogTab() {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const debouncedSearch = useDebounceValue(search, 300);
   const [showFilters, setShowFilters] = useState(false);
 
   // B: active filter count buat badge
@@ -75,7 +77,7 @@ export default function AuditLogTab() {
     const params: Record<string, unknown> = { page };
     if (filter) params.filter = filter;
     if (currentProjectId) params.project_id = currentProjectId;
-    if (search.trim()) params.search = search.trim();
+    if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
     if (dateFrom) params.date_from = dateFrom;
     if (dateTo) params.date_to = dateTo;
 
@@ -91,7 +93,7 @@ export default function AuditLogTab() {
       })
       .catch(() => toast.error("Gagal memuat audit log"))
       .finally(() => setLoading(false));
-  }, [teamId, page, filter, currentProjectId, search, dateFrom, dateTo]);
+  }, [teamId, page, filter, currentProjectId, debouncedSearch, dateFrom, dateTo]);
 
     
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
@@ -125,12 +127,12 @@ export default function AuditLogTab() {
           <input
             type="text"
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); setLogs([]); }}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Cari aksi atau deskripsi..."
             className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
           />
           {search && (
-            <button onClick={() => { setSearch(""); setPage(1); setLogs([]); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
+            <button onClick={() => { setSearch(""); setPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
               <X className="size-3.5" />
             </button>
           )}

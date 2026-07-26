@@ -5,6 +5,7 @@ import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
 import { useProjectContext } from "@/contexts/ProjectContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDebounceValue } from "@/hooks/useDebounceValue";
 import type { Revenue } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { Loader2, Plus, TrendingUp, Search, X } from "lucide-react";
@@ -34,13 +35,14 @@ export default function RevenueTab() {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const debouncedSearch = useDebounceValue(search, 300);
 
   // ── Fetch Revenues (no loading state — caller manages it) ──
   // ponytail: overridePage param biar gak perlu nunggu setPage propagate
   const fetchRevenues = useCallback((overridePage?: number) => {
     const p = overridePage ?? page;
     const params: Record<string, unknown> = { page: p };
-    if (search.trim()) params.search = search.trim();
+    if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
     if (dateFrom) params.date_from = dateFrom;
     if (dateTo) params.date_to = dateTo;
     return api
@@ -53,7 +55,7 @@ export default function RevenueTab() {
         setLastPage(res.data.meta.last_page);
       })
       .catch(() => toast.error("Gagal memuat revenue"));
-  }, [basePath, search, dateFrom, dateTo]); // ponytail: sengaja gak include page — dipake via overridePage
+  }, [basePath, debouncedSearch, dateFrom, dateTo]); // ponytail: sengaja gak include page — dipake via overridePage
 
   // ── Fetch equity total_slices untuk scope ini (disable tombol distribusi kalau 0) ──
   const fetchEquity = useCallback(() => {
@@ -77,7 +79,7 @@ export default function RevenueTab() {
     const targetPage = isNewScope ? 1 : page;
     Promise.all([fetchRevenues(targetPage), fetchEquity()]).finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [basePath, page, search, dateFrom, dateTo]);
+  }, [basePath, page, debouncedSearch, dateFrom, dateTo]);
 
   // Page change → loading + fetch with new page
   const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
@@ -126,12 +128,12 @@ export default function RevenueTab() {
           <input
             type="text"
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); setLoading(true); }}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Cari deskripsi atau pencatat..."
             className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
           />
           {search && (
-            <button onClick={() => { setSearch(""); setPage(1); setLoading(true); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
+            <button onClick={() => { setSearch(""); setPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
               <X className="size-3.5" />
             </button>
           )}

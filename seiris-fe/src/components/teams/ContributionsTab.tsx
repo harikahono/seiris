@@ -4,6 +4,7 @@ import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
 import { useProjectContext } from "@/contexts/ProjectContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDebounceValue } from "@/hooks/useDebounceValue";
 import type { Contribution, ContributionStatus, EquityData } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,7 @@ export default function ContributionsTab() {
   const [typeFilter, setTypeFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const debouncedSearch = useDebounceValue(search, 300);
   // B: collapsible filter panel
   const [showFilters, setShowFilters] = useState(false);
 
@@ -94,7 +96,7 @@ export default function ContributionsTab() {
     const p = overridePage ?? page;
     const params: Record<string, unknown> = { page: p };
     if (filter !== 'all') params.status = filter;
-    if (search.trim()) params.search = search.trim();
+    if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
     if (typeFilter) params.type = typeFilter;
     if (dateFrom) params.date_from = dateFrom;
     if (dateTo) params.date_to = dateTo;
@@ -108,7 +110,7 @@ export default function ContributionsTab() {
         setLastPage(res.data.meta.last_page);
       })
       .catch(() => toast.error("Gagal memuat kontribusi"));
-  }, [basePath, filter, search, typeFilter, dateFrom, dateTo]); // ponytail: sengaja gak include page — dipake via overridePage
+  }, [basePath, filter, debouncedSearch, typeFilter, dateFrom, dateTo]); // ponytail: sengaja gak include page — dipake via overridePage
 
   // Mount + page/filter change → fetch data.
   // basePath change (project switch) → pake page 1 langsung, gak nunggu propagasi.
@@ -124,7 +126,7 @@ export default function ContributionsTab() {
     Promise.all([fetchEquity(), fetchContributions(targetPage)])
       .finally(() => { setLoading(false); setEquityLoading(false); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [basePath, page, filter, search, typeFilter, dateFrom, dateTo]);
+  }, [basePath, page, filter, debouncedSearch, typeFilter, dateFrom, dateTo]);
 
   // Background refresh dari Pusher → silent, no skeleton
   const prevRefresh = useRef(0);
@@ -159,12 +161,12 @@ export default function ContributionsTab() {
             <input
               type="text"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); setLoading(true); }}
+               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               placeholder="Cari deskripsi atau anggota..."
               className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
             />
             {search && (
-              <button onClick={() => { setSearch(""); setPage(1); setLoading(true); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
+              <button onClick={() => { setSearch(""); setPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
                 <X className="size-3.5" />
               </button>
             )}
