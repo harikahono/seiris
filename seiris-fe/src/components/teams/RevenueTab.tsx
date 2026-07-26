@@ -137,7 +137,7 @@ export default function RevenueTab() {
             onClick={() => setShowForm(true)}
             disabled={team.members_count < 2}
             title={team.members_count < 2 ? "Minimal 2 anggota tim aktif" : undefined}
-            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
+            className="ml-auto flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
           >
             <Plus className="size-4" />
             Catat Revenue

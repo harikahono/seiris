@@ -206,13 +206,13 @@ export default function ContributionsTab() {
             </button>
           )}
 
-          {/* Add button */}
+          {/* Add button — ml-auto dorong ke kanan */}
           <button
             type="button"
             onClick={() => setShowForm(true)}
             disabled={team.members_count < 2 || isProjectFrozen || (currentProjectId !== null && !isCurrentUserProjectMember)}
             title={team.members_count < 2 ? "Minimal 2 anggota tim aktif" : isProjectFrozen ? "Project sudah dikunci, kontribusi baru tidak bisa ditambah" : (!isCurrentUserProjectMember ? "Kamu bukan anggota project ini — hanya bisa melihat" : undefined)}
-            className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
+            className="ml-auto flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
           >
             <Plus className="size-4" />
             Kontribusi
