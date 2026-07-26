@@ -6,7 +6,7 @@ import { useProjectContext } from "@/contexts/ProjectContext";
 import type { AuditLogItem } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
-import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings, ClipboardList, Search, X } from "lucide-react";
+import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings, ClipboardList, Search, X, SlidersHorizontal } from "lucide-react";
 import AuditLogEntry from "@/components/ui/AuditLogEntry";
 import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
@@ -57,6 +57,18 @@ export default function AuditLogTab() {
   const [search, setSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  // B: active filter count buat badge
+  const activeFilterCount = (filter ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
+
+  const clearFilters = () => {
+    setFilter("");
+    setDateFrom("");
+    setDateTo("");
+    setPage(1);
+    setLogs([]);
+  };
 
   const fetchLogs = useCallback(() => {
     setLoading(true);
@@ -106,7 +118,7 @@ export default function AuditLogTab() {
         <span className="text-xs text-gray-500">{total} log</span>
       </div>
 
-      {/* A4: search & date filter bar */}
+      {/* B: top bar — search selalu kelihatan */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[160px] max-w-xs">
           <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
@@ -123,23 +135,62 @@ export default function AuditLogTab() {
             </button>
           )}
         </div>
-        <input
-          type="date"
-          value={dateFrom}
-          onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLogs([]); }}
-          className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
-          title="Dari tanggal"
-        />
-        <input
-          type="date"
-          value={dateTo}
-          onChange={(e) => { setDateTo(e.target.value); setPage(1); setLogs([]); }}
-          className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
-          title="Sampai tanggal"
-        />
+
+        {/* Filter toggle with active badge */}
+        <button
+          type="button"
+          onClick={() => setShowFilters(!showFilters)}
+          className={cn(
+            "flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors",
+            showFilters || activeFilterCount > 0
+              ? "border-accent/50 text-accent"
+              : "border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white"
+          )}
+          title={showFilters ? "Sembunyikan filter" : "Tampilkan filter"}
+        >
+          <SlidersHorizontal className="size-4" />
+          {activeFilterCount > 0 && (
+            <span className="flex size-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold leading-none text-black">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+
+        {/* Clear filters — muncul kalo ada yg aktif */}
+        {activeFilterCount > 0 && (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="flex items-center gap-1 text-xs text-gray-500 hover:text-white transition-colors"
+          >
+            <X className="size-3" />
+            Hapus filter
+          </button>
+        )}
       </div>
 
-      <div className="flex flex-wrap gap-1 rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
+      {/* B: collapsible filter panel */}
+      {(showFilters || activeFilterCount > 0) && (
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLogs([]); }}
+            className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+            title="Dari tanggal"
+          />
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => { setDateTo(e.target.value); setPage(1); setLogs([]); }}
+            className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+            title="Sampai tanggal"
+          />
+        </div>
+      )}
+
+      {/* B: category filter pills — always visible, compact */}
+      <div className="flex flex-wrap gap-1">
         {FILTERS.map((f) => {
           const Icon = f.icon;
           return (
@@ -148,13 +199,13 @@ export default function AuditLogTab() {
               type="button"
               onClick={() => { setFilter(f.key); setPage(1); setLogs([]); }}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",
                 filter === f.key
                   ? "bg-accent text-black shadow-sm"
                   : "text-gray-500 hover:text-gray-300"
               )}
             >
-              <Icon className="size-3.5" />
+              <Icon className="size-3" />
               {f.label}
             </button>
           );

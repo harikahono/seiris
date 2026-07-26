@@ -14,7 +14,7 @@ import ContributionTypeBar from "@/components/ui/ContributionTypeBar";
 import MemberEquityTable from "@/components/ui/MemberEquityTable";
 import ExportPdfButton from "@/components/ui/ExportPdfButton";
 import Pagination from "@/components/ui/Pagination";
-import { Plus, Loader2, ListChecks, Lock, Search, X, ChevronDown } from "lucide-react";
+import { Plus, Loader2, ListChecks, Lock, Search, X, ChevronDown, SlidersHorizontal } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
@@ -63,6 +63,19 @@ export default function ContributionsTab() {
   const [typeFilter, setTypeFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  // B: collapsible filter panel
+  const [showFilters, setShowFilters] = useState(false);
+
+  const activeFilterCount = (typeFilter ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0) + (filter !== 'all' ? 1 : 0);
+
+  const clearFilters = () => {
+    setTypeFilter("");
+    setDateFrom("");
+    setDateTo("");
+    setFilter("all");
+    setPage(1);
+    setLoading(true);
+  };
 
   // ── Fetch Equity (no loading state — caller manages it) ──
   const fetchEquity = useCallback(() => {
@@ -138,89 +151,139 @@ export default function ContributionsTab() {
           <span>Project ini sudah dikunci — seluruh perubahan sudah tidak bisa dilakukan.</span>
         </div>
       )}
-      {/* ── Toggle: Kontribusi / Equity ── */}
-      <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
-        <button
-          type="button"
-          onClick={() => setView("contributions")}
-          className={cn(
-            "rounded-md px-5 py-2 text-sm font-medium transition-colors",
-            view === "contributions"
-              ? "bg-accent text-black shadow-sm"
-              : "text-gray-500 hover:text-gray-300"
-          )}
-        >
-          Kontribusi
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("equity")}
-          className={cn(
-            "rounded-md px-5 py-2 text-sm font-medium transition-colors",
-            view === "equity"
-              ? "bg-accent text-black shadow-sm"
-              : "text-gray-500 hover:text-gray-300"
-          )}
-        >
-          Equity
-        </button>
+      {/* B: top bar — search selalu kelihatan, filter collapsible */}
+      <div className="flex flex-wrap items-center gap-2">
+        {view === "contributions" && (
+          <div className="relative flex-1 min-w-[160px] max-w-xs">
+            <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); setLoading(true); }}
+              placeholder="Cari deskripsi atau anggota..."
+              className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
+            />
+            {search && (
+              <button onClick={() => { setSearch(""); setPage(1); setLoading(true); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
+                <X className="size-3.5" />
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* ── Toggle: Kontribusi / Equity — always visible ── */}
+        <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
+          <button
+            type="button"
+            onClick={() => setView("contributions")}
+            className={cn(
+              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
+              view === "contributions"
+                ? "bg-accent text-black shadow-sm"
+                : "text-gray-500 hover:text-gray-300"
+            )}
+          >
+            Kontribusi
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("equity")}
+            className={cn(
+              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
+              view === "equity"
+                ? "bg-accent text-black shadow-sm"
+                : "text-gray-500 hover:text-gray-300"
+            )}
+          >
+            Equity
+          </button>
+        </div>
+
+        {view === "contributions" && (
+          <>
+            {/* Filter toggle with active badge */}
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors",
+                showFilters || activeFilterCount > 0
+                  ? "border-accent/50 text-accent"
+                  : "border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white"
+              )}
+              title={showFilters ? "Sembunyikan filter" : "Tampilkan filter"}
+            >
+              <SlidersHorizontal className="size-4" />
+              {activeFilterCount > 0 && (
+                <span className="flex size-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold leading-none text-black">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {/* Clear filters — muncul kalo ada yg aktif */}
+            {activeFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-white transition-colors"
+              >
+                <X className="size-3" />
+                Hapus filter
+              </button>
+            )}
+
+            {/* Add button */}
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              disabled={team.members_count < 2 || isProjectFrozen || (currentProjectId !== null && !isCurrentUserProjectMember)}
+              title={team.members_count < 2 ? "Minimal 2 anggota tim aktif" : isProjectFrozen ? "Project sudah dikunci, kontribusi baru tidak bisa ditambah" : (!isCurrentUserProjectMember ? "Kamu bukan anggota project ini — hanya bisa melihat" : undefined)}
+              className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
+            >
+              <Plus className="size-4" />
+              Kontribusi
+            </button>
+          </>
+        )}
       </div>
 
       {/* ── Kontribusi View ── */}
       {view === "contributions" && (
         <>
-          {/* A3: search & filter bar */}
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <div className="relative flex-1 min-w-[160px] max-w-xs">
-              <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
+          {/* B: collapsible filter panel — type, date, status */}
+          {(showFilters || activeFilterCount > 0) && (
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative">
+                <select
+                  value={typeFilter}
+                  onChange={(e) => { setTypeFilter(e.target.value); setPage(1); setLoading(true); }}
+                  className="appearance-none rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 pr-7 text-sm text-white outline-none focus:border-accent"
+                >
+                  <option value="">Semua Tipe</option>
+                  <option value="CASH">CASH</option>
+                  <option value="TIME">TIME</option>
+                  <option value="IDEA">IDEA</option>
+                  <option value="NETWORK">NETWORK</option>
+                  <option value="FACILITY">FACILITY</option>
+                  <option value="SALES">SALES</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
+              </div>
               <input
-                type="text"
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1); setLoading(true); }}
-                placeholder="Cari deskripsi atau anggota..."
-                className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
+                type="date"
+                value={dateFrom}
+                onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLoading(true); }}
+                className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+                title="Dari tanggal"
               />
-              {search && (
-                <button onClick={() => { setSearch(""); setPage(1); setLoading(true); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
-                  <X className="size-3.5" />
-                </button>
-              )}
-            </div>
-            <div className="relative">
-              <select
-                value={typeFilter}
-                onChange={(e) => { setTypeFilter(e.target.value); setPage(1); setLoading(true); }}
-                className="appearance-none rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 pr-7 text-sm text-white outline-none focus:border-accent"
-              >
-                <option value="">Semua Tipe</option>
-                <option value="CASH">CASH</option>
-                <option value="TIME">TIME</option>
-                <option value="IDEA">IDEA</option>
-                <option value="NETWORK">NETWORK</option>
-                <option value="FACILITY">FACILITY</option>
-                <option value="SALES">SALES</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
-            </div>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLoading(true); }}
-              className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
-              title="Dari tanggal"
-            />
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => { setDateTo(e.target.value); setPage(1); setLoading(true); }}
-              className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
-              title="Sampai tanggal"
-            />
-          </div>
-
-          <div>
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold text-white">Kontribusi</h2>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => { setDateTo(e.target.value); setPage(1); setLoading(true); }}
+                className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+                title="Sampai tanggal"
+              />
               <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
                 {FILTERS.map((f) => (
                   <button
@@ -242,78 +305,68 @@ export default function ContributionsTab() {
                   </button>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={() => setShowForm(true)}
-                disabled={team.members_count < 2 || isProjectFrozen || (currentProjectId !== null && !isCurrentUserProjectMember)}
-                title={team.members_count < 2 ? "Minimal 2 anggota tim aktif" : isProjectFrozen ? "Project sudah dikunci, kontribusi baru tidak bisa ditambah" : (!isCurrentUserProjectMember ? "Kamu bukan anggota project ini — hanya bisa melihat" : undefined)}
-                className="flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
-              >
-                <Plus className="size-4" />
-                Kontribusi
-              </button>
             </div>
+          )}
 
-            {currentProjectId !== null && !isCurrentUserProjectMember && !loading && (
-              <p className="mb-3 rounded-lg border border-gray-800 bg-gray-900/40 px-3 py-2 text-xs text-gray-500">
-                Mode lihat saja — kamu bukan anggota project ini. Minta owner menambahkanmu untuk bisa kontribusi &amp; vote.
-              </p>
-            )}
+          {currentProjectId !== null && !isCurrentUserProjectMember && !loading && (
+            <p className="rounded-lg border border-gray-800 bg-gray-900/40 px-3 py-2 text-xs text-gray-500">
+              Mode lihat saja — kamu bukan anggota project ini. Minta owner menambahkanmu untuk bisa kontribusi &amp; vote.
+            </p>
+          )}
 
-            <div className="relative">
-              {loading && page === 1 ? (
-                <div className="space-y-3">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="relative pl-7 py-2">
-                      {/* Timeline dot skeleton */}
-                      <Skeleton className="absolute left-2 top-[14px] size-[10px] rounded-full" />
-                      {i < 3 && <Skeleton className="absolute left-[11px] top-[26px] bottom-0 w-px h-[calc(100%-14px)]" />}
-                      <div className="flex items-center gap-2 mb-2">
-                        <Skeleton className="size-7 rounded-full shrink-0" />
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-4 w-16 rounded-full" />
-                        <Skeleton className="ml-auto h-4 w-24" />
-                      </div>
-                      <Skeleton className="h-3 w-3/4 mb-1.5" />
-                      <div className="flex gap-2">
-                        <Skeleton className="h-3 w-24" />
-                        <Skeleton className="h-3 w-16" />
-                        <Skeleton className="h-3 w-20" />
-                      </div>
+          <div className="relative">
+            {loading && page === 1 ? (
+              <div className="space-y-3">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="relative pl-7 py-2">
+                    {/* Timeline dot skeleton */}
+                    <Skeleton className="absolute left-2 top-[14px] size-[10px] rounded-full" />
+                    {i < 3 && <Skeleton className="absolute left-[11px] top-[26px] bottom-0 w-px h-[calc(100%-14px)]" />}
+                    <div className="flex items-center gap-2 mb-2">
+                      <Skeleton className="size-7 rounded-full shrink-0" />
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-16 rounded-full" />
+                      <Skeleton className="ml-auto h-4 w-24" />
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <>
-                  {contributions.map((c, i) => (
-                    <div key={c.id} className="stagger-enter" style={{ animationDelay: `${i * 40}ms` }}>
-                      <ContributionCard contribution={c} teamId={teamId} isLast={i === contributions.length - 1} />
+                    <Skeleton className="h-3 w-3/4 mb-1.5" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-3 w-20" />
                     </div>
-                  ))}
-                  {!loading && contributions.length === 0 && (
-                    <EmptyState
-                      icon={ListChecks}
-                      title={filter === "all" ? "Belum ada kontribusi" : "Tidak ditemukan"}
-                      description={filter === "all"
-                        ? "Catat kontribusi pertama untuk mulai menghitung equity."
-                        : `Tidak ada kontribusi dengan status "${filter}".`}
-                    />
-                  )}
-                  {loading && (
-                    <div className="flex justify-center py-8">
-                      <Loader2 className="size-5 animate-spin text-gray-500" />
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            {!loading && (
-              <div className="mt-4 flex justify-center">
-                <Pagination current={page} last={lastPage} onChange={handlePageChange} />
+                  </div>
+                ))}
               </div>
+            ) : (
+              <>
+                {contributions.map((c, i) => (
+                  <div key={c.id} className="stagger-enter" style={{ animationDelay: `${i * 40}ms` }}>
+                    <ContributionCard contribution={c} teamId={teamId} isLast={i === contributions.length - 1} />
+                  </div>
+                ))}
+                {!loading && contributions.length === 0 && (
+                  <EmptyState
+                    icon={ListChecks}
+                    title={filter === "all" ? "Belum ada kontribusi" : "Tidak ditemukan"}
+                    description={filter === "all"
+                      ? "Catat kontribusi pertama untuk mulai menghitung equity."
+                      : `Tidak ada kontribusi dengan status "${filter}".`}
+                  />
+                )}
+                {loading && (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="size-5 animate-spin text-gray-500" />
+                  </div>
+                )}
+              </>
             )}
           </div>
+
+          {!loading && (
+            <div className="flex justify-center">
+              <Pagination current={page} last={lastPage} onChange={handlePageChange} />
+            </div>
+          )}
 
           <ContributionForm
             teamId={teamId}
