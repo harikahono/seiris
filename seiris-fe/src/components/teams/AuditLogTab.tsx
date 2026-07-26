@@ -111,6 +111,13 @@ export default function AuditLogTab() {
 
   return (
     <div className="space-y-4">
+      {/* ── Header ── */}
+      <div className="animate-fade-in-up mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Riwayat Aktivitas</h1>
+        <p className="mt-1 text-sm text-gray-500">Catatan perubahan dan aktivitas tim</p>
+        <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
+      </div>
+
       {/* ── Toolbar: scope + search + filter dropdown + date ── */}
       <div className="flex flex-wrap items-center gap-2">
         <ProjectSelector inline isOwner={isOwner} />

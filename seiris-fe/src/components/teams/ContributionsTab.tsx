@@ -148,6 +148,13 @@ export default function ContributionsTab() {
 
   return (
     <div className="space-y-6">
+      {/* ── Header ── */}
+      <div className="animate-fade-in-up mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Kontribusi</h1>
+        <p className="mt-1 text-sm text-gray-500">Catat dan kelola kontribusi anggota tim</p>
+        <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
+      </div>
+
       {isProjectFrozen && (
         <div className="flex items-center gap-2 rounded-lg border border-gray-800 bg-card px-4 py-3 text-sm text-gray-400">
           <Lock className="size-4 shrink-0 text-gray-500" />

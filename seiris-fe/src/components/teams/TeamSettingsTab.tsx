@@ -168,6 +168,13 @@ export default function TeamSettingsTab() {
 
   return (
     <div className="space-y-8">
+      {/* ── Header ── */}
+      <div className="animate-fade-in-up mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Pengaturan Tim</h1>
+        <p className="mt-1 text-sm text-gray-500">Atur project, periode, dan pengaturan tim</p>
+        <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
+      </div>
+
       {/* ── Informasi Tim ── */}
       <section className="animate-fade-in-up">
         <SectionHeader label="Informasi Tim" />

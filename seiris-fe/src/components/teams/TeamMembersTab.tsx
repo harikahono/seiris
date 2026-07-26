@@ -239,6 +239,13 @@ export default function TeamMembersTab() {
 
   return (
     <div className="space-y-4">
+      {/* ── Header ── */}
+      <div className="animate-fade-in-up mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Anggota Tim</h1>
+        <p className="mt-1 text-sm text-gray-500">Kelola anggota dan peran dalam tim</p>
+        <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
+      </div>
+
       {/* ── Toolbar: scope ── */}
       <div className="flex flex-wrap items-center gap-2">
         <ProjectSelector inline isOwner={isOwner} />

@@ -99,6 +99,13 @@ export default function RevenueTab() {
 
   return (
     <div className="space-y-6">
+      {/* ── Header ── */}
+      <div className="animate-fade-in-up mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Revenue</h1>
+        <p className="mt-1 text-sm text-gray-500">Catat pendapatan dan distribusi profit</p>
+        <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
+      </div>
+
       {/* ── Toolbar: scope + search + date + button ── */}
       <div className="flex flex-wrap items-center gap-2">
         <ProjectSelector inline isOwner={isOwner} />

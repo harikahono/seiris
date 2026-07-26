@@ -116,15 +116,6 @@ export default function TeamDetailPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 pt-10 pb-8">
-      {/* ── Team Header ── */}
-      <div className="animate-fade-in-up mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-white">{team.name}</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          {team.description || "Tidak ada deskripsi."}
-        </p>
-        <div className="mt-4 h-px bg-gradient-to-r from-gray-800 to-transparent" />
-      </div>
-
       {/* ── Tab Content ── */}
       <Outlet context={context} />
     </div>
