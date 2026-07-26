@@ -24,6 +24,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['team_id', 'is_frozen']);
+            $table->unique(['team_id', 'name'], 'projects_team_id_name_unique');
         });
 
         // project_id FK — can't be inlined in create_* tables because

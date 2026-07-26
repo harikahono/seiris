@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignUuid('owner_id')->constrained('users')->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->string('logo_path')->nullable()->after('description');
             $table->char('invite_code', 8)->unique();
             $table->string('approval_threshold', 3)->default('50');
             $table->boolean('is_frozen')->default(false);

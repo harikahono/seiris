@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -21,10 +22,18 @@ return new class extends Migration
             $table->index(['team_id', 'status']);
             $table->index('member_id');
         });
+
+        // partial unique index: cuma 1 PENDING proposal per member
+        DB::statement('
+            CREATE UNIQUE INDEX uq_fmr_proposals_pending
+            ON fmr_proposals (member_id)
+            WHERE status = \'PENDING\'
+        ');
     }
 
     public function down(): void
     {
+        DB::statement('DROP INDEX IF EXISTS uq_fmr_proposals_pending');
         Schema::dropIfExists('fmr_proposals');
     }
 };
