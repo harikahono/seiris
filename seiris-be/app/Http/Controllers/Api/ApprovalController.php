@@ -216,13 +216,6 @@ class ApprovalController extends Controller
                 ->where('id', '!=', $contribution->member_id)
                 ->count();
 
-        if ($totalVoters === 0) {
-            // Hanya ada 1 anggota di tim — auto approve
-            $contribution->update(['status' => 'APPROVED']);
-            $this->slicingPie->recalculate($team, $contribution->id, $project);
-            return;
-        }
-
         $approvals = $contribution->approvals;
         $approveCount = $approvals->where('vote', 'APPROVE')->count();
         $rejectCount  = $approvals->where('vote', 'REJECT')->count();

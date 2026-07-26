@@ -100,6 +100,13 @@ class ContributionController extends Controller
             ], 403);
         }
 
+        // Kontribusi minimal 2 anggota tim aktif (pre-seed startup case)
+        if ($team->activeMembers()->count() < 2) {
+            return response()->json([
+                'message' => 'Minimal 2 anggota tim aktif untuk bisa mencatat kontribusi.',
+            ], 422);
+        }
+
         // TeamMember sudah di-attach oleh middleware EnsureTeamMember
         $member = $request->teamMember;
 
