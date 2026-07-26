@@ -54,7 +54,7 @@ export default function ProjectSelector({ isOwner = false, inline = false }: Pro
           id="project-scope"
           value={currentProjectId ?? ""}
           onChange={(e) => setCurrentProject(e.target.value || null)}
-          className={`appearance-none rounded-md border border-gray-700 bg-gray-900 py-1.5 text-white outline-none focus:border-[#e07820] ${inline ? 'max-w-[180px] pl-2 pr-7 text-xs' : 'max-w-[260px] pl-3 pr-9 text-sm'}`}
+          className={`appearance-none rounded-md border border-gray-700 bg-gray-900 text-white outline-none focus:border-[#e07820] ${inline ? 'h-9 max-w-[180px] pl-2 pr-7 text-sm' : 'max-w-[260px] pl-3 pr-9 text-sm py-1.5'}`}
         >
           <option value="">Tim (Induk)</option>
           {projects.map((p) => (
@@ -64,7 +64,7 @@ export default function ProjectSelector({ isOwner = false, inline = false }: Pro
             </option>
           ))}
         </select>
-        <ChevronDown className={`pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 ${inline ? 'size-3' : 'size-4'}`} />
+        <ChevronDown className={`pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 size-4`} />
       </div>
 
       {creating ? (
@@ -95,7 +95,7 @@ export default function ProjectSelector({ isOwner = false, inline = false }: Pro
           type="button"
           onClick={() => setCreating(true)}
           title="Buat project baru"
-          className={`flex items-center rounded-md border border-dashed border-gray-700 text-gray-400 hover:border-[#e07820] hover:text-[#e07820] transition-colors ${inline ? 'p-1.5' : 'gap-1 px-2 py-1.5 text-sm'}`}
+          className={`flex items-center rounded-md border border-dashed border-gray-700 text-gray-400 hover:border-[#e07820] hover:text-[#e07820] transition-colors ${inline ? 'p-2' : 'gap-1 px-2 py-1.5 text-sm'}`}
         >
           <Plus className={inline ? 'size-3.5' : 'size-3.5'} />
           {!inline && 'Project'}
