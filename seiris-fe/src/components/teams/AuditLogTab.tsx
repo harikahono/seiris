@@ -115,7 +115,7 @@ export default function AuditLogTab() {
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); setLogs([]); }}
             placeholder="Cari aksi atau deskripsi..."
-            className="w-full rounded-md border border-gray-700 bg-gray-900 py-1.5 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
+            className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
           />
           {search && (
             <button onClick={() => { setSearch(""); setPage(1); setLogs([]); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
@@ -127,15 +127,14 @@ export default function AuditLogTab() {
           type="date"
           value={dateFrom}
           onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLogs([]); }}
-          className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+          className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
           title="Dari tanggal"
         />
-        <span className="text-xs text-gray-500">—</span>
         <input
           type="date"
           value={dateTo}
           onChange={(e) => { setDateTo(e.target.value); setPage(1); setLogs([]); }}
-          className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+          className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
           title="Sampai tanggal"
         />
       </div>

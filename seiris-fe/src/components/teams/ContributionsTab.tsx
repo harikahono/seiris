@@ -14,7 +14,7 @@ import ContributionTypeBar from "@/components/ui/ContributionTypeBar";
 import MemberEquityTable from "@/components/ui/MemberEquityTable";
 import ExportPdfButton from "@/components/ui/ExportPdfButton";
 import Pagination from "@/components/ui/Pagination";
-import { Plus, Loader2, ListChecks, Lock, Search, X } from "lucide-react";
+import { Plus, Loader2, ListChecks, Lock, Search, X, ChevronDown } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
@@ -178,7 +178,7 @@ export default function ContributionsTab() {
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); setLoading(true); }}
                 placeholder="Cari deskripsi atau anggota..."
-                className="w-full rounded-md border border-gray-700 bg-gray-900 py-1.5 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
+                className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
               />
               {search && (
                 <button onClick={() => { setSearch(""); setPage(1); setLoading(true); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
@@ -186,32 +186,34 @@ export default function ContributionsTab() {
                 </button>
               )}
             </div>
-            <select
-              value={typeFilter}
-              onChange={(e) => { setTypeFilter(e.target.value); setPage(1); setLoading(true); }}
-              className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent"
-            >
-              <option value="">Semua Tipe</option>
-              <option value="CASH">CASH</option>
-              <option value="TIME">TIME</option>
-              <option value="IDEA">IDEA</option>
-              <option value="NETWORK">NETWORK</option>
-              <option value="FACILITY">FACILITY</option>
-              <option value="SALES">SALES</option>
-            </select>
+            <div className="relative">
+              <select
+                value={typeFilter}
+                onChange={(e) => { setTypeFilter(e.target.value); setPage(1); setLoading(true); }}
+                className="appearance-none rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 pr-7 text-sm text-white outline-none focus:border-accent"
+              >
+                <option value="">Semua Tipe</option>
+                <option value="CASH">CASH</option>
+                <option value="TIME">TIME</option>
+                <option value="IDEA">IDEA</option>
+                <option value="NETWORK">NETWORK</option>
+                <option value="FACILITY">FACILITY</option>
+                <option value="SALES">SALES</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
+            </div>
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLoading(true); }}
-              className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+              className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
               title="Dari tanggal"
             />
-            <span className="text-xs text-gray-500">—</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => { setDateTo(e.target.value); setPage(1); setLoading(true); }}
-              className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+              className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
               title="Sampai tanggal"
             />
           </div>
