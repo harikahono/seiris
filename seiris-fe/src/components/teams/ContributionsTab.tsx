@@ -153,89 +153,45 @@ export default function ContributionsTab() {
           <span>Project ini sudah dikunci — seluruh perubahan sudah tidak bisa dilakukan.</span>
         </div>
       )}
-      {/* B: top bar — search selalu kelihatan, filter collapsible */}
-      <div className="flex flex-wrap items-center gap-2">
-        {view === "contributions" && (
-          <div className="relative flex-1 min-w-[160px] max-w-xs">
-            <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
-            <input
-              type="text"
-              value={search}
-               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Cari deskripsi atau anggota..."
-              className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
-            />
-            {search && (
-              <button onClick={() => { setSearch(""); setPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
-                <X className="size-3.5" />
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* ── Toggle: Kontribusi / Equity — always visible ── */}
-        <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
-          <button
-            type="button"
-            onClick={() => setView("contributions")}
-            className={cn(
-              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
-              view === "contributions"
-                ? "bg-accent text-black shadow-sm"
-                : "text-gray-500 hover:text-gray-300"
-            )}
-          >
-            Kontribusi
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("equity")}
-            className={cn(
-              "rounded-md px-5 py-2 text-sm font-medium transition-colors",
-              view === "equity"
-                ? "bg-accent text-black shadow-sm"
-                : "text-gray-500 hover:text-gray-300"
-            )}
-          >
-            Equity
-          </button>
+      {/* ── Header: title + toggle + add button ── */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-white">Kontribusi</h2>
+          {view === "contributions" && (
+            <p className="text-xs text-gray-500">{contributions.length} kontribusi</p>
+          )}
         </div>
-
-        {view === "contributions" && (
-          <>
-            {/* Filter toggle with active badge */}
+        <div className="flex items-center gap-2">
+          {/* ── Toggle: Kontribusi / Equity ── */}
+          <div className="inline-flex rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
             <button
               type="button"
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={() => setView("contributions")}
               className={cn(
-                "flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors",
-                showFilters || activeFilterCount > 0
-                  ? "border-accent/50 text-accent"
-                  : "border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white"
+                "rounded-md px-5 py-2 text-sm font-medium transition-colors",
+                view === "contributions"
+                  ? "bg-accent text-black shadow-sm"
+                  : "text-gray-500 hover:text-gray-300"
               )}
-              title={showFilters ? "Sembunyikan filter" : "Tampilkan filter"}
             >
-              <SlidersHorizontal className="size-4" />
-              {activeFilterCount > 0 && (
-                <span className="flex size-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold leading-none text-black">
-                  {activeFilterCount}
-                </span>
-              )}
+              Kontribusi
             </button>
+            <button
+              type="button"
+              onClick={() => setView("equity")}
+              className={cn(
+                "rounded-md px-5 py-2 text-sm font-medium transition-colors",
+                view === "equity"
+                  ? "bg-accent text-black shadow-sm"
+                  : "text-gray-500 hover:text-gray-300"
+              )}
+            >
+              Equity
+            </button>
+          </div>
 
-            {/* Clear filters — muncul kalo ada yg aktif */}
-            {activeFilterCount > 0 && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="flex items-center gap-1 text-xs text-gray-500 hover:text-white transition-colors"
-              >
-                <X className="size-3" />
-                Hapus filter
-              </button>
-            )}
-
-            {/* Add button */}
+          {/* Add button — only in contributions view */}
+          {view === "contributions" && (
             <button
               type="button"
               onClick={() => setShowForm(true)}
@@ -246,9 +202,62 @@ export default function ContributionsTab() {
               <Plus className="size-4" />
               Kontribusi
             </button>
-          </>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* ── Toolbar: search + filter (contributions only) ── */}
+      {view === "contributions" && (
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative flex-1 min-w-[160px] max-w-xs">
+            <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Cari deskripsi atau anggota..."
+              className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
+            />
+            {search && (
+              <button onClick={() => { setSearch(""); setPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
+                <X className="size-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Filter toggle with active badge */}
+          <button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors",
+              showFilters || activeFilterCount > 0
+                ? "border-accent/50 text-accent"
+                : "border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white"
+            )}
+            title={showFilters ? "Sembunyikan filter" : "Tampilkan filter"}
+          >
+            <SlidersHorizontal className="size-4" />
+            {activeFilterCount > 0 && (
+              <span className="flex size-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold leading-none text-black">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
+          {/* Clear filters — muncul kalo ada yg aktif */}
+          {activeFilterCount > 0 && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-white transition-colors"
+            >
+              <X className="size-3" />
+              Hapus filter
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ── Kontribusi View ── */}
       {view === "contributions" && (
