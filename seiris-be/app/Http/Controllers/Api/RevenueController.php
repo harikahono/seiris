@@ -57,6 +57,13 @@ class RevenueController extends Controller
     {
         Gate::authorize('update', $team);
 
+        // D1: revenue cuma bisa dibuat kalo tim punya minimal 2 active members
+        if ($team->activeMembers()->count() < 2) {
+            return response()->json([
+                'message' => 'Revenue hanya bisa dibuat jika tim memiliki minimal 2 anggota aktif (owner + minimal 1 anggota tambahan).',
+            ], 422);
+        }
+
         // TeamMember sudah di-attach oleh middleware EnsureTeamMember / EnsureProjectMember
         $member = $request->teamMember;
 
@@ -195,6 +202,13 @@ class RevenueController extends Controller
     {
         $team = $revenue->team;
         Gate::authorize('update', $team);
+
+        // D2: distribusi cuma bisa kalo tim punya minimal 2 active members
+        if ($team->activeMembers()->count() < 2) {
+            return response()->json([
+                'message' => 'Distribusi hanya bisa dilakukan jika tim memiliki minimal 2 anggota aktif.',
+            ], 422);
+        }
 
         if ($revenue->is_distributed) {
             return response()->json([

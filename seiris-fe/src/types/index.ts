@@ -66,6 +66,7 @@ export interface Team {
   id: string;
   name: string;
   description: string | null;
+  logo_url: string | null;
   invite_code: string;
   approval_threshold: ApprovalThreshold;
   is_frozen: boolean;

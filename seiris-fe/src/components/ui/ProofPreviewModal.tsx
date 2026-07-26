@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, ExternalLink } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useModalAnimation } from "@/hooks/useModalAnimation";
 
 interface ProofPreviewModalProps {
   url: string;
@@ -10,30 +11,30 @@ interface ProofPreviewModalProps {
 }
 
 export default function ProofPreviewModal({ url, open, onClose }: ProofPreviewModalProps) {
-  const trapRef = useFocusTrap(open);
+  const { show, animClass, animateClose } = useModalAnimation(open);
+  const trapRef = useFocusTrap(show);
   const isPdf = /\.pdf$/i.test(url);
 
   useEffect(() => {
-    if (!open) return;
+    if (!show) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") animateClose(onClose);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show, onClose]);
 
-  if (!open) return null;
+  if (!show) return null;
 
-  // ponytail: portal ke body — lepas dari ancestor ber-transform (animate-fade-in-up)
-  // supaya position:fixed relatif viewport, bukan ke wrapper konten.
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      onClick={() => animateClose(onClose)}
     >
       <div
         ref={trapRef}
-        className="modal-enter relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card"
+        className={`${animClass} relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">

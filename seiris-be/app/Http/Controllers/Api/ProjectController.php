@@ -46,6 +46,13 @@ class ProjectController extends Controller
         Gate::authorize('update', $team);
 
         $project = DB::transaction(function () use ($request, $team) {
+            // B3: LOCK row tim — serialisir concurrent project creation
+            // (sama persis pola ContributionController@store line 131–134)
+            DB::table('teams')
+                ->where('id', $team->id)
+                ->lockForUpdate()
+                ->first();
+
             $project = Project::create([
                 'team_id'     => $team->id,
                 'name'        => $request->name,

@@ -19,7 +19,18 @@ class Team extends Model
         'owner_id', 'name', 'description',
         'invite_code', 'approval_threshold',
         'is_frozen', 'frozen_at',
+        'logo_path',
     ];
+
+    // C2: accessor logo_url — mirip User::getProfilePhotoUrlAttribute
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (!$this->logo_path) {
+            return null;
+        }
+
+        return asset('storage/' . $this->logo_path);
+    }
 
     protected function casts(): array
     {

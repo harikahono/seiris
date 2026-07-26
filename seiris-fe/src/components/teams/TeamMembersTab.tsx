@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useOutletContext } from "react-router-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut, Info, Lock, ShieldAlert } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useModalAnimation } from "@/hooks/useModalAnimation";
 
 export default function TeamMembersTab() {
   const { team, currentUserId, fetchTeam } = useOutletContext<TeamContext>();
@@ -24,6 +26,8 @@ export default function TeamMembersTab() {
   const [proposals, setProposals] = useState<FmrProposal[]>([]);
   const [loadingProposals, setLoadingProposals] = useState(false);
   const [proposalsOpen, setProposalsOpen] = useState(true);
+  // F-2: loading state per-proposal buat approve/reject — cegah double click
+  const [actioningProposal, setActioningProposal] = useState<string | null>(null);
 
   const { refreshVersion } = useRealtime();
   const { currentProjectId, projects } = useProjectContext();
@@ -99,6 +103,7 @@ export default function TeamMembersTab() {
 
   // ── Approve / Reject (owner only) ──
   const handleApprove = async (proposal: FmrProposal) => {
+    setActioningProposal(proposal.id);
     try {
       await api.post(`/fmr-proposals/${proposal.id}/approve`);
       toast.success(`FMR ${proposal.member.user.name} disetujui`);
@@ -110,10 +115,13 @@ export default function TeamMembersTab() {
       } else {
         toast.error("Gagal menyetujui proposal");
       }
+    } finally {
+      setActioningProposal(null);
     }
   };
 
   const handleReject = async (proposal: FmrProposal) => {
+    setActioningProposal(proposal.id);
     try {
       await api.post(`/fmr-proposals/${proposal.id}/reject`);
       toast.success(`Proposal FMR ${proposal.member.user.name} ditolak`);
@@ -124,6 +132,8 @@ export default function TeamMembersTab() {
       } else {
         toast.error("Gagal menolak proposal");
       }
+    } finally {
+      setActioningProposal(null);
     }
   };
 
@@ -202,7 +212,10 @@ export default function TeamMembersTab() {
   const [leaverType, setLeaverType] = useState<"good" | "bad">("bad");
   const [exitReason, setExitReason] = useState("");
   const [exitingLoading, setExitingLoading] = useState(false);
-  const exitTrapRef = useFocusTrap(!!exitingMember);
+  const { show: showExit, animClass: exitAnim, animateClose: exitClose } = useModalAnimation(!!exitingMember);
+  const exitTrapRef = useFocusTrap(showExit);
+
+  const exitCancel = () => exitClose(() => { setExitingMember(null); setExitReason(""); });
 
   const handleExit = async () => {
     if (!exitingMember) return;
@@ -515,18 +528,22 @@ export default function TeamMembersTab() {
                           <button
                             type="button"
                             onClick={() => handleApprove(proposal)}
-                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-green-400 transition-colors active:scale-[0.97] hover:bg-gray-800"
+                            disabled={actioningProposal === proposal.id}
+                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-green-400 transition-colors active:scale-[0.97] hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label={`Setujui proposal ${proposal.member.user.name}`}
                           >
-                            <Check className="size-3.5" /> Setujui
+                            {actioningProposal === proposal.id ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
+                            {actioningProposal === proposal.id ? "Menyetujui..." : "Setujui"}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleReject(proposal)}
-                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-red-400 transition-colors active:scale-[0.97] hover:bg-gray-800"
+                            disabled={actioningProposal === proposal.id}
+                            className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-red-400 transition-colors active:scale-[0.97] hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label={`Tolak proposal ${proposal.member.user.name}`}
                           >
-                            <X className="size-3.5" /> Tolak
+                            {actioningProposal === proposal.id ? <Loader2 className="size-3.5 animate-spin" /> : <X className="size-3.5" />}
+                            {actioningProposal === proposal.id ? "Menolak..." : "Tolak"}
                           </button>
                         </>
                       ) : null}
@@ -547,10 +564,10 @@ export default function TeamMembersTab() {
       )}
 
       {/* ── Exit Member Modal with Leaver Type ── */}
-      {exitingMember && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/60" onClick={() => { setExitingMember(null); setExitReason(""); }} />
-          <div ref={exitTrapRef} className="relative w-full max-w-md rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
+      {showExit && exitingMember && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0" onClick={exitCancel} />
+          <div ref={exitTrapRef} className={`${exitAnim} relative w-full max-w-md rounded-xl border border-gray-700 bg-card p-6 shadow-2xl`} onClick={(e) => e.stopPropagation()}>
             <div className="flex flex-col items-center text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
                 <LogOut className="size-6 text-red-400" />
@@ -601,7 +618,7 @@ export default function TeamMembersTab() {
             <div className="mt-6 flex gap-3">
               <button
                 type="button"
-                onClick={() => { setExitingMember(null); setExitReason(""); }}
+                onClick={exitCancel}
                 disabled={exitingLoading}
                 className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:bg-gray-800 hover:text-white disabled:opacity-50"
               >
@@ -617,7 +634,8 @@ export default function TeamMembersTab() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

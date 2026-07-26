@@ -9,7 +9,7 @@ import type { ApprovalThreshold } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Loader2, Snowflake, FolderKanban, AlertTriangle, Info, CheckCircle } from "lucide-react";
+import { Camera, Loader2, Snowflake, FolderKanban, AlertTriangle, Info, CheckCircle } from "lucide-react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface FieldErrors {
@@ -36,6 +36,11 @@ export default function TeamSettingsTab() {
   const [description, setDescription] = useState(team.description ?? "");
   const [approvalThreshold, setApprovalThreshold] = useState<ApprovalThreshold>(team.approval_threshold);
   const [saving, setSaving] = useState(false);
+  // C5: state logo
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoLoading, setLogoLoading] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [freezing, setFreezing] = useState(false);
   const [freezeConfirmOpen, setFreezeConfirmOpen] = useState(false);
   const [projectFreezing, setProjectFreezing] = useState<string | null>(null);
@@ -51,6 +56,36 @@ export default function TeamSettingsTab() {
     fetchTeam();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
+
+  // C5: logo upload handler
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleLogoUpload = async () => {
+    if (!logoFile) return;
+    setLogoLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("logo", logoFile);
+      await api.post(`/teams/${team.id}/logo`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("Logo tim berhasil diperbarui.");
+      setLogoFile(null);
+      setLogoPreview(null);
+      fetchTeam();
+    } catch (err) {
+      const msg = isAxiosError(err) ? err.response?.data?.message : null;
+      toast.error(msg ?? "Gagal mengunggah logo.");
+    } finally {
+      setLogoLoading(false);
+    }
+  };
 
   if (!isOwner) {
     return (
@@ -121,6 +156,63 @@ export default function TeamSettingsTab() {
       <section className="animate-fade-in-up">
         <SectionHeader label="Informasi Tim" />
         <form onSubmit={handleSave} className="space-y-5">
+          {/* C5: Logo Tim */}
+          <div className="flex items-center gap-4 pb-4 border-b border-white/5">
+            <div className="relative">
+              <div className="size-16 overflow-hidden rounded-full border border-gray-700 bg-gray-800">
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Preview logo" className="size-full object-cover" />
+                ) : team.logo_url ? (
+                  <img src={team.logo_url} alt={team.name} className="size-full object-cover" />
+                ) : (
+                  <div className="flex size-full items-center justify-center text-gray-500">
+                    <Camera className="size-6" />
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => logoInputRef.current?.click()}
+                disabled={logoLoading}
+                className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full border border-gray-700 bg-gray-800 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+                aria-label="Ubah logo tim"
+              >
+                <Camera className="size-3" />
+              </button>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleLogoChange}
+                className="hidden"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white">Logo Tim</p>
+              <p className="text-xs text-gray-500">JPG, PNG atau WebP. Maks 5 MB.</p>
+              {logoFile && (
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleLogoUpload}
+                    disabled={logoLoading}
+                    className="flex items-center gap-1 rounded bg-accent px-3 py-1 text-xs font-medium text-black transition-colors hover:bg-accent-hover disabled:opacity-50"
+                  >
+                    {logoLoading && <Loader2 className="size-3 animate-spin" />}
+                    {logoLoading ? "Mengunggah..." : "Simpan Logo"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setLogoFile(null); setLogoPreview(null); }}
+                    className="text-xs text-gray-500 hover:text-white transition-colors"
+                  >
+                    Batal
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div>
             <label htmlFor="settings-name" className="mb-1.5 block text-sm font-medium text-gray-300">
               Nama Tim

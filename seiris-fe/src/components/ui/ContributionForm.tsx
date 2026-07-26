@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { X, Loader2, ArrowLeft, AlertTriangle, Upload } from "lucide-react";
 import type { ContributionType } from "@/types";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useModalAnimation } from "@/hooks/useModalAnimation";
 
 interface ContributionFormProps {
   teamId: string;
@@ -33,7 +34,6 @@ interface FieldErrors {
 }
 
 export default function ContributionForm({ teamId, projectId, fmr, open, onClose, onCreated }: ContributionFormProps) {
-  const trapRef = useFocusTrap(open);
   const basePath = projectId
     ? `/teams/${teamId}/projects/${projectId}`
     : `/teams/${teamId}`;
@@ -62,7 +62,9 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
       .catch(() => setFeatureEnabled(true));
   }, []);
 
-  if (!open) return null;
+  const { show, animClass, animateClose } = useModalAnimation(open);
+  const trapRef = useFocusTrap(show);
+  if (!show) return null;
 
   const requiresHours = type && ["TIME", "IDEA", "NETWORK"].includes(type);
   const requiresAmount = type && ["CASH", "FACILITY"].includes(type);
@@ -145,7 +147,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
     setProofFile(null);
     setSourceUrl("");
     setErrors({});
-    onClose();
+    animateClose(onClose);
   };
 
   const inputClass = (field: keyof FieldErrors) =>
@@ -158,7 +160,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={handleClose}>
-      <div ref={trapRef} className="modal-enter w-full max-w-lg rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div ref={trapRef} className={`${animClass} relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl`} onClick={(e) => e.stopPropagation()}>
         {step === "select" && (
           <>
             {fmr === 0 && (

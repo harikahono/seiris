@@ -10,6 +10,7 @@ import { TypeIcon, StatusBadge } from "@/components/ui/StatusBadge";
 import VotePanel from "@/components/ui/VotePanel";
 import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
 import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink, ChevronDown, Loader2, RefreshCw } from "lucide-react";
+import { useModalAnimation } from "@/hooks/useModalAnimation";
 import { html } from "diff2html";
 import "diff2html/bundles/css/diff2html.min.css";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ export default function ContributionDetailPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [isProjectMember, setIsProjectMember] = useState(true);
   const [featureEnabled, setFeatureEnabled] = useState(true);
+  const { show: showDiffModal, animClass: diffAnim, animateClose: diffClose } = useModalAnimation(showDiff);
 
   const fetchData = useCallback(async (isBackground = false) => {
     if (!teamId || !contributionId) return;
@@ -232,9 +234,9 @@ export default function ContributionDetailPage() {
               </div>
             )}
             {/* Diff modal */}
-            {showDiff && createPortal(
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-                <div className="relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card shadow-2xl">
+            {showDiffModal && createPortal(
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                <div className={`${diffAnim} relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card shadow-2xl`}>
                   <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
                     <span className="text-sm font-medium text-gray-300">Diff GitHub</span>
                     <div className="flex items-center gap-3">
@@ -249,7 +251,7 @@ export default function ContributionDetailPage() {
                       </a>
                       <button
                         type="button"
-                        onClick={() => setShowDiff(false)}
+                        onClick={() => diffClose(() => setShowDiff(false))}
                         className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]"
                         aria-label="Tutup"
                       >

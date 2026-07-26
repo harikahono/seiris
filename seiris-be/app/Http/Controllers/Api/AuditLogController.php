@@ -34,9 +34,29 @@ class AuditLogController extends Controller
             $query->where('action', 'like', $request->filter . '.%');
         }
 
+        // A2: search di action + payload description
+        if ($request->filled('search')) {
+            $search = '%' . $request->search . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('action', 'ilike', $search)
+                  ->orWhereRaw("payload->>'description' ilike ?", [$search])
+                  ->orWhereRaw("payload->>'name' ilike ?", [$search])
+                  ->orWhereRaw("payload->>'type' ilike ?", [$search]);
+            });
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $perPage = min((int) $request->input('per_page', 6), 50);
         $logs = $query->with('actor')
             ->orderByDesc('created_at')
-            ->paginate(6);
+            ->paginate($perPage);
 
         return response()->json([
             'data' => $logs->map(fn($log) => [
@@ -56,6 +76,7 @@ class AuditLogController extends Controller
                 'current_page' => $logs->currentPage(),
                 'last_page'    => $logs->lastPage(),
                 'total'        => $logs->total(),
+                'per_page'     => $logs->perPage(),
             ],
         ]);
     }

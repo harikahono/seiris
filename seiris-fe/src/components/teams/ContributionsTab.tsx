@@ -14,7 +14,7 @@ import ContributionTypeBar from "@/components/ui/ContributionTypeBar";
 import MemberEquityTable from "@/components/ui/MemberEquityTable";
 import ExportPdfButton from "@/components/ui/ExportPdfButton";
 import Pagination from "@/components/ui/Pagination";
-import { Plus, Loader2, ListChecks, Lock } from "lucide-react";
+import { Plus, Loader2, ListChecks, Lock, Search, X } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
 import EmptyState from "@/components/ui/EmptyState";
 import { toast } from "sonner";
@@ -58,6 +58,11 @@ export default function ContributionsTab() {
   const [showForm, setShowForm] = useState(false);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
+  // A3: search & filter state
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   // ── Fetch Equity (no loading state — caller manages it) ──
   const fetchEquity = useCallback(() => {
@@ -76,6 +81,10 @@ export default function ContributionsTab() {
     const p = overridePage ?? page;
     const params: Record<string, unknown> = { page: p };
     if (filter !== 'all') params.status = filter;
+    if (search.trim()) params.search = search.trim();
+    if (typeFilter) params.type = typeFilter;
+    if (dateFrom) params.date_from = dateFrom;
+    if (dateTo) params.date_to = dateTo;
     return api
       .get<{ data: Contribution[]; meta: { current_page: number; last_page: number } }>(
         `${basePath}/contributions`,
@@ -86,7 +95,7 @@ export default function ContributionsTab() {
         setLastPage(res.data.meta.last_page);
       })
       .catch(() => toast.error("Gagal memuat kontribusi"));
-  }, [basePath, filter]); // ponytail: sengaja gak include page — dipake via overridePage
+  }, [basePath, filter, search, typeFilter, dateFrom, dateTo]); // ponytail: sengaja gak include page — dipake via overridePage
 
   // Mount + page/filter change → fetch data.
   // basePath change (project switch) → pake page 1 langsung, gak nunggu propagasi.
@@ -160,6 +169,53 @@ export default function ContributionsTab() {
       {/* ── Kontribusi View ── */}
       {view === "contributions" && (
         <>
+          {/* A3: search & filter bar */}
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[160px] max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); setLoading(true); }}
+                placeholder="Cari deskripsi atau anggota..."
+                className="w-full rounded-md border border-gray-700 bg-gray-900 py-1.5 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
+              />
+              {search && (
+                <button onClick={() => { setSearch(""); setPage(1); setLoading(true); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </div>
+            <select
+              value={typeFilter}
+              onChange={(e) => { setTypeFilter(e.target.value); setPage(1); setLoading(true); }}
+              className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent"
+            >
+              <option value="">Semua Tipe</option>
+              <option value="CASH">CASH</option>
+              <option value="TIME">TIME</option>
+              <option value="IDEA">IDEA</option>
+              <option value="NETWORK">NETWORK</option>
+              <option value="FACILITY">FACILITY</option>
+              <option value="SALES">SALES</option>
+            </select>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLoading(true); }}
+              className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+              title="Dari tanggal"
+            />
+            <span className="text-xs text-gray-500">—</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => { setDateTo(e.target.value); setPage(1); setLoading(true); }}
+              className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+              title="Sampai tanggal"
+            />
+          </div>
+
           <div>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-white">Kontribusi</h2>
@@ -228,7 +284,9 @@ export default function ContributionsTab() {
               ) : (
                 <>
                   {contributions.map((c, i) => (
-                    <ContributionCard key={c.id} contribution={c} teamId={teamId} isLast={i === contributions.length - 1} />
+                    <div key={c.id} className="stagger-enter" style={{ animationDelay: `${i * 40}ms` }}>
+                      <ContributionCard contribution={c} teamId={teamId} isLast={i === contributions.length - 1} />
+                    </div>
                   ))}
                   {!loading && contributions.length === 0 && (
                     <EmptyState

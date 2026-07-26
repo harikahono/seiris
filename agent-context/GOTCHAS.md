@@ -1,6 +1,6 @@
 # GOTCHAS — SEIRIS
 
-> Trap yang sudah bikin bug / salah asumsi. Diambil dari `CLAIMS_V2.md` (caveats) + `AGENTS.md` quirks + temuan sesi 2026-07-14 s.d. 2026-07-21. Baca ini SEBELUM ngubah kode. Untuk isu UI/UX affordance selain trap di sini, baca `UI_AUDIT.md`.
+> Trap yang sudah bikin bug / salah asumsi. Diambil dari `CLAIMS_V2.md` (caveats) + `AGENTS.md` quirks + temuan sesi 2026-07-14 s.d. 2026-07-26. Baca ini SEBELUM ngubah kode. Untuk isu UI/UX affordance selain trap di sini, baca `UI_AUDIT.md`.
 
 ## Database & Deploy
 - **PostgreSQL wajib di produksi.** Migrasi pakai `gen_random_uuid()` & `lockForUpdate()` (row-level lock) — **gagal di MySQL/SQLite**. SQLite hanya untuk test (`:memory:`). Jangan deploy ke SQLite.
@@ -86,4 +86,33 @@
 - **useEffect deps wajib include `page`** — RevenueTab pagination gak pernah fetch halaman >1 karena `page` absen dari dep array. Hook cuma liat perubahan `basePath`/`filter`, tapi `page` berubah tanpa trigger re-fetch. **Rule:** setiap state yang dipake dalam fetch callback harus di dep array — atau pake `useRef` kalau emang gak perlu re-fetch.
 - **Scope change = reset ke page 1 sebelum fetch** — ContributionsTab dulunya pakai side-effect `prevBasePath` yang double-render dan stuck. **Fix:** fetch function terima `overridePage` parameter, effect tentuin `targetPage = isNewScope ? 1 : page` langsung, tanpa side-effect. **Rule:** kalau butuh reset state + fetch di perubahan dependency, pass target value langsung ke fetch function, jangan via side-effect setState.
 - **`onCreated` callback harus explicit panggil fetch** — RevenueTab punya handler `onCreated` yang cuma close modal + toast, tapi lupa panggil `fetchRevenues()`. List tidak refresh tanpa navigasi manual. **Rule:** tiap mutation handler (create/update/delete), panggil fetch ulang data yang terdampak.
+
+## Penemuan review dosen 2026-07-26
+
+### 1. Filter & Search: Contribution + Audit Log
+- **Contribution index** cuma punya filter `?status=` (PENDING/APPROVED/REJECTED) — belum ada search teks (`description` / `member.user.name`), filter `type` (CASH/TIME/IDEA/NETWORK/FACILITY/SALES), filter `member_id`, atau range `contribution_date`.
+- **Audit log index** cuma punya filter `?filter=` (prefix match `action`, misal "contribution" → "contribution.created") + `?project_id=` — belum ada search teks atau filter lain.
+- **FE ContributionsTab**: 4 tombol toggle status. **FE AuditLogTab**: 8 tombol toggle kategori action. Keduanya **tidak punya search input / date range / dropdown filter**.
+- **Pagination 6/page** untuk keduanya — mungkin perlu opsi `per_page` biar gak nge-scroll terus.
+
+### 2. Race condition + duplikat nama project
+- **`ProjectController::store()`** pakai `DB::transaction`, tapi **TIDAK `lockForUpdate()`** — berbeda dari SEMUA write operation lain (`ContributionController::store`, `ApprovalController::vote`, `RevenueController::distribute`, `SlicingPieService::recalculate`) yang semuanya row-lock.
+- Akibat nyata: jaringan lemot → user klik "Buat Project" berkali-kali → 5+ project dengan nama sama terbuat. **Dua masalah:**
+  - Tidak ada `lockForUpdate()` → 5 request masuk transaksi barengan.
+  - Tidak ada unique constraint `(team_id, name)` → DB gak nolak duplikat nama.
+- **Fix butuh 3 lapis:** (a) migration unique constraint, (b) `Rule::unique` di form request, (c) `lockForUpdate()` di transaction.
+- Lihat `DECISIONS.md` ADR-010 (pessimistic locking) — project creation adalah satu-satunya write path yang melanggar ADR ini.
+
+### 3. Team logo/foto profil
+- **Tabel `teams`** tidak punya kolom `logo_path` / `profile_photo_path`. `TeamController::update()` cuma handle name, description, approval_threshold — tidak ada upload foto.
+- **FE TeamSettingsTab.tsx** tidak ada field upload foto tim. Tidak ada tampilkan logo tim di mana pun (DashboardPage, sidebar, TeamDetailPage).
+- **User photo SUDAH ada** (`profile_photo_path` di `User.php`, upload di `AuthController::updateProfile`) — tinggal tiru pola yang sama: migration + accessor `logo_url` + endpoint upload + UI.
+- Tim `$fillable` di model `Team.php` hanya: `owner_id, name, description, invite_code, approval_threshold, is_frozen, frozen_at`. Perlu tambah `logo_path`.
+
+### 4. Revenue & distribusi diblokir untuk tim 1 anggota
+- **Tidak ada validasi minimum anggota** — tim cuma berisi owner (1 anggota) bisa bikin revenue dan distribusi. Ini celah business logic.
+- **Aturan bisnis:** Tim harus punya **minimal 2 active members** (owner + minimal 1 anggota tambahan) sebelum bisa bikin revenue atau distribusi.
+- **Yang di-lock:** `RevenueController::store()` + `RevenueController::distribute()` — cek `$team->activeMembers()->count() < 2` → return 422.
+- **Yang TIDAK di-lock:** `ContributionController::store()` — owner tetap boleh kontribusi meskipun tim sendiri. Auto-approve untuk 1 anggota tetap normal.
+- **Tidak relevan dengan project member:** `project_members` count bukan acuan — validasi di level **tim**, bukan project.
 

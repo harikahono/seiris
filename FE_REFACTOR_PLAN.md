@@ -12,7 +12,7 @@ Setiap komponen di FE nemu caranya sendiri untuk hal yang sama: fetching data, l
 
 1. **22 file panggil `api.get/post` langsung** — gak ada service layer. URL construction, error handling, response unwrapping diulang tiap file.
 2. **Button & input style copy-paste 7+ varian** — gak ada komponen `<Button>`, `<Input>`, `<Modal>`. Kalo ada perubahan design, harus edit 30+ file.
-3. **Modal 3 pendekatan** — ada yg portal, ada yg inline, ada yg pake `backdrop-blur`, ada yg gak. Animasi beda-beda.
+3. **Modal 3 pendekatan** — ada yg portal, ada yg inline, ada yg pake `backdrop-blur`, ada yg gak. Animasi beda-beda. → ✔️ Sudah distandardisasi (per 2026-07-27): semua unified backdrop + exit animation + portal + focus trap. Tinggal extract ke shared `<Modal>` component.
 4. **Pola realtime refresh (`refreshVersion`) di-copy-paste 9x** — tiap file punya implementasi sendiri, 2 di antaranya bermasalah (skeleton unmount, stuck pagination).
 5. **Loading state gak konsisten** — ada yg skeleton early-return (unmount children), ada yg inline skeleton, ada yg spinner doang.
 6. **Tidak ada test untuk service layer** — testing data fetching logic harus render komponen penuh.
@@ -82,17 +82,26 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 #### `<Modal open onClose>`
 
+**Status (2026-07-27):** Foundation sudah siap — semua 9 modal punya:
+- Backdrop seragam: `bg-black/60 backdrop-blur-sm z-50`, card `bg-card border-gray-700 shadow-2xl`
+- Exit animation via `useModalAnimation` (150ms modal-exit scale-down)
+- Portal via `createPortal(document.body)` (termasuk 3 modal yang sebelumnya inline)
+- Focus trap via `useFocusTrap(show)` — dipanggil setelah `useModalAnimation`
+- Click-outside close di modal tanpa tombol X
+
+**Yang belum (masih perlu Phase 0):**
+
 ```tsx
 // src/components/ui/Modal.tsx
-// createPortal ke document.body
-// bg-black/60 backdrop-blur-sm
-// modal-enter scale animation
-// useFocusTrap built-in
-// Close on backdrop click + Escape key
-// auto aria-label dari title
+// createPortal ke document.body — ✅ done manually per modal, tinggal extract
+// bg-black/60 backdrop-blur-sm — ✅ done
+// modal-enter scale animation — ✅ done via useModalAnimation
+// useFocusTrap built-in — ✅ done (manual per modal, tunggu extract)
+// Close on backdrop click + Escape key — ⚠️ partial (backdrop: 2 modal, Escape: none)
+// auto aria-label dari title — ❌ belum
 ```
 
-**Files affected:** Semua file yang pake button/input/modal raw — ~20 files.
+**Files affected:** ~20 files (sama). Modal work sejauh ini udah touch 9 modal files.
 
 ---
 
@@ -194,7 +203,7 @@ Standardisasi pola yang udah ada tapi beda-beda:
 |---------|--------|--------|
 | Loading (page 1) | Skeleton inline | Gak unmount children |
 | Loading (page > 1) | Spinner `Loader2` | Ringan, cukup |
-| Modal | Portal + backdrop-blur + scale anim | ConfirmModal is the model |
+| Modal | Portal + backdrop-blur + exit anim + focus trap | ✔️ Unified per 2026-07-27. Tinggal extract ke shared `<Modal>` component |
 | Empty state | `<EmptyState icon={...}>` | Udah ada, tinggal pake |
 | Button variants | `<Button variant="...">` | Phase 0 |
 | Input variants | `<Input variant="underline" | "card">` | Phase 0 |

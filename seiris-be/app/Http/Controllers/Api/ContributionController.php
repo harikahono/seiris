@@ -39,13 +39,40 @@ class ContributionController extends Controller
             $query->where('project_id', $project->id);
         }
 
-        // Server-side filter by status
+        // A1: filter & search
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('member_id')) {
+            $query->where('member_id', $request->member_id);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('contribution_date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('contribution_date', '<=', $request->date_to);
+        }
+
+        if ($request->filled('search')) {
+            $search = '%' . $request->search . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'ilike', $search)
+                  ->orWhereHas('member.user', function ($uq) use ($search) {
+                      $uq->where('name', 'ilike', $search);
+                  });
+            });
+        }
+
+        $perPage = min((int) $request->input('per_page', 6), 50);
         $contributions = $query->orderByDesc('created_at')
-            ->paginate(6);
+            ->paginate($perPage);
 
         return response()->json([
             'data' => ContributionResource::collection($contributions),
@@ -53,6 +80,7 @@ class ContributionController extends Controller
                 'current_page' => $contributions->currentPage(),
                 'last_page'    => $contributions->lastPage(),
                 'total'        => $contributions->total(),
+                'per_page'     => $contributions->perPage(),
             ],
         ]);
     }
@@ -245,14 +273,24 @@ class ContributionController extends Controller
         if ($request->hasFile('proof')) {
             $proofPath = $request->file('proof')->store('contributions', 'public');
         }
-        // update fields
-        $contribution->update([
-            'proof_path' => $proofPath ?? $contribution->proof_path,
-            'source_url' => $request->input('source_url') ?? $contribution->source_url,
-        ]);
+        // F-3: update dengan WHERE status guard — cegah stale status race
+        // kalau status udah berubah (vote concurrent) di antara check dan update
+        $updated = Contribution::where('id', $contribution->id)
+            ->where('status', 'PENDING')
+            ->update([
+                'proof_path' => $proofPath ?? $contribution->proof_path,
+                'source_url' => $request->input('source_url') ?? $contribution->source_url,
+            ]);
+
+        if (!$updated) {
+            return response()->json([
+                'message' => 'Kontribusi sudah tidak berstatus PENDING. Bukti tidak bisa diubah.',
+            ], 422);
+        }
+
         return response()->json([
             'message' => 'Bukti kontribusi berhasil disimpan.',
-            'data' => new ContributionResource($contribution->load('member.user')),
+            'data' => new ContributionResource($contribution->fresh()->load('member.user')),
         ]);
     }
 

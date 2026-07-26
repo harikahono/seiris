@@ -36,7 +36,7 @@ seiris-fe/
       ui/              # 30 shared components (UserAvatar, ConfirmModal, VotePanel, Skeleton, ContributionForm, RevenueCard, Pagination, dll)
       teams/           # 8 tab components (TeamMembersTab, ContributionsTab, RevenueTab, TeamSettingsTab, dll)
     contexts/          # Auth, Team, Project, Realtime
-    hooks/             # usePusher.ts, useFocusTrap.ts
+    hooks/             # usePusher.ts, useFocusTrap.ts, useModalAnimation.ts
     api/axios.ts       # Axios instance + interceptors (Bearer token)
     types/index.ts     # semua interface FE
     lib/{constants,utils,parseErrors,contribution}.ts

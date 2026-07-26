@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamContext } from "@/contexts/TeamContext";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import CreateTeamModal from "@/components/ui/CreateTeamModal";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useModalAnimation } from "@/hooks/useModalAnimation";
 
 import Skeleton from "@/components/ui/Skeleton";
 import { 
@@ -171,11 +173,16 @@ export default function DashboardLayout() {
 
   // ── Logout ──
   const handleLogout = () => setShowLogoutModal(true);
-  const logoutTrapRef = useFocusTrap(showLogoutModal);
+  const { show: showLogout, animClass: logoutAnim, animateClose: logoutClose } = useModalAnimation(showLogoutModal);
+  const logoutTrapRef = useFocusTrap(showLogout);
+  const closeLogout = () => logoutClose(() => setShowLogoutModal(false));
 
   const confirmLogout = () => {
-    logout();
-    navigate("/");
+    logoutClose(() => {
+      setShowLogoutModal(false);
+      logout();
+      navigate("/");
+    });
   };
 
   return (
@@ -453,10 +460,10 @@ export default function DashboardLayout() {
       </main>
 
       {/* ── Logout Confirmation Modal ── */}
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/60" onClick={() => setShowLogoutModal(false)} />
-          <div ref={logoutTrapRef} className="relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
+      {showLogout && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0" onClick={closeLogout} />
+          <div ref={logoutTrapRef} className={`${logoutAnim} relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl`}>
             <div className="flex flex-col items-center text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-red-500/10">
                 <AlertTriangle className="size-6 text-red-400" />
@@ -469,7 +476,7 @@ export default function DashboardLayout() {
             <div className="mt-6 flex gap-3">
               <button
                 type="button"
-                onClick={() => setShowLogoutModal(false)}
+                onClick={closeLogout}
                 className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
               >
                 Batal
@@ -483,7 +490,8 @@ export default function DashboardLayout() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Create Team Modal ── */}

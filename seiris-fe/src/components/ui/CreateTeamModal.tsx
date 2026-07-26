@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { X, Loader2, LogIn } from "lucide-react";
 import type { ApprovalThreshold, CreateTeamPayload } from "@/types";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useModalAnimation } from "@/hooks/useModalAnimation";
 
 type Tab = "create" | "join";
 
@@ -26,7 +27,6 @@ interface CreateFieldErrors {
 }
 
 export default function CreateTeamModal({ open, onClose, onCreated, defaultTab = "create" }: CreateTeamModalProps) {
-  const trapRef = useFocusTrap(open);
   const [tab, setTab] = useState<Tab>(defaultTab);
 
   // ── Form: Buat Tim ──
@@ -42,7 +42,9 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
   const [loadingJoin, setLoadingJoin] = useState(false);
   const [joinError, setJoinError] = useState("");
 
-  if (!open) return null;
+  const { show, animClass, animateClose } = useModalAnimation(open);
+  const trapRef = useFocusTrap(show);
+  if (!show) return null;
 
   // ── Create handler ──
   const handleCreate = async (e: FormEvent) => {
@@ -121,7 +123,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
     setInviteCode("");
     setLoadingJoin(false);
     setJoinError("");
-    onClose();
+    animateClose(onClose);
   };
 
   const createInputClass = (field: keyof CreateFieldErrors) =>
@@ -146,8 +148,8 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
     );
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div ref={trapRef} className="modal-enter w-full max-w-md rounded-xl border border-gray-800 bg-[#0d0d0d] p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => animateClose(onClose)}>
+      <div ref={trapRef} className={`${animClass} w-full max-w-md rounded-xl border border-gray-700 bg-card p-6 shadow-2xl`} onClick={(e) => e.stopPropagation()}>
         {/* ── Header + Tabs ── */}
         <div className="mb-4 flex items-center justify-between">
           <div className="flex flex-1 gap-2">

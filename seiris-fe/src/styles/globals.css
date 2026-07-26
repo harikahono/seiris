@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Override spin speed: 700ms instead of default 1s */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 700ms linear infinite;
+}
+
 :root {
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -117,6 +125,12 @@
   .animate-fade-in-up {
     animation: fade-in-up 0.25s var(--ease-out) both;
   }
+
+  /* Stagger variant — pake di list items */
+  .stagger-enter {
+    animation: fade-in-up 0.25s var(--ease-out) both;
+  }
+
   .modal-enter {
     animation: modal-in 250ms var(--ease-out) both;
     transform-origin: center;
@@ -124,6 +138,11 @@
   .modal-exit {
     animation: modal-out 150ms var(--ease-out) both;
     transform-origin: center;
+  }
+
+  /* Crossfade — skeleton → content */
+  .crossfade-enter {
+    animation: fade-in-up 0.2s var(--ease-out) both;
   }
 }
 

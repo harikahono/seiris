@@ -44,18 +44,19 @@
 
 **✅ Semua form sudah OK** — pakai `<form onSubmit>` + `<button type="submit">`. Enter bisa submit dari input mana aja.
 
-**❌ Tapi modal focus management bermasalah:**
+**✔️ Resolved per 2026-07-27:**
 
 | Modal | Masalah |
 |-------|---------|
-| `CreateRevenueForm` | Inline (bukan portal) — Tab bisa tembus ke halaman di belakang |
-| `ContributionForm` | Portal tapi tanpa focus trap — Tab bisa kabur ke browser chrome |
-| `CreateTeamModal` | Sama — tanpa trap |
-| `ConfirmModal` | Inline, Tab tembus ke background |
-| `ShareInviteModal` | Portal, tanpa trap |
-| **SEMUA MODAL** | Tidak ada focus restoration ke tombol trigger setelah ditutup |
+| `CreateRevenueForm` | ✔️ Sekarang portaled (`createPortal(document.body)`) |
+| `ContributionForm` | ✔️ Portal + focus trap via `useFocusTrap(show)` |
+| `CreateTeamModal` | ✔️ Portal + focus trap + click-outside close |
+| `ConfirmModal` | ✔️ Portal + focus trap + exit animation |
+| `ShareInviteModal` | ✔️ Portal + focus trap + click-outside close |
+| ALL modals | ✔️ `useFocusTrap(show)` dipanggil setelah `useModalAnimation(open)`, exit animation (150ms) sebelum unmount |
+| **SEMUA MODAL** | ❌ Focus restoration ke trigger masih belum diimplementasikan |
 
-**Fix:** Tambah `useEffect` di tiap modal: buka → fokus ke elemen pertama, Tab cycle di dalam modal, tutup → balikin fokus ke tombol trigger.
+**Fix (sisa):** tambah `useEffect cleanup` + ref trigger button → focus() setelah modal close.
 
 ---
 
@@ -183,19 +184,19 @@ Bukan WCAG. Cuma duplikasi konten yang bikin bingung.
 
 ## Prioritas Perbaikan (berdasarkan WCAG)
 
-| Tier | WCAG | Item | Effort |
-|:----:|:----:|------|:------:|
-| **P0 🚨** | **A** | `aria-label` di semua icon-only button (~15 titik) | 5 menit |
-| **P0 🚨** | **A** | Modal focus trap + return focus (5 modal) | 30 menit |
-| **P1 🔥** | **AA** | Approve/reject FMR: 3 gaya → 1 standar + label | 20 menit |
-| **P1 🔥** | **AA** | Touch target Simpan/Batal edit FMR → `min-w-[44px]` | 10 menit |
-| **P2 ⚠️** | usability | False affordance StatCard (Anggota Aktif + baris anggota) | 2 line |
-| **P2 ⚠️** | usability | "Ajukan FMR" ganti gaya beda dari sidebar active | 2 line |
-| **P2 ⚠️** | borderline | "Simpan" project hijau → orange (konsisten tombol) | 1 line |
-| **P3** | — | "Batal" 3 gaya → 1 standar | 10 menit |
-| **P3** | — | "Kembali" teks hidden di `< sm` | 7 line |
-| **P3** | — | Redundant empty state equity (merge jadi 1) | 2 line |
-| **P3** | — | ContributionForm close via backdrop (konsisten) | 2 line |
+| Tier | WCAG | Item | Effort | Status |
+|:----:|:----:|------|:------:|:------:|
+| **P0 🚨** | **A** | `aria-label` di semua icon-only button (~15 titik) | 5 menit | ❌ |
+| **P0 🚨** | **A** | Modal focus trap + return focus (5 modal) | 30 menit | ⚠️ trap done, return pending |
+| **P1 🔥** | **AA** | Approve/reject FMR: 3 gaya → 1 standar + label | 20 menit | ❌ |
+| **P1 🔥** | **AA** | Touch target Simpan/Batal edit FMR → `min-w-[44px]` | 10 menit | ❌ |
+| **P2 ⚠️** | usability | False affordance StatCard (Anggota Aktif + baris anggota) | 2 line | ❌ |
+| **P2 ⚠️** | usability | "Ajukan FMR" ganti gaya beda dari sidebar active | 2 line | ❌ |
+| **P2 ⚠️** | borderline | "Simpan" project hijau → orange (konsisten tombol) | 1 line | ❌ |
+| **P3** | — | "Batal" 3 gaya → 1 standar | 10 menit | ❌ |
+| **P3** | — | "Kembali" teks hidden di `< sm` | 7 line | ❌ |
+| **P3** | — | Redundant empty state equity (merge jadi 1) | 2 line | ❌ |
+| **P3** | — | ContributionForm close via backdrop (konsisten) | 2 line | ⚠️ ShareInvite + CreateTeam done, ContributionForm still pending |
 
 > **Prioritas hukum WCAG:** A → wajib, AA → harus, AAA → target ideal.
 > **P0 + P1 cover semua violasi WCAG.** P2+ sisanya usability/code hygiene.

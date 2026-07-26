@@ -6,7 +6,7 @@ import { useProjectContext } from "@/contexts/ProjectContext";
 import type { AuditLogItem } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
 import { cn } from "@/lib/utils";
-import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings, ClipboardList } from "lucide-react";
+import { Loader2, FileText, ThumbsUp, PieChart, TrendingUp, Gift, Users, Settings, ClipboardList, Search, X } from "lucide-react";
 import AuditLogEntry from "@/components/ui/AuditLogEntry";
 import Pagination from "@/components/ui/Pagination";
 import Skeleton from "@/components/ui/Skeleton";
@@ -53,12 +53,19 @@ export default function AuditLogTab() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
+  // A4: search & date range
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const fetchLogs = useCallback(() => {
     setLoading(true);
     const params: Record<string, unknown> = { page };
     if (filter) params.filter = filter;
     if (currentProjectId) params.project_id = currentProjectId;
+    if (search.trim()) params.search = search.trim();
+    if (dateFrom) params.date_from = dateFrom;
+    if (dateTo) params.date_to = dateTo;
 
     api
       .get<{ data: AuditLogItem[]; meta: { current_page: number; last_page: number; total: number } }>(
@@ -72,7 +79,7 @@ export default function AuditLogTab() {
       })
       .catch(() => toast.error("Gagal memuat audit log"))
       .finally(() => setLoading(false));
-  }, [teamId, page, filter, currentProjectId]);
+  }, [teamId, page, filter, currentProjectId, search, dateFrom, dateTo]);
 
     
   useEffect(() => { fetchLogs(); }, [fetchLogs]);
@@ -97,6 +104,40 @@ export default function AuditLogTab() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white">Audit Log</h2>
         <span className="text-xs text-gray-500">{total} log</span>
+      </div>
+
+      {/* A4: search & date filter bar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[160px] max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); setLogs([]); }}
+            placeholder="Cari aksi atau deskripsi..."
+            className="w-full rounded-md border border-gray-700 bg-gray-900 py-1.5 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
+          />
+          {search && (
+            <button onClick={() => { setSearch(""); setPage(1); setLogs([]); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+              <X className="size-3.5" />
+            </button>
+          )}
+        </div>
+        <input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLogs([]); }}
+          className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+          title="Dari tanggal"
+        />
+        <span className="text-xs text-gray-500">—</span>
+        <input
+          type="date"
+          value={dateTo}
+          onChange={(e) => { setDateTo(e.target.value); setPage(1); setLogs([]); }}
+          className="rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+          title="Sampai tanggal"
+        />
       </div>
 
       <div className="flex flex-wrap gap-1 rounded-lg border border-gray-700/20 bg-gray-900/30 p-1">
@@ -136,8 +177,10 @@ export default function AuditLogTab() {
               {date}
             </h3>
             <div className="space-y-1">
-              {dateLogs.map((log) => (
-                <AuditLogEntry key={log.id} log={log} teamId={teamId} />
+              {dateLogs.map((log, j) => (
+                <div key={log.id} className="stagger-enter" style={{ animationDelay: `${j * 30}ms` }}>
+                  <AuditLogEntry log={log} teamId={teamId} />
+                </div>
               ))}
             </div>
           </div>

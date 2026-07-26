@@ -32,19 +32,23 @@ class FmrProposalController extends Controller
 
         $member = $request->teamMember;
 
-        // Cek apakah member sudah punya proposal PENDING
-        $pendingExists = FmrProposal::where('team_id', $team->id)
-            ->where('member_id', $member->id)
-            ->where('status', 'PENDING')
-            ->exists();
-
-        if ($pendingExists) {
-            return response()->json([
-                'message' => 'Kamu sudah memiliki proposal FMR yang menunggu persetujuan owner.',
-            ], 409);
-        }
-
         $proposal = DB::transaction(function () use ($request, $team, $member) {
+            // F-1: LOCK row tim + check PENDING di DALEM transaction
+            // (cegah TOCTOU race — 2 request bareng bikin 2 proposal PENDING)
+            DB::table('teams')
+                ->where('id', $team->id)
+                ->lockForUpdate()
+                ->first();
+
+            $pendingExists = FmrProposal::where('team_id', $team->id)
+                ->where('member_id', $member->id)
+                ->where('status', 'PENDING')
+                ->exists();
+
+            if ($pendingExists) {
+                throw new \RuntimeException('DUPLICATE_PENDING');
+            }
+
             $proposal = FmrProposal::create([
                 'team_id'      => $team->id,
                 'member_id'    => $member->id,
@@ -65,7 +69,14 @@ class FmrProposalController extends Controller
             );
 
             return $proposal;
-        });
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() === 'DUPLICATE_PENDING') {
+                return response()->json([
+                    'message' => 'Kamu sudah memiliki proposal FMR yang menunggu persetujuan owner.',
+                ], 409);
+            }
+            throw $e;
+        }
 
         broadcast(new TeamUpdated($team, 'fmr.proposed', $request->user()->name ?? ''))->toOthers();
 

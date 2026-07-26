@@ -1,6 +1,6 @@
 import { useProjectContext } from "@/contexts/ProjectContext";
 import { useTeamContext } from "@/contexts/TeamContext";
-import { Plus, ChevronDown } from "lucide-react";
+import { Plus, ChevronDown, Loader2 } from "lucide-react";
 import { useState } from "react";
 import api from "@/api/axios";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ export default function ProjectSelector() {
   const { projects, currentProjectId, setCurrentProject, refreshProjects } = useProjectContext();
   const { currentTeamId } = useTeamContext();
   const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
 
@@ -21,6 +22,7 @@ export default function ProjectSelector() {
       toast.error("Tim tidak ditemukan.");
       return;
     }
+    setSaving(true);
     api
       .post(`/teams/${currentTeamId}/projects`, { name: name.trim(), description: desc.trim() })
       .then(() => {
@@ -30,7 +32,8 @@ export default function ProjectSelector() {
         setCreating(false);
         refreshProjects();
       })
-      .catch(() => toast.error("Gagal membuat project."));
+      .catch(() => toast.error("Gagal membuat project."))
+      .finally(() => setSaving(false));
   };
 
   return (
@@ -71,8 +74,9 @@ export default function ProjectSelector() {
             placeholder="Deskripsi (opsional)"
             className="w-44 rounded-md border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-white outline-none focus:border-[#e07820]"
           />
-          <button onClick={createProject} className="rounded-md bg-accent px-2 py-1.5 text-sm text-black hover:bg-accent-hover transition-colors active:scale-[0.97]">
-            Simpan
+          <button onClick={createProject} disabled={saving} className="rounded-md bg-accent px-2 py-1.5 text-sm text-black hover:bg-accent-hover transition-colors active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed">
+            {saving ? <Loader2 className="inline size-3.5 animate-spin" /> : null}
+            {saving ? "Menyimpan..." : "Simpan"}
           </button>
           <button onClick={() => setCreating(false)} className="rounded-md border border-gray-700 px-2 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
             Batal

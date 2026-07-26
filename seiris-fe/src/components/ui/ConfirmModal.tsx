@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useModalAnimation } from "@/hooks/useModalAnimation";
 
 interface ConfirmModalProps {
   open: boolean;
@@ -28,8 +29,9 @@ export default function ConfirmModal({
   loading = false,
   icon,
 }: ConfirmModalProps) {
-  const trapRef = useFocusTrap(open);
-  if (!open) return null;
+  const { show, animClass, animateClose } = useModalAnimation(open);
+  const trapRef = useFocusTrap(show);
+  if (!show) return null;
 
   const isDanger = variant === "danger";
   const btnClass = isDanger
@@ -37,9 +39,9 @@ export default function ConfirmModal({
     : "bg-accent hover:bg-accent-hover text-black";
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/60" onClick={(e) => { e.stopPropagation(); onClose(); }} />
-      <div ref={trapRef} className="modal-enter relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0" onClick={() => animateClose(onClose)} />
+      <div ref={trapRef} className={`${animClass} relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl`}>
         <div className="flex flex-col items-center text-center">
           {icon ?? (
             <div className={`flex size-12 items-center justify-center rounded-full ${isDanger ? "bg-red-500/10" : "bg-accent/10"}`}>
@@ -56,7 +58,7 @@ export default function ConfirmModal({
         <div className="mt-6 flex gap-3">
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            onClick={() => animateClose(onClose)}
             disabled={loading}
             className="flex-1 rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:bg-gray-800 hover:text-white disabled:opacity-50"
           >

@@ -43,9 +43,9 @@ function EquityHero({
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-accent/5 p-8 transition-[background] duration-500 hover:to-accent/10">
+    <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-accent/5 p-8 transition-[background] duration-200 hover:to-accent/10">
       {/* Glow */}
-      <div className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-accent/5 blur-3xl transition-opacity duration-500 group-hover:opacity-60" />
+      <div className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-accent/5 blur-3xl transition-opacity duration-200 group-hover:opacity-60" />
       <div className="pointer-events-none absolute -bottom-10 -left-10 size-40 rounded-full bg-accent/3 blur-2xl" />
 
       <div className="relative">

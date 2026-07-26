@@ -86,6 +86,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         // Teams
         Route::get('teams/{team}',                                [TeamController::class, 'show']);
         Route::put('teams/{team}',                                [TeamController::class, 'update'])->middleware('throttle:write');
+        Route::post('teams/{team}/logo',                          [TeamController::class, 'uploadLogo'])->middleware('throttle:write');
         Route::put('teams/{team}/members/{member}/fmr',           [TeamController::class, 'updateFmr'])->middleware('throttle:write');
         Route::post('teams/{team}/freeze',                        [TeamController::class, 'freeze'])->middleware('throttle:write');
         Route::post('teams/{team}/members/{member}/exit',         [TeamController::class, 'exitMember'])->middleware('throttle:write');

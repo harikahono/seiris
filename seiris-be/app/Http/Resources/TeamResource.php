@@ -19,6 +19,7 @@ class TeamResource extends JsonResource
             'approval_threshold' => $this->approval_threshold,
             'is_frozen'          => $this->is_frozen,
             'frozen_at'          => $this->frozen_at?->toISOString(),
+            'logo_url'           => $this->logo_url,
             'owner'              => new UserResource($this->whenLoaded('owner')),
             'members'            => TeamMemberResource::collection($this->whenLoaded('members')),
             'members_count'      => $this->whenLoaded('members', fn() =>

@@ -18,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class TeamController extends Controller
@@ -140,6 +141,44 @@ class TeamController extends Controller
 
         return response()->json([
             'message' => 'Tim berhasil diperbarui.',
+            'data'    => new TeamResource($team->fresh()->load(['members.user', 'owner'])),
+        ]);
+    }
+
+    /**
+     * POST /api/teams/{team}/logo
+     * Upload/foto profil tim — hanya owner
+     */
+    public function uploadLogo(Request $request, Team $team): JsonResponse
+    {
+        Gate::authorize('update', $team);
+
+        $request->validate([
+            'logo' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ]);
+
+        // Hapus logo lama kalo ada
+        if ($team->logo_path) {
+            Storage::disk('public')->delete($team->logo_path);
+        }
+
+        $path = $request->file('logo')->store('team-logos', 'public');
+
+        $team->update(['logo_path' => $path]);
+
+        AuditLogService::logFromRequest(
+            request:     $request,
+            teamId:      $team->id,
+            action:      'team.logo_updated',
+            subjectType: Team::class,
+            subjectId:   $team->id,
+            payload:     [],
+        );
+
+        broadcast(new TeamUpdated($team, 'team.logo_updated', $request->user()->name ?? ''))->toOthers();
+
+        return response()->json([
+            'message' => 'Logo tim berhasil diperbarui.',
             'data'    => new TeamResource($team->fresh()->load(['members.user', 'owner'])),
         ]);
     }
@@ -363,69 +402,84 @@ class TeamController extends Controller
             return response()->json(['message' => 'Owner tidak bisa dikeluarkan dari tim.'], 403);
         }
 
-        if ($member->status === 'exited') {
-            return response()->json(['message' => 'Anggota sudah keluar sebelumnya.'], 409);
-        }
-
         $leaverType = in_array($request->leaver_type, ['good', 'bad']) ? $request->leaver_type : null;
 
-        DB::transaction(function () use ($request, $team, $member, $leaverType) {
-            $member->update([
-                'status'      => 'exited',
-                'exited_at'   => now(),
-                'leaver_type' => $leaverType,
-                'exit_reason' => $request->exit_reason,
-            ]);
+        try {
+            DB::transaction(function () use ($request, $team, $member, $leaverType) {
+                // F-4: LOCK row member + re-check status di DALEM transaction
+                // cegah TOCTOU race — 2 request exit bareng bisa "exited" 2x
+                $locked = TeamMember::where('id', $member->id)
+                    ->lockForUpdate()
+                    ->first();
 
-            // Hapus semua project_members row (cegah ghost member di roster project)
-            DB::table('project_members')
-                ->where('team_member_id', $member->id)
-                ->delete();
+                if ($locked->status === 'exited') {
+                    throw new \RuntimeException('ALREADY_EXITED');
+                }
 
-            // Auto-reject semua kontribusi PENDING milik member yang exit
-            $pendingCount = $member->contributions()
-                ->where('status', 'PENDING')
-                ->count();
+                $locked->update([
+                    'status'      => 'exited',
+                    'exited_at'   => now(),
+                    'leaver_type' => $leaverType,
+                    'exit_reason' => $request->exit_reason,
+                ]);
 
-            if ($pendingCount > 0) {
-                $member->contributions()
+                // Hapus semua project_members row (cegah ghost member di roster project)
+                DB::table('project_members')
+                    ->where('team_member_id', $member->id)
+                    ->delete();
+
+                // Auto-reject semua kontribusi PENDING milik member yang exit
+                $pendingCount = $member->contributions()
                     ->where('status', 'PENDING')
-                    ->update(['status' => 'REJECTED']);
+                    ->count();
+
+                if ($pendingCount > 0) {
+                    $member->contributions()
+                        ->where('status', 'PENDING')
+                        ->update(['status' => 'REJECTED']);
+
+                    AuditLogService::logFromRequest(
+                        request:     $request,
+                        teamId:      $team->id,
+                        action:      'contribution.auto_rejected',
+                        subjectType: TeamMember::class,
+                        subjectId:   $member->id,
+                        payload:     [
+                            'reason'         => 'member_exited',
+                            'rejected_count' => $pendingCount,
+                        ],
+                    );
+                }
 
                 AuditLogService::logFromRequest(
                     request:     $request,
                     teamId:      $team->id,
-                    action:      'contribution.auto_rejected',
+                    action:      'member.exited',
                     subjectType: TeamMember::class,
                     subjectId:   $member->id,
                     payload:     [
-                        'reason'         => 'member_exited',
-                        'rejected_count' => $pendingCount,
+                        'user_id'     => $member->user_id,
+                        'leaver_type' => $leaverType,
                     ],
                 );
-            }
 
-            AuditLogService::logFromRequest(
-                request:     $request,
-                teamId:      $team->id,
-                action:      'member.exited',
-                subjectType: TeamMember::class,
-                subjectId:   $member->id,
-                payload:     [
-                    'user_id'     => $member->user_id,
-                    'leaver_type' => $leaverType,
-                ],
-            );
-
-            // Recovery 2-level: recalc semua project agar bad-leaver penalty
-            // tercermin di tiap Pie anak, lalu agregasi tim ikut ter-update.
-            foreach ($team->projects as $project) {
-                if ($project->contributions()->where('status', 'APPROVED')->exists()) {
-                    $this->slicingPie->recalculate($team, null, $project);
+                // Recovery 2-level: recalc semua project agar bad-leaver penalty
+                // tercermin di tiap Pie anak, lalu agregasi tim ikut ter-update.
+                foreach ($team->projects as $project) {
+                    if ($project->contributions()->where('status', 'APPROVED')->exists()) {
+                        $this->slicingPie->recalculate($team, null, $project);
+                    }
                 }
+                $this->slicingPie->recalculate($team);
+            });
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() === 'ALREADY_EXITED') {
+                return response()->json([
+                    'message' => 'Anggota sudah keluar sebelumnya.',
+                ], 409);
             }
-            $this->slicingPie->recalculate($team);
-        });
+            throw $e;
+        }
 
         broadcast(new TeamUpdated($team, 'member.exited', $member->user?->name ?? ''))->toOthers();
 

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
 import { parseErrors } from "@/lib/parseErrors";
@@ -7,6 +8,7 @@ import { toast } from "sonner";
 import { Loader2, X, Upload, Plus, Trash2 } from "lucide-react";
 import type { RevenueDeduction } from "@/types";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useModalAnimation } from "@/hooks/useModalAnimation";
 
 interface CreateRevenueFormProps {
   teamId: string;
@@ -22,7 +24,6 @@ interface FieldErrors extends Partial<Record<FieldKey, string>> {
 }
 
 export default function CreateRevenueForm({ teamId, projectId, open, onClose, onCreated }: CreateRevenueFormProps) {
-  const trapRef = useFocusTrap(open);
   const basePath = projectId
     ? `/teams/${teamId}/projects/${projectId}`
     : `/teams/${teamId}`;
@@ -35,7 +36,9 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
 
-  if (!open) return null;
+  const { show, animClass, animateClose } = useModalAnimation(open);
+  const trapRef = useFocusTrap(show);
+  if (!show) return null;
 
   const totalDeductions = deductions.reduce((s, d) => s + (Number(d.amount) || 0), 0);
   const amountNum = Number(amount) || 0;
@@ -60,7 +63,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
     setErrors({});
   };
 
-  const handleClose = () => { resetForm(); onClose(); };
+  const handleClose = () => { resetForm(); animateClose(onClose); };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -120,10 +123,10 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/60" onClick={handleClose} />
-      <div ref={trapRef} className="modal-enter relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0" onClick={handleClose} />
+      <div ref={trapRef} className={`${animClass} relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto`} onClick={(e) => e.stopPropagation()}>
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Catat Revenue Baru</h2>
           <button type="button" onClick={handleClose} className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup">
@@ -223,6 +226,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
