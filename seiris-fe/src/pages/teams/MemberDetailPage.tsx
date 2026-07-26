@@ -45,7 +45,6 @@ export default function MemberDetailPage() {
 
   // Realtime
   const { refreshVersion } = useRealtime();
-  const { currentProjectId } = useProjectContext();
   const prevRefresh = useRef(0);
   useEffect(() => {
     if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
