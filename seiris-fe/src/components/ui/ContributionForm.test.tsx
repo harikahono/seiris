@@ -5,7 +5,10 @@ import ContributionForm from "@/components/ui/ContributionForm";
 
 const mockPost = vi.fn().mockResolvedValue({ data: {} });
 vi.mock("@/api/axios", () => ({
-  default: { post: (...args: unknown[]) => mockPost(...(args as [])) },
+  default: {
+    get: vi.fn().mockResolvedValue({ data: { features: {} } }),
+    post: (...args: unknown[]) => mockPost(...(args as [])),
+  },
 }));
 
 describe("ContributionForm", () => {
@@ -37,8 +40,11 @@ describe("ContributionForm", () => {
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(1));
     const [url, payload] = mockPost.mock.calls[0];
     expect(url).toBe("/teams/t1/contributions");
-    expect(payload).toMatchObject({ type: "CASH", description: "Modal awal", amount: 1000000 });
-    expect((payload as { project_id?: string }).project_id).toBeUndefined();
+    // component sends FormData (for file upload support)
+    expect(payload.get("type")).toBe("CASH");
+    expect(payload.get("description")).toBe("Modal awal");
+    expect(payload.get("amount")).toBe("1000000");
+    expect(payload.get("project_id")).toBeNull();
 
     await waitFor(() => expect(onCreated).toHaveBeenCalled());
   });

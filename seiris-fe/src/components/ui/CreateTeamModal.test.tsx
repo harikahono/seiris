@@ -18,7 +18,7 @@ describe("CreateTeamModal — create tab", () => {
     const user = userEvent.setup();
 
     await user.type(screen.getByPlaceholderText("Nama tim kamu"), "Team Ku");
-    await user.click(screen.getByText("50% (Mayoritas Sederhana)"));
+    await user.click(screen.getByText(/50\+1.*Mayoritas/));
     await user.click(screen.getAllByRole("button", { name: /Buat Tim/i })[1]); // submit bawah
 
     await waitFor(async () => {

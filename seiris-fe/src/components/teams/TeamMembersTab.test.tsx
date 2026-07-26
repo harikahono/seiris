@@ -15,6 +15,10 @@ vi.mock("@/contexts/RealtimeContext", () => ({
   useRealtime: () => ({ refreshVersion: 0 }),
 }));
 
+vi.mock("@/components/teams/ProjectSelector", () => ({
+  default: () => null,
+}));
+
 const mockProjectCtx = vi.hoisted(() => ({
   currentProjectId: null as string | null,
   projects: [] as Array<{ id: string; is_frozen: boolean }>,

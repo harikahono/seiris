@@ -44,8 +44,16 @@ class ContributionStoreValidationTest extends TestCase
     /** TIME with FMR=0 member → 422 from controller guard. */
     public function test_time_with_fmr_zero_is_blocked(): void
     {
-        $user = User::factory()->create();
-        $team = Team::factory()->create(['owner_id' => $user->id]);
+        $owner = User::factory()->create();
+        $user  = User::factory()->create();
+        $team  = Team::factory()->create(['owner_id' => $owner->id]);
+        // Owner member (so team has >=2 members)
+        TeamMember::factory()->create([
+            'team_id' => $team->id,
+            'user_id' => $owner->id,
+            'role'    => 'owner',
+            'fmr'     => 50000,
+        ]);
         // Member with zero FMR
         TeamMember::factory()->create([
             'team_id' => $team->id,

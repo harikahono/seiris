@@ -46,6 +46,10 @@ const mockProjectCtx = vi.hoisted(() => ({
   projects: [] as Array<{ id: string; is_frozen: boolean }>,
 }));
 
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({ user: { id: "u1", name: "Test" } }),
+}));
+
 vi.mock("@/contexts/ProjectContext", () => ({
   useProjectContext: () => mockProjectCtx,
 }));
@@ -54,13 +58,21 @@ vi.mock("@/contexts/RealtimeContext", () => ({
   useRealtime: () => ({ refreshVersion: 0 }),
 }));
 
+vi.mock("@/components/teams/ProjectSelector", () => ({
+  default: () => null,
+}));
+
 // ── Mock API ──
 const mockAxiosGet = vi.hoisted(() => vi.fn());
 vi.mock("@/api/axios", () => ({
   default: { get: mockAxiosGet },
 }));
 
-const mockOutletCtx = { team: { id: "t1" }, fmr: 50000 };
+const mockOutletCtx = {
+  team: { id: "t1", members_count: 2, members: [{ user: { id: "u1" }, fmr: 50000, project_fmr: null }] },
+  fmr: 50000,
+  isOwner: true,
+};
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (

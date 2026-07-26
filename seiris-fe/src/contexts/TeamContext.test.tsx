@@ -3,6 +3,10 @@ import { render, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { TeamProvider, useTeamContext } from "@/contexts/TeamContext";
 
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({ user: { id: "u1", name: "Test" } }),
+}));
+
 const mockTeams = vi.hoisted(() => [
   { id: "t1", name: "Team Alpha", role: "owner", my_equity_percentage: 25 },
   { id: "t2", name: "Team Beta", role: "member", my_equity_percentage: 10 },
