@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+
 import { useOutletContext } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
@@ -6,7 +7,7 @@ import { useProjectContext } from "@/contexts/ProjectContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Revenue } from "@/types";
 import type { TeamContext } from "@/pages/teams/TeamDetailPage";
-import { Loader2, Plus, TrendingUp } from "lucide-react";
+import { Loader2, Plus, TrendingUp, Search, X } from "lucide-react";
 import RevenueCard from "@/components/ui/RevenueCard";
 import CreateRevenueForm from "@/components/ui/CreateRevenueForm";
 import Pagination from "@/components/ui/Pagination";
@@ -30,20 +31,29 @@ export default function RevenueTab() {
   const [lastPage, setLastPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [equitySlices, setEquitySlices] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   // ── Fetch Revenues (no loading state — caller manages it) ──
-  const fetchRevenues = useCallback(() => {
+  // ponytail: overridePage param biar gak perlu nunggu setPage propagate
+  const fetchRevenues = useCallback((overridePage?: number) => {
+    const p = overridePage ?? page;
+    const params: Record<string, unknown> = { page: p };
+    if (search.trim()) params.search = search.trim();
+    if (dateFrom) params.date_from = dateFrom;
+    if (dateTo) params.date_to = dateTo;
     return api
       .get<{ data: Revenue[]; meta: { current_page: number; last_page: number; total: number } }>(
         `${basePath}/revenues`,
-        { params: { page } }
+        { params }
       )
       .then((res) => {
         setRevenues(res.data.data);
         setLastPage(res.data.meta.last_page);
       })
       .catch(() => toast.error("Gagal memuat revenue"));
-  }, [basePath, page]);
+  }, [basePath, search, dateFrom, dateTo]); // ponytail: sengaja gak include page — dipake via overridePage
 
   // ── Fetch equity total_slices untuk scope ini (disable tombol distribusi kalau 0) ──
   const fetchEquity = useCallback(() => {
@@ -53,14 +63,21 @@ export default function RevenueTab() {
       .catch(() => setEquitySlices(null));
   }, [basePath]);
 
-  // Initial load + page/scope/filter change → fetch
+  // Track basePath changes (project switch) untuk reset page
+  const prevBasePath = useRef(basePath);
+
+  // Initial load + page/scope/search/date change → fetch
   useEffect(() => {
     setRevenues([]);
     setEquitySlices(null);
     setLoading(true);
-    Promise.all([fetchRevenues(), fetchEquity()]).finally(() => setLoading(false));
+    const isNewScope = prevBasePath.current !== basePath;
+    prevBasePath.current = basePath;
+    if (isNewScope) setPage(1);
+    const targetPage = isNewScope ? 1 : page;
+    Promise.all([fetchRevenues(targetPage), fetchEquity()]).finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [basePath, page]);
+  }, [basePath, page, search, dateFrom, dateTo]);
 
   // Page change → loading + fetch with new page
   const handlePageChange = (p: number) => { setPage(p); setLoading(true); };
@@ -100,6 +117,39 @@ export default function RevenueTab() {
             Catat Revenue
           </button>
         )}
+      </div>
+
+      {/* A3: search & date filter */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[160px] max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-500" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); setLoading(true); }}
+            placeholder="Cari deskripsi atau pencatat..."
+            className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
+          />
+          {search && (
+            <button onClick={() => { setSearch(""); setPage(1); setLoading(true); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
+              <X className="size-3.5" />
+            </button>
+          )}
+        </div>
+        <input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => { setDateFrom(e.target.value); setPage(1); setLoading(true); }}
+          className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+          title="Dari tanggal"
+        />
+        <input
+          type="date"
+          value={dateTo}
+          onChange={(e) => { setDateTo(e.target.value); setPage(1); setLoading(true); }}
+          className="h-9 rounded-md border border-gray-700 bg-gray-900 px-2 text-sm text-white outline-none focus:border-accent [color-scheme:dark]"
+          title="Sampai tanggal"
+        />
       </div>
 
       <div className="[&>*+*]:border-t [&>*+*]:border-subtle">

@@ -129,7 +129,7 @@ export default function TeamDetailPage() {
       </div>
 
       {/* ── Project Scope Selector (Slicing Pie Beranak) — disembunyiin di Settings (team-level) ── */}
-      {!isSettings && <ProjectSelector />}
+      {!isSettings && <ProjectSelector isOwner={isOwner} />}
       {/* ── Tab Content ── */}
       <Outlet context={context} />
     </div>

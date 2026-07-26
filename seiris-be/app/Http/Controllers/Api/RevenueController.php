@@ -37,6 +37,25 @@ class RevenueController extends Controller
             $query->where('project_id', $project->id);
         }
 
+        // Filter & search
+        if ($request->filled('search')) {
+            $search = '%' . $request->search . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'ilike', $search)
+                  ->orWhereHas('recordedBy.user', function ($uq) use ($search) {
+                      $uq->where('name', 'ilike', $search);
+                  });
+            });
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('revenue_date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('revenue_date', '<=', $request->date_to);
+        }
+
         $revenues = $query->orderByDesc('revenue_date')->paginate(6);
 
         return response()->json([

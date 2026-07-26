@@ -61,13 +61,23 @@ class ContributionController extends Controller
         }
 
         if ($request->filled('search')) {
-            $search = '%' . $request->search . '%';
-            $query->where(function ($q) use ($search) {
-                $q->where('description', 'ilike', $search)
-                  ->orWhereHas('member.user', function ($uq) use ($search) {
-                      $uq->where('name', 'ilike', $search);
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('description', 'ilike', $searchTerm)
+                  ->orWhereHas('member.user', function ($uq) use ($searchTerm) {
+                      $uq->where('name', 'ilike', $searchTerm);
+                  })
+                  ->orWhere('type', 'ilike', $searchTerm)
+                  ->orWhere('status', 'ilike', $searchTerm)
+                  ->orWhereHas('approvals.member.user', function ($uq) use ($searchTerm) {
+                      $uq->where('name', 'ilike', $searchTerm);
                   });
             });
+
+            // Value search (numeric exact match)
+            if (is_numeric($request->search)) {
+                $query->orWhere('value', (int) $request->search);
+            }
         }
 
         $perPage = min((int) $request->input('per_page', 6), 50);

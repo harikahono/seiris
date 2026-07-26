@@ -111,7 +111,7 @@ export default function ContributionsTab() {
     Promise.all([fetchEquity(), fetchContributions(targetPage)])
       .finally(() => { setLoading(false); setEquityLoading(false); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [basePath, page, filter]);
+  }, [basePath, page, filter, search, typeFilter, dateFrom, dateTo]);
 
   // Background refresh dari Pusher → silent, no skeleton
   const prevRefresh = useRef(0);

@@ -5,7 +5,11 @@ import { useState } from "react";
 import api from "@/api/axios";
 import { toast } from "sonner";
 
-export default function ProjectSelector() {
+interface Props {
+  isOwner?: boolean;
+}
+
+export default function ProjectSelector({ isOwner = false }: Props) {
   const { projects, currentProjectId, setCurrentProject, refreshProjects } = useProjectContext();
   const { currentTeamId } = useTeamContext();
   const [creating, setCreating] = useState(false);
@@ -82,7 +86,7 @@ export default function ProjectSelector() {
             Batal
           </button>
         </div>
-      ) : (
+      ) : isOwner && (
         <button
           type="button"
           onClick={() => setCreating(true)}
