@@ -107,6 +107,7 @@ export interface DashboardTeamItem {
   total_team_slices: number;
   pending_approvals_count: number;
   total_members: number;
+  logo_url: string | null;
   created_at: string;
 }
 

@@ -305,16 +305,24 @@ export default function DashboardLayout() {
                       )}
                     >
                       {/* Avatar lingkaran */}
-                      <span
-                        className={cn(
-                          "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition",
-                          isActive
-                            ? "bg-accent text-black"
-                            : "bg-gray-800 text-gray-500 group-hover:bg-gray-700"
-                        )}
-                      >
-                        {team.name.charAt(0).toUpperCase()}
-                      </span>
+                      {team.logo_url ? (
+                        <img
+                          src={team.logo_url}
+                          alt={team.name}
+                          className="size-8 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span
+                          className={cn(
+                            "flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition",
+                            isActive
+                              ? "bg-accent text-black"
+                              : "bg-gray-800 text-gray-500 group-hover:bg-gray-700"
+                          )}
+                        >
+                          {team.name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
 
                       {!collapsed && (
                         <div className="flex-1 text-left">
