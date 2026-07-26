@@ -2,19 +2,16 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "@/api/axios";
 import { useRealtime } from "@/contexts/RealtimeContext";
-import { useProjectContext } from "@/contexts/ProjectContext";
 import type { Team, TeamMember, Contribution } from "@/types";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import UserAvatar from "@/components/ui/UserAvatar";
-import { ArrowLeft, RefreshCw, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import Skeleton from "@/components/ui/Skeleton";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export default function MemberDetailPage() {
   const { teamId, memberId } = useParams<{ teamId: string; memberId: string }>();
   const navigate = useNavigate();
-  const [team, setTeam] = useState<Team | null>(null);
   const [member, setMember] = useState<TeamMember | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -32,8 +29,7 @@ export default function MemberDetailPage() {
         }),
       ]);
 
-      const t = teamRes.data.data;
-      setTeam(t);
+      const t = teamRes.data.data as Team;
       const m = t.members.find((mem) => mem.id === memberId) ?? null;
       setMember(m);
       setContributions(contribRes.data.data ?? []);
@@ -131,7 +127,7 @@ export default function MemberDetailPage() {
       {/* ── Profile Card ── */}
       <div className="animate-fade-in-up rounded-xl border border-gray-800 bg-card p-6 transition-colors duration-200 hover:border-gray-700">
         <div className="flex items-center gap-4">
-          <UserAvatar user={member.user} size="xl" />
+          <UserAvatar user={member.user} size="lg" />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-lg font-bold text-white">{member.user.name}</h1>
