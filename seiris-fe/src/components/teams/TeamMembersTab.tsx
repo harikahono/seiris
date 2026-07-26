@@ -279,7 +279,6 @@ export default function TeamMembersTab() {
                     onClick={handleProposeFmr}
                     disabled={submittingProposal}
                     className="rounded p-1.5 text-green-400 hover:bg-gray-800 transition-colors active:scale-[0.97] disabled:opacity-50"
-                    title="Kirim proposal"
                     aria-label="Kirim proposal FMR" title="Kirim proposal FMR"
                   >
                   {submittingProposal ? (
@@ -392,10 +391,12 @@ export default function TeamMembersTab() {
                           )}
                         </div>
                         {isProjectFrozen ? (
-                            <Lock
-                              className="size-3.5 text-gray-600"
-                              aria-label="Project sudah dikunci, FMR tidak bisa diubah" title="Project sudah dikunci, FMR tidak bisa diubah"
-                            />
+                            <span title="Project sudah dikunci, FMR tidak bisa diubah">
+                              <Lock
+                                className="size-3.5 text-gray-600"
+                                aria-label="Project sudah dikunci, FMR tidak bisa diubah"
+                              />
+                            </span>
                         ) : (
                           <button
                             type="button"
