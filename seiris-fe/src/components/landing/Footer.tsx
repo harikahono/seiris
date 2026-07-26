@@ -171,7 +171,7 @@ export function Footer() {
                   <a
                     key={link.title}
                     href={link.href}
-                    aria-label={link.title}
+                    aria-label={link.title} title={link.title}
                     className="footer-social-btn"
                     target="_blank"
                     rel="noopener noreferrer"

@@ -244,7 +244,7 @@ export default function TeamMembersTab() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-sm text-white">
-                {hasProjectScope ? "FMR Project Kamu" : "FMR Kamu"}:{" "}
+                <span title="Fair Market Rate — nilai pasar wajar per jam">{hasProjectScope ? "FMR Project Kamu" : "FMR Kamu"}</span>:{" "}
                 <span className="font-semibold text-accent">
                   Rp {displayFmr(currentMember).toLocaleString("id-ID")}
                 </span>
@@ -280,7 +280,7 @@ export default function TeamMembersTab() {
                     disabled={submittingProposal}
                     className="rounded p-1.5 text-green-400 hover:bg-gray-800 transition-colors active:scale-[0.97] disabled:opacity-50"
                     title="Kirim proposal"
-                    aria-label="Kirim proposal FMR"
+                    aria-label="Kirim proposal FMR" title="Kirim proposal FMR"
                   >
                   {submittingProposal ? (
                     <Loader2 className="size-4 animate-spin" />
@@ -295,7 +295,7 @@ export default function TeamMembersTab() {
                       setProposedFmrValue("");
                     }}
                     className="rounded p-1.5 text-gray-500 hover:bg-gray-800 transition-colors active:scale-[0.97]"
-                    aria-label="Batal ajukan proposal"
+                    aria-label="Batal ajukan proposal" title="Batal ajukan proposal"
                   >
                   <X className="size-4" />
                 </button>
@@ -363,7 +363,7 @@ export default function TeamMembersTab() {
                           onClick={() => saveFmr(member)}
                           disabled={savingFmr}
                           className="flex items-center justify-center rounded p-1 text-green-400 hover:bg-gray-800 min-w-[44px] min-h-[44px]"
-                          aria-label={`Simpan FMR ${member.user.name}`}
+                          aria-label={`Simpan FMR ${member.user.name}`} title={`Simpan FMR ${member.user.name}`}
                         >
                           {savingFmr ? (
                             <Loader2 className="size-3.5 animate-spin" />
@@ -375,7 +375,7 @@ export default function TeamMembersTab() {
                           type="button"
                           onClick={cancelEditFmr}
                           className="flex items-center justify-center rounded p-1 text-gray-500 hover:bg-gray-800 min-w-[44px] min-h-[44px]"
-                          aria-label={`Batal edit FMR ${member.user.name}`}
+                          aria-label={`Batal edit FMR ${member.user.name}`} title={`Batal edit FMR ${member.user.name}`}
                         >
                           <X className="size-3.5" />
                         </button>
@@ -383,7 +383,7 @@ export default function TeamMembersTab() {
                     ) : (
                       <>
                         <div className="text-right">
-                          <p className="text-[11px] text-gray-600">{hasProjectScope ? "FMR Project" : "FMR"}</p>
+<p className="text-[11px] text-gray-600" title="Fair Market Rate — nilai pasar wajar per jam">{hasProjectScope ? "FMR Project" : "FMR"}</p>
                           <p className="text-sm font-semibold tabular-nums text-white">
                             Rp {displayFmr(member).toLocaleString("id-ID")}
                           </p>
@@ -394,14 +394,14 @@ export default function TeamMembersTab() {
                         {isProjectFrozen ? (
                             <Lock
                               className="size-3.5 text-gray-600"
-                              aria-label="Project sudah dikunci, FMR tidak bisa diubah"
+                              aria-label="Project sudah dikunci, FMR tidak bisa diubah" title="Project sudah dikunci, FMR tidak bisa diubah"
                             />
                         ) : (
                           <button
                             type="button"
                             onClick={() => startEditFmr(member)}
                             className="rounded p-1.5 text-gray-500 hover:text-accent transition-colors active:scale-[0.97]"
-                            aria-label={`Edit FMR ${member.user.name}`}
+                            aria-label={`Edit FMR ${member.user.name}`} title={`Edit FMR ${member.user.name}`}
                           >
                             <Pencil className="size-3.5" />
                           </button>
@@ -411,7 +411,7 @@ export default function TeamMembersTab() {
                   </div>
                 ) : (
                   <div className="text-right">
-                    <p className="text-[11px] text-gray-600">{hasProjectScope ? "FMR Project" : "FMR"}</p>
+                    <p className="text-[11px] text-gray-600" title="Fair Market Rate — nilai pasar wajar per jam">{hasProjectScope ? "FMR Project" : "FMR"}</p>
                     <p className="text-sm font-semibold tabular-nums text-white">
                       Rp {displayFmr(member).toLocaleString("id-ID")}
                     </p>
@@ -530,7 +530,7 @@ export default function TeamMembersTab() {
                             onClick={() => handleApprove(proposal)}
                             disabled={actioningProposal === proposal.id}
                             className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-green-400 transition-colors active:scale-[0.97] hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                            aria-label={`Setujui proposal ${proposal.member.user.name}`}
+                            aria-label={`Setujui proposal ${proposal.member.user.name}`} title={`Setujui proposal ${proposal.member.user.name}`}
                           >
                             {actioningProposal === proposal.id ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
                             {actioningProposal === proposal.id ? "Menyetujui..." : "Setujui"}
@@ -540,7 +540,7 @@ export default function TeamMembersTab() {
                             onClick={() => handleReject(proposal)}
                             disabled={actioningProposal === proposal.id}
                             className="flex items-center gap-1 rounded px-2.5 py-1.5 text-xs font-medium text-red-400 transition-colors active:scale-[0.97] hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                            aria-label={`Tolak proposal ${proposal.member.user.name}`}
+                            aria-label={`Tolak proposal ${proposal.member.user.name}`} title={`Tolak proposal ${proposal.member.user.name}`}
                           >
                             {actioningProposal === proposal.id ? <Loader2 className="size-3.5 animate-spin" /> : <X className="size-3.5" />}
                             {actioningProposal === proposal.id ? "Menolak..." : "Tolak"}

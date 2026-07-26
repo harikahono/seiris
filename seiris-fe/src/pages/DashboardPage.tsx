@@ -195,7 +195,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
                 type="button"
                 onClick={() => setShareOpen(true)}
                 className="rounded-lg border border-gray-700/50 p-2 text-gray-400 transition-colors hover:border-accent hover:text-accent active:scale-[0.97]"
-                aria-label="Bagikan undangan"
+                aria-label="Bagikan undangan" title="Bagikan undangan"
               >
                 <Share2 className="size-4" />
               </button>
@@ -226,7 +226,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
             to={`/teams/${teamId}/contributions`}
             className="animate-fade-in-up block rounded-xl"
             style={{ animationDelay: "80ms" }}
-            aria-label="Lihat semua kontribusi tim"
+            aria-label="Lihat semua kontribusi tim" title="Lihat semua kontribusi tim"
           >
             <StatCard
               icon={FileText}
@@ -257,7 +257,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
               <Link
                 to={`/teams/${teamId}/revenue`}
                 className="flex items-center gap-1 text-xs text-accent hover:text-accent-hover"
-                aria-label="Lihat detail revenue"
+                aria-label="Lihat detail revenue" title="Lihat detail revenue"
               >
                 Detail <ChevronRight className="size-3" />
               </Link>

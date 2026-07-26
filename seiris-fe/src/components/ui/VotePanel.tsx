@@ -101,6 +101,7 @@ export default function VotePanel({ contribution, currentMemberId, onVoted, isPr
         type="button"
         onClick={handleVote}
         disabled={!vote || loading}
+        title={!vote ? "Pilih Setuju atau Tolak terlebih dahulu" : undefined}
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
       >
         {loading && <Loader2 className="size-4 animate-spin" />}

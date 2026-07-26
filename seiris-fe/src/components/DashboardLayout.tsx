@@ -214,6 +214,7 @@ export default function DashboardLayout() {
             onClick={() => setCollapsed(!collapsed)}
             className="rounded-md p-1.5 text-gray-500 hover:bg-gray-800 hover:text-white active:scale-[0.97]"
             aria-label={collapsed ? "Buka sidebar" : "Ciutkan sidebar"}
+            title={collapsed ? "Buka sidebar" : "Ciutkan sidebar"}
           >
             {collapsed ? <Menu className="size-4" /> : <ChevronLeft className="size-4" />}
           </button>

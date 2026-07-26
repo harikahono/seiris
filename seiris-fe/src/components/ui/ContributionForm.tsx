@@ -175,7 +175,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
             )}
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Pilih Jenis Kontribusi</h2>
-              <button type="button" onClick={handleClose} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup">
+              <button type="button" onClick={handleClose} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup" title="Tutup">
                 <X className="size-4" />
               </button>
             </div>
@@ -189,6 +189,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
                     type="button"
                     disabled={disabled}
                     onClick={() => selectType(ct.value)}
+                    title={disabled ? "FMR belum diset — atur dulu di halaman Anggota" : ct.label}
                     className={cn(
                       "flex flex-col items-center gap-2 rounded-lg border p-4 text-center transition-colors",
                       disabled
@@ -209,11 +210,11 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
         {step === "form" && type && (
           <>
             <div className="mb-4 flex items-center gap-2">
-              <button type="button" onClick={() => setStep("select")} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Kembali ke pilih jenis">
+              <button type="button" onClick={() => setStep("select")} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Kembali ke pilih jenis" title="Kembali ke pilih jenis">
                 <ArrowLeft className="size-4" />
               </button>
               <h2 className="text-lg font-semibold text-white">Buat Kontribusi {type}</h2>
-              <button type="button" onClick={handleClose} className="ml-auto rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup">
+              <button type="button" onClick={handleClose} className="ml-auto rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup" title="Tutup">
                 <X className="size-4" />
               </button>
             </div>
@@ -347,7 +348,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-300">
+                    <label className="mb-1 block text-sm font-medium text-gray-300" title="Persentase markup yang menjadi komisi kamu (dari deal − estimasi)">
                       Komisi Rate: <span className="text-accent font-bold">{commissionRate}%</span>
                     </label>
                     <div className="flex items-center gap-3">
@@ -390,6 +391,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
               <button
                 type="submit"
                 disabled={loading || !canSubmitForm}
+                title={!canSubmitForm ? "Lengkapi deskripsi (min 5 karakter) dan tanggal kontribusi" : undefined}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
               >
                 {loading && <Loader2 className="size-4 animate-spin" />}

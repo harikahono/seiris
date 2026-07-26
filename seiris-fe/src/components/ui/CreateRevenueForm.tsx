@@ -129,7 +129,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
       <div ref={trapRef} className={`${animClass} relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto`} onClick={(e) => e.stopPropagation()}>
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Catat Revenue Baru</h2>
-          <button type="button" onClick={handleClose} className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup">
+          <button type="button" onClick={handleClose} className="rounded p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup" title="Tutup">
             <X className="size-5" />
           </button>
         </div>
@@ -170,7 +170,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
                     placeholder="0" min="0"
                     className="w-28 rounded-lg border border-gray-700 bg-gray-800 px-2.5 py-1.5 text-xs text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent text-right" />
                   <button type="button" onClick={() => removeDeduction(i)}
-                    className="rounded p-1 text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition-colors" aria-label="Hapus potongan">
+                    className="rounded p-1 text-gray-500 hover:text-red-400 hover:bg-red-900/20 transition-colors" aria-label="Hapus potongan" title="Hapus potongan">
                     <Trash2 className="size-3.5" />
                   </button>
                 </div>

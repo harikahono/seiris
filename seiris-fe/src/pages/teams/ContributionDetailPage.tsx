@@ -162,7 +162,7 @@ export default function ContributionDetailPage() {
         <button
           onClick={() => navigate(-1)}
           className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
-          aria-label="Kembali"
+          aria-label="Kembali" title="Kembali"
         >
           <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
         </button>
@@ -181,7 +181,7 @@ export default function ContributionDetailPage() {
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
-          aria-label="Kembali"
+          aria-label="Kembali" title="Kembali"
         >
           <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
         </button>
@@ -253,7 +253,7 @@ export default function ContributionDetailPage() {
                         type="button"
                         onClick={() => diffClose(() => setShowDiff(false))}
                         className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]"
-                        aria-label="Tutup"
+                        aria-label="Tutup" title="Tutup"
                       >
                         <X className="size-4" />
                       </button>
@@ -306,7 +306,7 @@ export default function ContributionDetailPage() {
             </p>
           </div>
           <div className="min-w-[100px] rounded-lg border border-gray-800 bg-gray-950/50 p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500">Multiplier</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500" title="Faktor pengali — CASH=×4, non-cash lainnya=×2">Multiplier</p>
             <p className="mt-1 font-mono text-sm font-medium text-white">
               &times;{contribution.multiplier}
             </p>

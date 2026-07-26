@@ -89,7 +89,7 @@ export default function RevenueDetailPage() {
         <button
           onClick={() => navigate(-1)}
           className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
-          aria-label="Kembali"
+          aria-label="Kembali" title="Kembali"
         >
           <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
         </button>
@@ -106,7 +106,7 @@ export default function RevenueDetailPage() {
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
-          aria-label="Kembali"
+          aria-label="Kembali" title="Kembali"
         >
           <ArrowLeft className="size-4" /> <span className="hidden sm:inline">Kembali</span>
         </button>

@@ -40,7 +40,7 @@ export default function ContributionCard({
           <StatusBadge status={contribution.status} />
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <span className="text-sm font-semibold tabular-nums text-accent">
+          <span className="text-sm font-semibold tabular-nums text-accent" title="Unit equity dalam metode Slicing Pie">
             {contribution.total_slices.toLocaleString("id-ID")} slices
           </span>
         </div>

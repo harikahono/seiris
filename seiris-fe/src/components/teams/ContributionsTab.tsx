@@ -181,7 +181,7 @@ export default function ContributionsTab() {
                 className="h-9 w-full rounded-md border border-gray-700 bg-gray-900 pl-8 pr-8 text-sm text-white placeholder-gray-500 outline-none focus:border-accent"
               />
               {search && (
-                <button onClick={() => { setSearch(""); setPage(1); setLoading(true); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                <button onClick={() => { setSearch(""); setPage(1); setLoading(true); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white" aria-label="Hapus pencarian" title="Hapus pencarian">
                   <X className="size-3.5" />
                 </button>
               )}

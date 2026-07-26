@@ -134,7 +134,7 @@ export default function SettingsPage() {
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1 text-sm text-gray-500 hover:text-white transition-colors"
-        aria-label="Kembali"
+        aria-label="Kembali" title="Kembali"
       >
         <ArrowLeft className="size-4" />
         <span className="hidden sm:inline">Kembali</span>
@@ -174,7 +174,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full border border-gray-700 bg-gray-800 text-gray-400 hover:text-white transition-colors active:scale-[0.97]"
-                aria-label="Ubah foto profil"
+                aria-label="Ubah foto profil" title="Ubah foto profil"
               >
                 <Camera className="size-3" />
               </button>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={() => setShowToken(!showToken)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white active:scale-[0.97]"
-                  aria-label={showToken ? "Sembunyikan token" : "Tampilkan token"}
+                  aria-label={showToken ? "Sembunyikan token" : "Tampilkan token"} title={showToken ? "Sembunyikan token" : "Tampilkan token"}
                 >
                   {showToken ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -297,6 +297,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={tokenLoading || !githubToken.trim()}
+              title={!githubToken.trim() ? "Masukkan token GitHub terlebih dahulu" : undefined}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {tokenLoading ? "Menyimpan..." : "Simpan Token"}

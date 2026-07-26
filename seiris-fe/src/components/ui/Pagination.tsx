@@ -35,6 +35,7 @@ export default function Pagination({ current, last, onChange }: PaginationProps)
         type="button"
         disabled={current <= 1}
         onClick={() => onChange(current - 1)}
+        title={current <= 1 ? "Halaman pertama" : "Sebelumnya"}
         className="rounded-md px-2 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-[0.97]"
       >
         ‹
@@ -67,6 +68,7 @@ export default function Pagination({ current, last, onChange }: PaginationProps)
         type="button"
         disabled={current >= last}
         onClick={() => onChange(current + 1)}
+        title={current >= last ? "Halaman terakhir" : "Selanjutnya"}
         className="rounded-md px-2 py-1 text-sm text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors active:scale-[0.97]"
       >
         ›

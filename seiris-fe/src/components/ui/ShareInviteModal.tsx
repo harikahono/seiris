@@ -68,7 +68,7 @@ export default function ShareInviteModal({ open, onClose, teamName, inviteCode }
         {/* Header */}
         <div className="mb-1 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Bagikan Undangan</h2>
-          <button type="button" onClick={() => animateClose(onClose)} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup">
+          <button type="button" onClick={() => animateClose(onClose)} className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]" aria-label="Tutup" title="Tutup">
             <X className="size-4" />
           </button>
         </div>

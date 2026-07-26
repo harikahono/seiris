@@ -89,7 +89,7 @@ export default function TeamDetailPage() {
           type="button"
           onClick={() => navigate("/dashboard")}
           className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-white transition"
-          aria-label="Kembali"
+          aria-label="Kembali" title="Kembali"
         >
           <ArrowLeft className="size-4" />
           <span className="hidden sm:inline">Kembali</span>

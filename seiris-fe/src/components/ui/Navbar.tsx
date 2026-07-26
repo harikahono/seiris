@@ -52,7 +52,7 @@ export function Navbar() {
         <header className="header container mx-auto">
           <nav className="nav-row">
             <div className="nav-row__right">
-              <button role="button" className="nav-logo-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              <button role="button" className="nav-logo-btn" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label={isMenuOpen ? "Tutup menu" : "Buka menu"} title={isMenuOpen ? "Tutup menu" : "Buka menu"}>
                 <img src={logo} alt="SEIRIS" className="nav-logo-img" />
               </button>
             </div>

@@ -175,7 +175,7 @@ export default function TeamSettingsTab() {
                 onClick={() => logoInputRef.current?.click()}
                 disabled={logoLoading}
                 className="absolute -bottom-1 -right-1 flex size-6 items-center justify-center rounded-full border border-gray-700 bg-gray-800 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
-                aria-label="Ubah logo tim"
+                aria-label="Ubah logo tim" title="Ubah logo tim"
               >
                 <Camera className="size-3" />
               </button>
@@ -323,6 +323,7 @@ export default function TeamSettingsTab() {
                   type="button"
                   onClick={() => setFreezeConfirmOpen(true)}
                   disabled={freezing || team.is_frozen || activeProjectsCount > 0}
+                  title={activeProjectsCount > 0 ? "Freeze semua project dulu sebelum freeze tim" : team.is_frozen ? "Tim sudah di-freeze" : undefined}
                   className="flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-400 transition-colors active:scale-[0.97] hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {freezing ? (
@@ -395,6 +396,7 @@ export default function TeamSettingsTab() {
                   <button
                     type="button"
                     disabled={p.is_frozen || projectFreezing === p.id}
+                    title={p.is_frozen ? "Project sudah di-freeze" : undefined}
                     onClick={async () => {
                       setProjectFreezing(p.id);
                       try {

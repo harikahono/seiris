@@ -164,7 +164,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
             type="button"
             onClick={handleClose}
             className="ml-2 rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]"
-            aria-label="Tutup"
+            aria-label="Tutup" title="Tutup"
           >
             <X className="size-4" />
           </button>
@@ -231,7 +231,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
             </div>
 
             <div>
-              <label htmlFor="team-fmr" className="mb-1.5 block text-sm font-medium text-gray-300">
+              <label htmlFor="team-fmr" className="mb-1.5 block text-sm font-medium text-gray-300" title="Fair Market Rate — nilai pasar wajar per jam">
                 FMR (Rp/jam) <span className="text-gray-500">(opsional)</span>
               </label>
               <input
@@ -291,6 +291,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
             <button
               type="submit"
               disabled={loadingJoin || inviteCode.trim().length !== 8}
+              title={inviteCode.trim().length !== 8 ? "Kode undangan harus 8 karakter" : undefined}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
             >
               {loadingJoin ? (

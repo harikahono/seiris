@@ -40,8 +40,8 @@ export default function EquityPieCard({ members, totalSlices, isFrozen }: Equity
 
   return (
     <div className="rounded-xl border border-gray-800 bg-card p-5 h-full">
-      <h3 className="mb-1 text-sm font-semibold text-white">Equity per Anggota</h3>
-      <p className="mb-4 text-xs text-gray-500">
+      <h3 className="mb-1 text-sm font-semibold text-white" title="Equity = hak kepemilikan atas nilai tim, dihitung dari total slices">Equity per Anggota</h3>
+      <p className="mb-4 text-xs text-gray-500" title="Unit equity dalam metode Slicing Pie — total hak kepemilikan tim">
         Total Slices: {totalSlices.toLocaleString("id-ID")}
         {isFrozen && <span className="ml-2 text-red-400">(Frozen)</span>}
       </p>
