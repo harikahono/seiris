@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [photoDeleting, setPhotoDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ── GitHub token state ──
@@ -75,6 +76,24 @@ export default function SettingsPage() {
     if (file) {
       setProfilePhoto(file);
       setPhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  // ── Delete photo ──
+  const handleDeletePhoto = async () => {
+    setPhotoDeleting(true);
+    try {
+      await api.delete("/users/me/profile-photo");
+      setPhotoPreview(null);
+      setProfilePhoto(null);
+      if (setUser) {
+        setUser((prev: any) => ({ ...prev, profile_photo_url: null }));
+      }
+      toast.success("Foto profil berhasil dihapus.");
+    } catch {
+      toast.error("Gagal menghapus foto profil.");
+    } finally {
+      setPhotoDeleting(false);
     }
   };
 
@@ -178,6 +197,16 @@ export default function SettingsPage() {
             <div>
               <p className="text-sm font-medium text-white">{user?.name}</p>
               <p className="text-xs text-gray-500">JPG, PNG atau WebP. Maks 5 MB.</p>
+              {(user?.profile_photo_url || photoPreview) && (
+                <button
+                  type="button"
+                  onClick={handleDeletePhoto}
+                  disabled={photoDeleting}
+                  className="mt-1.5 text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                >
+                  {photoDeleting ? "Menghapus..." : "Hapus foto"}
+                </button>
+              )}
             </div>
           </div>
 

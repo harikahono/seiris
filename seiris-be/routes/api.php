@@ -61,6 +61,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('auth/me', [AuthController::class, 'me']);
     // User settings
     Route::patch('users/me/profile', [AuthController::class, 'updateProfile'])->middleware('throttle:write');
+    Route::delete('users/me/profile-photo', [AuthController::class, 'deleteProfilePhoto'])->middleware('throttle:write');
     Route::patch('users/me/github-token', [AuthController::class, 'updateGithubToken'])->middleware('throttle:write');
 
     // Dashboard
@@ -87,6 +88,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('teams/{team}',                                [TeamController::class, 'show']);
         Route::put('teams/{team}',                                [TeamController::class, 'update'])->middleware('throttle:write');
         Route::post('teams/{team}/logo',                          [TeamController::class, 'uploadLogo'])->middleware('throttle:write');
+        Route::delete('teams/{team}/logo',                         [TeamController::class, 'deleteLogo'])->middleware('throttle:write');
         Route::put('teams/{team}/members/{member}/fmr',           [TeamController::class, 'updateFmr'])->middleware('throttle:write');
         Route::post('teams/{team}/freeze',                        [TeamController::class, 'freeze'])->middleware('throttle:write');
         Route::post('teams/{team}/members/{member}/exit',         [TeamController::class, 'exitMember'])->middleware('throttle:write');

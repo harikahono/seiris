@@ -184,6 +184,37 @@ class TeamController extends Controller
     }
 
     /**
+     * DELETE /api/teams/{team}/logo
+     * Hapus logo tim — hanya owner
+     */
+    public function deleteLogo(Request $request, Team $team): JsonResponse
+    {
+        Gate::authorize('update', $team);
+
+        if ($team->logo_path) {
+            Storage::disk('public')->delete($team->logo_path);
+        }
+
+        $team->update(['logo_path' => null]);
+
+        AuditLogService::logFromRequest(
+            request:     $request,
+            teamId:      $team->id,
+            action:      'team.logo_deleted',
+            subjectType: Team::class,
+            subjectId:   $team->id,
+            payload:     [],
+        );
+
+        broadcast(new TeamUpdated($team, 'team.logo_deleted', $request->user()->name ?? ''))->toOthers();
+
+        return response()->json([
+            'message' => 'Logo tim berhasil dihapus.',
+            'data'    => new TeamResource($team->fresh()->load(['members.user', 'owner'])),
+        ]);
+    }
+
+    /**
      * GET /api/teams/invite/{inviteCode}
      * Public preview tim — ngga perlu auth, informasinya terbatas
      */

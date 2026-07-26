@@ -40,6 +40,7 @@ export default function TeamSettingsTab() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoLoading, setLogoLoading] = useState(false);
+  const [logoDeleting, setLogoDeleting] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [freezing, setFreezing] = useState(false);
   const [freezeConfirmOpen, setFreezeConfirmOpen] = useState(false);
@@ -84,6 +85,21 @@ export default function TeamSettingsTab() {
       toast.error(msg ?? "Gagal mengunggah logo.");
     } finally {
       setLogoLoading(false);
+    }
+  };
+
+  const handleDeleteLogo = async () => {
+    setLogoDeleting(true);
+    try {
+      await api.delete(`/teams/${team.id}/logo`);
+      setLogoPreview(null);
+      setLogoFile(null);
+      fetchTeam();
+      toast.success("Logo tim berhasil dihapus.");
+    } catch {
+      toast.error("Gagal menghapus logo.");
+    } finally {
+      setLogoDeleting(false);
     }
   };
 
@@ -209,6 +225,16 @@ export default function TeamSettingsTab() {
                     Batal
                   </button>
                 </div>
+              )}
+              {!logoFile && team.logo_url && (
+                <button
+                  type="button"
+                  onClick={handleDeleteLogo}
+                  disabled={logoDeleting}
+                  className="mt-2 text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                >
+                  {logoDeleting ? "Menghapus..." : "Hapus logo"}
+                </button>
               )}
             </div>
           </div>

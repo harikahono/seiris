@@ -126,6 +126,26 @@ class AuthController extends Controller
     }
 
     /**
+     * DELETE /api/users/me/profile-photo
+     * Hapus foto profil
+     */
+    public function deleteProfilePhoto(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->profile_photo_path) {
+            Storage::disk('public')->delete($user->profile_photo_path);
+        }
+
+        $user->update(['profile_photo_path' => null]);
+
+        return response()->json([
+            'message' => 'Foto profil berhasil dihapus.',
+            'user'    => new UserResource($user->fresh()),
+        ]);
+    }
+
+    /**
      * PATCH /api/users/me/github-token
      * Update user's GitHub personal access token (for private repo diff)
      */
