@@ -339,7 +339,7 @@ class ContributionController extends Controller
             if ($token) {
                 $headers['Authorization'] = "Bearer $token";
             }
-            $response = Http::withHeaders($headers)->timeout(5)->get($url . '.diff');
+            $response = Http::withHeaders($headers)->timeout(5)->get($url . '.patch');
             if ($response->failed()) {
                 Log::warning('[GitHubDiff] fetch failed', ['url' => $url, 'status' => $response->status()]);
                 return null;
@@ -351,11 +351,10 @@ class ContributionController extends Controller
             // Extract commit message dari chunk pertama (sebelum diff --git)
             $message = '';
             if (!empty($chunks[0]) && trim($chunks[0])) {
-                // Strip metadata headers sampai blank line, lalu buang indent 4-spasi + trailing ---
-                $body = preg_replace('/^.*?\n\n/s', '', trim($chunks[0]));
-                $body = preg_replace('/^    /m', '', $body);
-                $body = preg_replace('/\n---[ \t]*$/', '', $body);
-                $message = trim($body);
+                // Parse Subject dari patch header, handle multiline continuation
+                if (preg_match('/^Subject: \[[^\]]*\]\s*((?:[^\n]|\n[ \t][^\n]*)*)/m', $chunks[0], $m)) {
+                    $message = preg_replace('/\s+/', ' ', trim($m[1]));
+                }
             }
 
             $files = [];
