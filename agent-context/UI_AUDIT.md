@@ -60,6 +60,44 @@
 
 ---
 
+## 2026-07-27 — UX Safety Audit (20 temuan baru)
+
+> Sesi audit ketiga fokus pada **edge case keamanan UX** — double submit, race condition, state setelah unmount, memory leak, dan exit animation inconsistency. Semua difix di commit `edaf35c`.
+
+### 🔴 HIGH — Crash / Double Submit
+
+| # | Issue | File | Fix |
+|---|-------|------|-----|
+| 1 | CreateRevenueForm X button crash — `onClick={handleClose}` kirim MouseEvent sbg argumen → `extra?.()` throw | `CreateRevenueForm.tsx:148` | `onClick={() => handleClose()}` ✅ |
+| 2 | RevenueCard distribute/requestDistribute — 2 POST kalau double-click sebelum React re-render | `RevenueCard.tsx:118,137` | `if (distributing) return;` ✅ |
+| 3 | 6 handler tanpa early-return guard | ContributionForm, CreateRevenueForm, TeamSettingsTab, CreateTeamModal, AuthUI, TeamMembersTab | `if (loading) return;` di baris pertama ✅ |
+
+### 🟡 MEDIUM — Race Condition & State Kacau
+
+| # | Issue | File | Fix |
+|---|-------|------|-----|
+| 4 | Realtime refresh race dengan pagination — 2 fetch jalan bersamaan, yg paling akhir nimpain data | `RevenueTab`, `ContributionsTab` | `fetchingRef` guard ✅ |
+| 5 | Realtime fetch setState setelah unmount — user pindah halaman, fetch masih jalan | RevenueDetailPage, ContributionDetailPage, MemberDetailPage, DashboardPage | `activeRef` guard ✅ |
+| 6 | Polling localStorage tiap 500ms selama session | `TeamContext.tsx` | Ganti `setInterval` → `storage` event + `CustomEvent` ✅ |
+| 7 | Frozen team: save button tetap aktif, approval_threshold dikirim → server 403 | `TeamSettingsTab.tsx` | `disabled={saving || team.is_frozen}` ✅ |
+| 8 | `d.amount || ""` — amount=0 jadi string kosong | `CreateRevenueForm.tsx:184` | `?? ""` ✅ |
+
+### 🟢 LOW — Polish & Edge Cases
+
+| # | Issue | Fix |
+|---|-------|-----|
+| 9 | ConfirmModal confirm skip exit anim | `animateClose(() => onConfirm())` ✅ |
+| 10 | ProofPreviewModal X button skip exit anim | `animateClose(onClose)` ✅ |
+| 11 | Logo preview `createObjectURL` gak di-revoke | revoke sebelum set baru ✅ |
+| 12 | ExportPdfButton revoke URL sebelum browser mulai download | `setTimeout(revoke, 1000)` ✅ |
+| 13 | `isDistributable` jadi `false` kalo fetch equity gagal (bawaan, minor) | — |
+| 14 | useFocusTrap return focus ke element yg udah unmount | Fallback `querySelector` ✅ |
+| 15 | AuthUI password meter `[score - 1]` bisa -1 (minor) | — |
+| 16 | `/config` fetch tiap mount (minor, pre-optimization) | — |
+| 17 | TeamMembersTab Escape handler stale closure | `useRef` pattern ✅ |
+
+---
+
 ## 2. Clickable Text vs Tombol vs Icon
 
 ### 🔴 3 Gaya Approve/Reject untuk Fungsi Sama — 🚨 WCAG AA
