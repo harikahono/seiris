@@ -223,7 +223,7 @@ export default function SettingsPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
+              className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
               required
             />
           </div>
@@ -235,7 +235,7 @@ export default function SettingsPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
+              className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
               required
             />
           </div>
@@ -251,7 +251,7 @@ export default function SettingsPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Kosongkan jika tidak ingin ganti"
-                className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
+                className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
               />
             </div>
             <div>
@@ -261,7 +261,7 @@ export default function SettingsPage() {
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
                 placeholder="Ulangi password baru"
-                className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
+                className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
               />
             </div>
           </div>
@@ -302,7 +302,7 @@ export default function SettingsPage() {
                   value={githubToken}
                   onChange={(e) => setGithubToken(e.target.value)}
                   placeholder="ghp_... atau github_pat_..."
-                  className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 pr-8 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
+                  className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 pr-8 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
                   required
                 />
                 <button
