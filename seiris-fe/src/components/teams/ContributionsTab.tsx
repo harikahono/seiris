@@ -60,6 +60,8 @@ export default function ContributionsTab() {
   const [showForm, setShowForm] = useState(false);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
+  const pageRef = useRef(page);
+  pageRef.current = page;
   // A3: search & filter state
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -94,7 +96,7 @@ export default function ContributionsTab() {
   // ── Fetch Contributions (server-side filter) ──
   // ponytail: overridePage param biar gak perlu nunggu setPage propagate
   const fetchContributions = useCallback((overridePage?: number) => {
-    const p = overridePage ?? page;
+    const p = overridePage ?? pageRef.current;
     const params: Record<string, unknown> = { page: p };
     if (filter !== 'all') params.status = filter;
     if (debouncedSearch.trim()) params.search = debouncedSearch.trim();

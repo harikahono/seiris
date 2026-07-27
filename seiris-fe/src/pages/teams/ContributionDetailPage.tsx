@@ -436,7 +436,7 @@ export default function ContributionDetailPage() {
           <VotePanel
             contribution={contribution}
             currentMemberId={currentMemberId}
-            onVoted={() => navigate(`/teams/${teamId}/contributions`)}
+            onVoted={() => fetchData()}
             isProjectMember={isProjectMember}
             frozen={contribution.project_id ? (projects.find((p) => p.id === contribution.project_id)?.is_frozen ?? false) : false}
           />

@@ -216,6 +216,16 @@ export default function TeamMembersTab() {
   const { show: showExit, animClass: exitAnim, animateClose: exitClose } = useModalAnimation(!!exitingMember);
   const exitTrapRef = useFocusTrap(showExit);
 
+  // Escape nutup exit modal
+  useEffect(() => {
+    if (!showExit) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') exitCancel();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showExit]);
+
   const exitCancel = () => exitClose(() => { setExitingMember(null); setExitReason(""); });
 
   const handleExit = async () => {

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { isAxiosError } from "axios";
 import api from "@/api/axios";
@@ -38,6 +38,17 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
 
   const { show, animClass, animateClose } = useModalAnimation(open);
   const trapRef = useFocusTrap(show);
+
+  // Escape nutup form (kecuali saving)
+  useEffect(() => {
+    if (!show || saving) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [show, saving]);
+
   if (!show) return null;
 
   const totalDeductions = deductions.reduce((s, d) => s + (Number(d.amount) || 0), 0);
@@ -63,7 +74,13 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
     setErrors({});
   };
 
-  const handleClose = () => { resetForm(); animateClose(onClose); };
+  const handleClose = (extra?: () => void) => {
+    animateClose(() => {
+      resetForm();
+      extra?.();
+      onClose();
+    });
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -102,9 +119,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
 
       await api.post(`${basePath}/revenues`, formData);
       toast.success("Revenue berhasil dicatat");
-      resetForm();
-      onCreated();
-      onClose();
+      handleClose(onCreated);
     } catch (err) {
       const parsed = parseErrors(err);
       if (Object.keys(parsed).length > 0) {
@@ -125,7 +140,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="fixed inset-0" onClick={handleClose} />
+      <div className="fixed inset-0" onClick={() => { if (saving) return; handleClose(); }} />
       <div ref={trapRef} className={`${animClass} relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl max-h-[90vh] overflow-y-auto`} onClick={(e) => e.stopPropagation()}>
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">Catat Revenue Baru</h2>

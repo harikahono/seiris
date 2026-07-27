@@ -30,6 +30,8 @@ export default function RevenueTab() {
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const pageRef = useRef(page);
+  pageRef.current = page;
   const [lastPage, setLastPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [equitySlices, setEquitySlices] = useState<number | null>(null);
@@ -41,7 +43,7 @@ export default function RevenueTab() {
   // ── Fetch Revenues (no loading state — caller manages it) ──
   // ponytail: overridePage param biar gak perlu nunggu setPage propagate
   const fetchRevenues = useCallback((overridePage?: number) => {
-    const p = overridePage ?? page;
+    const p = overridePage ?? pageRef.current;
     const params: Record<string, unknown> = { page: p };
     if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
     if (dateFrom) params.date_from = dateFrom;

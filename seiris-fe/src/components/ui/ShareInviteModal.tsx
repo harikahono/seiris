@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Link2, Check, MessageCircle, Mail, Copy } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +16,17 @@ export default function ShareInviteModal({ open, onClose, teamName, inviteCode }
   const [copiedLink, setCopiedLink] = useState(false);
   const { show, animClass, animateClose } = useModalAnimation(open);
   const trapRef = useFocusTrap(show);
+
+  // Escape nutup modal
+  useEffect(() => {
+    if (!show) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') animateClose(onClose);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [show, animateClose, onClose]);
+
   if (!show) return null;
 
   const inviteUrl = `${window.location.origin}/join/${inviteCode}`;

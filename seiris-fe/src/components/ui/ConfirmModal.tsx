@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -31,6 +31,17 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   const { show, animClass, animateClose } = useModalAnimation(open);
   const trapRef = useFocusTrap(show);
+
+  // Escape nutup modal (kecuali loading)
+  useEffect(() => {
+    if (!show || loading) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') animateClose(onClose);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [show, loading, animateClose, onClose]);
+
   if (!show) return null;
 
   const isDanger = variant === "danger";
@@ -40,7 +51,7 @@ export default function ConfirmModal({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="fixed inset-0" onClick={() => animateClose(onClose)} />
+      <div className="fixed inset-0" onClick={() => { if (loading) return; animateClose(onClose); }} />
       <div ref={trapRef} className={`${animClass} relative w-80 rounded-xl border border-gray-700 bg-card p-6 shadow-2xl`}>
         <div className="flex flex-col items-center text-center">
           {icon ?? (

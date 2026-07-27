@@ -64,6 +64,17 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
 
   const { show, animClass, animateClose } = useModalAnimation(open);
   const trapRef = useFocusTrap(show);
+
+  // Escape nutup form (kecuali loading)
+  useEffect(() => {
+    if (!show || loading) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [show, loading]);
+
   if (!show) return null;
 
   const requiresHours = type && ["TIME", "IDEA", "NETWORK"].includes(type);
@@ -135,19 +146,21 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
   };
 
   const handleClose = () => {
-    setStep("select");
-    setType(null);
-    setDescription("");
-    setContributionDate(new Date().toISOString().split("T")[0]);
-    setHours("");
-    setAmount("");
-    setDealValue("");
-    setEstimatedValue("");
-    setCommissionRate("50");
-    setProofFile(null);
-    setSourceUrl("");
-    setErrors({});
-    animateClose(onClose);
+    animateClose(() => {
+      setStep("select");
+      setType(null);
+      setDescription("");
+      setContributionDate(new Date().toISOString().split("T")[0]);
+      setHours("");
+      setAmount("");
+      setDealValue("");
+      setEstimatedValue("");
+      setCommissionRate("50");
+      setProofFile(null);
+      setSourceUrl("");
+      setErrors({});
+      onClose();
+    });
   };
 
   const inputClass = (field: keyof FieldErrors) =>
@@ -159,7 +172,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
     );
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={handleClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => { if (loading) return; handleClose(); }}>
       <div ref={trapRef} className={`${animClass} relative w-full max-w-lg rounded-xl border border-gray-700 bg-card p-6 shadow-2xl`} onClick={(e) => e.stopPropagation()}>
         {step === "select" && (
           <>

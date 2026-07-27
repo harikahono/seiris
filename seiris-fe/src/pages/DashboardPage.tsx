@@ -129,7 +129,7 @@ function TeamDashboard({ teamId }: { teamId: string }) {
   const [shareOpen, setShareOpen] = useState(false);
 
   const fetchData = useCallback(() => {
-    return Promise.all([
+    return Promise.allSettled([
       api.get<{ data: Team }>(`/teams/${teamId}`),
       api.get<{ data: EquityData }>(`/teams/${teamId}/equity`),
       api.get<{ data: Contribution[]; meta: { total: number } }>(
@@ -140,13 +140,22 @@ function TeamDashboard({ teamId }: { teamId: string }) {
       ),
     ])
       .then(([teamRes, equityRes, contribsRes, revenuesRes]) => {
-        setTeam(teamRes.data.data);
-        setEquity(equityRes.data.data);
-        setRecentContribs(contribsRes.data.data);
-        setTotalContribCount(contribsRes.data.meta?.total ?? contribsRes.data.data.length);
-        const revs = revenuesRes.data.data;
-        setTotalRevenue(revs.reduce((s, r) => s + r.amount, 0));
-        setTotalDistributed(revs.reduce((s, r) => s + (r.is_distributed ? r.distributable_amount : 0), 0));
+        if (teamRes.status === 'fulfilled') setTeam(teamRes.value.data.data);
+        if (equityRes.status === 'fulfilled') setEquity(equityRes.value.data.data);
+        if (contribsRes.status === 'fulfilled') {
+          setRecentContribs(contribsRes.value.data.data);
+          setTotalContribCount(contribsRes.value.data.meta?.total ?? contribsRes.value.data.data.length);
+        }
+        if (revenuesRes.status === 'fulfilled') {
+          const revs = revenuesRes.value.data.data;
+          setTotalRevenue(revs.reduce((s, r) => s + r.amount, 0));
+          setTotalDistributed(revs.reduce((s, r) => s + (r.is_distributed ? r.distributable_amount : 0), 0));
+        }
+        // Partial failure → still show partial data
+        const rejected = [teamRes, equityRes, contribsRes, revenuesRes].filter(r => r.status === 'rejected');
+        if (rejected.length > 0 && rejected.length === 4) {
+          toast.error("Gagal memuat data dashboard");
+        }
       })
       .catch(() => toast.error("Gagal memuat data dashboard"));
   }, [teamId]);
