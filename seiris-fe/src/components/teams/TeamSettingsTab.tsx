@@ -45,6 +45,7 @@ export default function TeamSettingsTab() {
   const [freezing, setFreezing] = useState(false);
   const [freezeConfirmOpen, setFreezeConfirmOpen] = useState(false);
   const [projectFreezing, setProjectFreezing] = useState<string | null>(null);
+  const [projectFreezeTargetId, setProjectFreezeTargetId] = useState<string | null>(null);
   const { projects, refreshProjects } = useProjectContext();
   const activeProjectsCount = projects.filter((p) => !p.is_frozen).length;
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -145,6 +146,7 @@ export default function TeamSettingsTab() {
     setFreezing(true);
     try {
       await api.post(`/teams/${team.id}/freeze`);
+      setFreezeConfirmOpen(false);
       toast.success("Equity tim berhasil di-freeze");
       fetchTeam();
     } catch (err) {
@@ -155,6 +157,27 @@ export default function TeamSettingsTab() {
       }
     } finally {
       setFreezing(false);
+    }
+  };
+
+  const handleProjectFreeze = async () => {
+    if (!projectFreezeTargetId) return;
+    setProjectFreezing(projectFreezeTargetId);
+    try {
+      await api.post(`/teams/${team.id}/projects/${projectFreezeTargetId}/freeze`);
+      setProjectFreezeTargetId(null);
+      toast.success("Project berhasil di-freeze");
+      refreshProjects();
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.status === 409) {
+        toast.error("Project sudah di-freeze sebelumnya");
+      } else if (isAxiosError(err) && err.response?.status === 422) {
+        toast.error(err.response.data?.message || "Gagal freeze project");
+      } else {
+        toast.error("Gagal freeze project");
+      }
+    } finally {
+      setProjectFreezing(null);
     }
   };
 
@@ -389,6 +412,17 @@ export default function TeamSettingsTab() {
         loading={freezing}
       />
 
+      <ConfirmModal
+        open={projectFreezeTargetId !== null}
+        onClose={() => setProjectFreezeTargetId(null)}
+        onConfirm={handleProjectFreeze}
+        title="Freeze Project"
+        description="Yakin ingin freeze project ini? Aksi ini tidak bisa dibatalkan."
+        confirmText="Freeze"
+        variant="danger"
+        loading={projectFreezing !== null}
+      />
+
       {/* ── Freeze Project ── */}
       {projects.length > 0 && (
         <section className="animate-fade-in-up" style={{ animationDelay: "160ms" }}>
@@ -428,26 +462,9 @@ export default function TeamSettingsTab() {
                   </div>
                   <button
                     type="button"
-                    disabled={p.is_frozen || projectFreezing === p.id}
+                    disabled={p.is_frozen || projectFreezing !== null}
                     title={p.is_frozen ? "Project sudah di-freeze" : undefined}
-                    onClick={async () => {
-                      setProjectFreezing(p.id);
-                      try {
-                        await api.post(`/teams/${team.id}/projects/${p.id}/freeze`);
-                        toast.success(`Project "${p.name}" berhasil di-freeze`);
-                        refreshProjects();
-                      } catch (err) {
-                        if (isAxiosError(err) && err.response?.status === 409) {
-                          toast.error(`Project "${p.name}" sudah di-freeze`);
-                        } else if (isAxiosError(err) && err.response?.status === 422) {
-                          toast.error(err.response.data?.message || "Gagal freeze project");
-                        } else {
-                          toast.error("Gagal freeze project");
-                        }
-                      } finally {
-                        setProjectFreezing(null);
-                      }
-                    }}
+                    onClick={() => setProjectFreezeTargetId(p.id)}
                     className="flex shrink-0 items-center gap-1.5 rounded-lg border border-yellow-500/30 px-3 py-1.5 text-xs text-yellow-400 transition-colors active:scale-[0.97] hover:bg-yellow-500/10 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {projectFreezing === p.id ? (

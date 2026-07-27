@@ -11,6 +11,7 @@ import VotePanel from "@/components/ui/VotePanel";
 import ProofPreviewModal from "@/components/ui/ProofPreviewModal";
 import { ArrowLeft, ThumbsUp, ThumbsDown, X, ExternalLink, ChevronDown, Loader2, RefreshCw } from "lucide-react";
 import { useModalAnimation } from "@/hooks/useModalAnimation";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { html } from "diff2html";
 import "diff2html/bundles/css/diff2html.min.css";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,17 @@ export default function ContributionDetailPage() {
   const [isProjectMember, setIsProjectMember] = useState(true);
   const [featureEnabled, setFeatureEnabled] = useState(true);
   const { show: showDiffModal, animClass: diffAnim, animateClose: diffClose } = useModalAnimation(showDiff);
+  const diffTrapRef = useFocusTrap(showDiffModal);
+
+  // Escape nutup modal
+  useEffect(() => {
+    if (!showDiffModal) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') diffClose(() => setShowDiff(false));
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showDiffModal, diffClose]);
 
   const fetchData = useCallback(async (isBackground = false) => {
     if (!teamId || !contributionId) return;
@@ -238,7 +250,9 @@ export default function ContributionDetailPage() {
             {/* Diff modal */}
             {showDiffModal && createPortal(
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                <div className={`${diffAnim} relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card shadow-2xl`}>
+                {/* Backdrop click → nutup */}
+                <div className="fixed inset-0" onClick={() => diffClose(() => setShowDiff(false))} />
+                <div ref={diffTrapRef} className={`${diffAnim} relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-gray-700 bg-card shadow-2xl`} onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
                     <span className="text-sm font-medium text-gray-300">Diff GitHub</span>
                     <div className="flex items-center gap-3">
@@ -264,15 +278,15 @@ export default function ContributionDetailPage() {
                   <div className="flex-1 overflow-auto p-4">
                     <div className="space-y-4">
                       {diffMessage && (
-                        <div className="rounded-lg border border-gray-700/50 bg-gray-900/30 px-4 py-3 text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                        <div className="stagger-enter rounded-lg border border-gray-700/50 bg-gray-900/30 px-4 py-3 text-sm text-gray-300 whitespace-pre-wrap leading-relaxed" style={{ animationDelay: '0ms' }}>
                           {diffMessage}
                         </div>
                       )}
-                      {diffFiles.length === 0 ? (
-                        <p className="text-gray-400">Tidak ada perubahan.</p>
-                      ) : (
-                        diffFiles.map((f, i) => (
-                          <div key={i} className="rounded border border-gray-700 overflow-hidden">
+{diffFiles.length === 0 ? (
+                          <p className="text-gray-400">Tidak ada perubahan.</p>
+                        ) : (
+                          diffFiles.map((f, i) => (
+                            <div key={i} className="stagger-enter rounded border border-gray-700 overflow-hidden" style={{ animationDelay: `${i * 60}ms` }}>
                             <button
                               onClick={() => toggleFile(i)}
                               className="flex w-full items-center justify-between gap-2 px-4 py-2 text-xs font-medium text-accent hover:bg-white/5 transition-colors border-b border-gray-700 bg-gray-900/50"
@@ -282,15 +296,19 @@ export default function ContributionDetailPage() {
                             </button>
                             {expandedFiles.has(i) && (
                               <div
-                                className="d2h-wrapper d2h-dark-color-scheme max-w-full overflow-x-auto"
-                                dangerouslySetInnerHTML={{
-                                  __html: html(f.patch ?? '', {
-                                    outputFormat: 'side-by-side',
-                                    drawFileList: false,
-                                    matching: 'lines',
-                                  })
-                                }}
-                              />
+                                className={`transition-all duration-200 ease-out ${expandedFiles.has(i) ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}
+                              >
+                                <div
+                                  className="d2h-wrapper d2h-dark-color-scheme max-w-full overflow-x-auto"
+                                  dangerouslySetInnerHTML={{
+                                    __html: html(f.patch ?? '', {
+                                      outputFormat: 'side-by-side',
+                                      drawFileList: false,
+                                      matching: 'lines',
+                                    })
+                                  }}
+                                />
+                              </div>
                             )}
                           </div>
                         ))
