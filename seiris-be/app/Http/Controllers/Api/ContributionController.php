@@ -346,11 +346,21 @@ class ContributionController extends Controller
             }
             // parser: split by "diff --git" lines
             $raw = $response->body();
-            $files = [];
             $chunks = preg_split('/\ndiff --git /', $raw);
+
+            // Extract commit message dari chunk pertama (sebelum diff --git)
+            $message = '';
+            if (!empty($chunks[0]) && trim($chunks[0])) {
+                // Strip metadata headers sampai blank line, lalu buang indent 4-spasi + trailing ---
+                $body = preg_replace('/^.*?\n\n/s', '', trim($chunks[0]));
+                $body = preg_replace('/^    /m', '', $body);
+                $body = preg_replace('/\n---[ \t]*$/', '', $body);
+                $message = trim($body);
+            }
+
+            $files = [];
             foreach ($chunks as $chunk) {
                 if (empty(trim($chunk))) continue;
-                // first chunk already starts with "diff --git", others need it prepended
                 if (!str_starts_with($chunk, 'diff --git')) {
                     $chunk = 'diff --git ' . $chunk;
                 }
@@ -361,12 +371,12 @@ class ContributionController extends Controller
                     ];
                 }
             }
-            return $files;
+            return compact('files', 'message');
         });
         if ($diff === null) {
             return response()->json(['message' => 'Gagal mengambil diff dari GitHub.'], 502);
         }
-        return response()->json(['files' => $diff]);
+        return response()->json($diff);
     }
 
     // ── Private Helpers ───────────────────────────────────────

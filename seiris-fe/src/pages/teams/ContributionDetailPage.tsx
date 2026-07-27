@@ -27,6 +27,7 @@ export default function ContributionDetailPage() {
   const [diffLoading, setDiffLoading] = useState(false);
   const [showProof, setShowProof] = useState(false);
   const [diffFiles, setDiffFiles] = useState<any[]>([]);
+  const [diffMessage, setDiffMessage] = useState("");
   const [expandedFiles, setExpandedFiles] = useState<Set<number>>(new Set([0]));
   const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -76,8 +77,9 @@ export default function ContributionDetailPage() {
     if (!teamId || !contributionId) return;
     setDiffLoading(true);
     try {
-      const res = await api.get<{ files: any[] }>(`/teams/${teamId}/contributions/${contributionId}/github-diff`);
+      const res = await api.get<{ files: any[]; message: string }>(`/teams/${teamId}/contributions/${contributionId}/github-diff`);
       setDiffFiles(res.data.files ?? []);
+      setDiffMessage(res.data.message ?? "");
       setExpandedFiles(new Set([0]));
       setShowDiff(true);
     } catch (e) {
@@ -261,6 +263,11 @@ export default function ContributionDetailPage() {
                   </div>
                   <div className="flex-1 overflow-auto p-4">
                     <div className="space-y-4">
+                      {diffMessage && (
+                        <div className="rounded-lg border border-gray-700/50 bg-gray-900/30 px-4 py-3 text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                          {diffMessage}
+                        </div>
+                      )}
                       {diffFiles.length === 0 ? (
                         <p className="text-gray-400">Tidak ada perubahan.</p>
                       ) : (
