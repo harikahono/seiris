@@ -4,6 +4,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Check, Eye, EyeOff, User, Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+function SectionHeader({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      <div className="h-4 w-0.5 rounded-full bg-accent/50" />
+      <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">{label}</h2>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { user, setUser } = useAuth();
 
@@ -157,11 +166,8 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Profile Section ── */}
-      <div className="animate-fade-in-up mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="h-4 w-0.5 rounded-full bg-accent/50" />
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">Profil</h2>
-        </div>
+      <section className="animate-fade-in-up mb-8">
+        <SectionHeader label="Profil" />
 
         <form onSubmit={handleProfileSubmit} className="space-y-4">
           {/* Photo */}
@@ -217,7 +223,7 @@ export default function SettingsPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
+              className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
               required
             />
           </div>
@@ -229,7 +235,7 @@ export default function SettingsPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
+              className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
               required
             />
           </div>
@@ -245,7 +251,7 @@ export default function SettingsPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Kosongkan jika tidak ingin ganti"
-                className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
+                className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
               />
             </div>
             <div>
@@ -255,33 +261,30 @@ export default function SettingsPage() {
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
                 placeholder="Ulangi password baru"
-                className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
+                className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={profileLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {profileLoading ? (
-              <><Loader2 className="size-4 animate-spin" /> Menyimpan...</>
-            ) : (
-              "Simpan Profil"
-            )}
-          </button>
+          <div className="flex justify-end border-t border-white/5 pt-5">
+            <button
+              type="submit"
+              disabled={profileLoading}
+              className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {profileLoading ? (
+                <><Loader2 className="size-4 animate-spin" /> Menyimpan...</>
+              ) : (
+                "Simpan Profil"
+              )}
+            </button>
+          </div>
         </form>
-      </div>
+      </section>
 
       {/* ── GitHub Token Section ── */}
-      <div className="animate-fade-in-up">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="h-4 w-0.5 rounded-full bg-accent/50" />
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-            GitHub Personal Access Token
-          </h2>
-        </div>
+      <section className="animate-fade-in-up">
+        <SectionHeader label="GitHub Personal Access Token" />
         <p className="text-sm text-gray-400">
           Token ini digunakan untuk mengakses diff dari repository privat.
           Token tidak akan ditampilkan setelah disimpan.
@@ -299,7 +302,7 @@ export default function SettingsPage() {
                   value={githubToken}
                   onChange={(e) => setGithubToken(e.target.value)}
                   placeholder="ghp_... atau github_pat_..."
-                  className="w-full border-0 border-b border-white/10 bg-transparent px-0 py-2.5 pr-8 text-sm text-white placeholder-gray-500 transition-colors focus:border-accent focus:outline-none focus:ring-0"
+                  className="w-full rounded-lg border border-gray-700 bg-card px-3 py-2 pr-8 text-sm text-white placeholder-gray-500 transition focus:outline-none focus:ring-1 focus:border-accent focus:ring-accent"
                   required
                 />
                 <button
@@ -312,14 +315,16 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
-            <button
-              type="submit"
-              disabled={tokenLoading || !githubToken.trim()}
-              title={!githubToken.trim() ? "Masukkan token GitHub terlebih dahulu" : undefined}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {tokenLoading ? "Menyimpan..." : "Simpan Token"}
-            </button>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={tokenLoading || !githubToken.trim()}
+                title={!githubToken.trim() ? "Masukkan token GitHub terlebih dahulu" : undefined}
+                className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {tokenLoading ? "Menyimpan..." : "Simpan Token"}
+              </button>
+            </div>
           </form>
         ) : (
           <div className="space-y-3">
@@ -329,16 +334,18 @@ export default function SettingsPage() {
                 GitHub token sudah tersimpan
               </p>
             </div>
-            <button
-              onClick={handleClearToken}
-              disabled={tokenLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-500/30 bg-red-900/10 px-4 py-2.5 text-sm font-semibold text-red-400 transition-colors active:scale-[0.97] hover:bg-red-900/20 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {tokenLoading ? "Menghapus..." : "Hapus Token"}
-            </button>
+            <div className="flex justify-end">
+              <button
+                onClick={handleClearToken}
+                disabled={tokenLoading}
+                className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-900/10 px-5 py-2.5 text-sm font-semibold text-red-400 transition-colors active:scale-[0.97] hover:bg-red-900/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {tokenLoading ? "Menghapus..." : "Hapus Token"}
+              </button>
+            </div>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
