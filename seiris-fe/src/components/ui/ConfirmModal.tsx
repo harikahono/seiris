@@ -77,7 +77,7 @@ export default function ConfirmModal({
           </button>
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onConfirm(); }}
+            onClick={(e) => { e.stopPropagation(); animateClose(() => onConfirm()); }}
             disabled={loading}
             className={`flex-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97] ${btnClass}`}
           >

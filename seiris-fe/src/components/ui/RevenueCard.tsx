@@ -116,6 +116,7 @@ export default function RevenueCard({ revenue, teamId, isOwner, hasEquity, isPro
   );
 
   const handleDistribute = async () => {
+    if (distributing) return;
     setDistributing(true);
     try {
       const url = `/revenues/${revenue.id}/distribute`;
@@ -135,6 +136,7 @@ export default function RevenueCard({ revenue, teamId, isOwner, hasEquity, isPro
   };
 
   const handleRequestDistribute = async () => {
+    if (distributing) return;
     setDistributing(true);
     try {
       const url = `/revenues/${revenue.id}/request-distribute`;

@@ -27,6 +27,7 @@ export default function RevenueTab() {
   const { user } = useAuth();
   const isCurrentUserProjectMember = !currentProjectId || (user != null && team.members.find((m) => m.user.id === user.id)?.project_fmr !== null);
   const { refreshVersion } = useRealtime();
+  const fetchingRef = useRef(false);
   const [revenues, setRevenues] = useState<Revenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -80,7 +81,8 @@ export default function RevenueTab() {
     prevBasePath.current = basePath;
     if (isNewScope) setPage(1);
     const targetPage = isNewScope ? 1 : page;
-    Promise.all([fetchRevenues(targetPage), fetchEquity()]).finally(() => setLoading(false));
+    fetchingRef.current = true;
+    Promise.all([fetchRevenues(targetPage), fetchEquity()]).finally(() => { setLoading(false); fetchingRef.current = false; });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basePath, page, debouncedSearch, dateFrom, dateTo]);
 
@@ -92,6 +94,7 @@ export default function RevenueTab() {
   useEffect(() => {
     if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
     prevRefresh.current = refreshVersion;
+    if (fetchingRef.current) return;
     fetchRevenues();
     fetchEquity();
     // eslint-disable-next-line react-hooks/exhaustive-deps

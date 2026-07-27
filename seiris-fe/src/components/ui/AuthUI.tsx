@@ -76,6 +76,7 @@ export function AuthUI({ defaultMode = "signin" }: AuthUIProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setErrors({});
 
     if (!validate()) return;

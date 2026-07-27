@@ -51,7 +51,7 @@ export default function ProofPreviewModal({ url, open, onClose }: ProofPreviewMo
             </a>
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => animateClose(onClose)}
               className="rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]"
               aria-label="Tutup" title="Tutup"
             >

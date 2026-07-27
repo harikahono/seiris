@@ -40,6 +40,7 @@ export default function ContributionsTab() {
   const isProjectFrozen = !!currentProjectId && (projects.find((p) => p.id === currentProjectId)?.is_frozen ?? false);
   const myMember = user ? team.members.find((m) => m.user.id === user.id) : undefined;
   const isCurrentUserProjectMember = !currentProjectId || (myMember?.project_fmr ?? null) !== null;
+  const fetchingRef = useRef(false);
 
   // basePath: kalau ada project -> scoped, kalau null -> tim (induk)
   const basePath = currentProjectId
@@ -126,8 +127,9 @@ export default function ContributionsTab() {
     if (isNewScope) setPage(1);
     const targetPage = isNewScope ? 1 : page;
 
+    fetchingRef.current = true;
     Promise.all([fetchEquity(), fetchContributions(targetPage)])
-      .finally(() => { setLoading(false); setEquityLoading(false); });
+      .finally(() => { setLoading(false); setEquityLoading(false); fetchingRef.current = false; });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basePath, page, filter, debouncedSearch, typeFilter, dateFrom, dateTo]);
 
@@ -136,6 +138,7 @@ export default function ContributionsTab() {
   useEffect(() => {
     if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
     prevRefresh.current = refreshVersion;
+    if (fetchingRef.current) return;
     fetchEquity();
     fetchContributions();
     // eslint-disable-next-line react-hooks/exhaustive-deps

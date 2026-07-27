@@ -43,19 +43,28 @@ export function TeamProvider({ children }: { children: ReactNode }) {
     refreshTeams();
   }, [refreshTeams, user]);
 
-  // H-H: clear teams on logout signal from AuthContext
+  // H-H: clear teams on logout signal — event-driven, gak polling tiap 500ms
   useEffect(() => {
-    let lastVersion = localStorage.getItem('seiris_teams_version') ?? '';
-    const id = setInterval(() => {
-      const current = localStorage.getItem('seiris_teams_version') ?? '';
-      if (current !== lastVersion) {
-        lastVersion = current;
-        setTeams([]);
-        setCurrentTeamId(null);
-        localStorage.removeItem('seiris_teams_version');
-      }
-    }, 500);
-    return () => clearInterval(id);
+    const clearTeams = () => {
+      setTeams([]);
+      setCurrentTeamId(null);
+      localStorage.removeItem('seiris_teams_version');
+    };
+
+    // Cross-tab: storage event fires di tab lain saat localStorage berubah
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'seiris_teams_version') clearTeams();
+    };
+
+    // Same-tab: CustomEvent dari AuthContext.logout
+    const onCustom = () => clearTeams();
+
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('seiris:teams-cleared', onCustom);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('seiris:teams-cleared', onCustom);
+    };
   }, []);
 
   const setCurrentTeam = useCallback((id: string) => {

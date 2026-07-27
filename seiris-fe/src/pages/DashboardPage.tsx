@@ -168,12 +168,15 @@ function TeamDashboard({ teamId }: { teamId: string }) {
 
   // Background refresh from Pusher → silent
   const prevRefresh = useRef(0);
+  const activeRef = useRef(true);
   useEffect(() => {
     if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
     prevRefresh.current = refreshVersion;
-    fetchData();
+    if (activeRef.current) fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
+
+  useEffect(() => { return () => { activeRef.current = false; }; }, []);
 
   const myMember = team?.members?.find((m) => m.user.id === user?.id);
   const myEquity = myMember

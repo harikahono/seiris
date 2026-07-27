@@ -63,6 +63,8 @@ export default function TeamSettingsTab() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // ponytail: revoke previous preview sebelum bikin baru
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
       setLogoFile(file);
       setLogoPreview(URL.createObjectURL(file));
     }
@@ -114,6 +116,7 @@ export default function TeamSettingsTab() {
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     setErrors({});
 
     if (!name.trim()) {
@@ -338,7 +341,8 @@ export default function TeamSettingsTab() {
             )}
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || team.is_frozen}
+              title={team.is_frozen ? "Tim sedang freeze — tidak bisa menyimpan perubahan threshold" : undefined}
               className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-black transition-colors active:scale-[0.97] hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving && <Loader2 className="size-4 animate-spin" />}

@@ -96,6 +96,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setErrors({});
     if (!type) return;
 

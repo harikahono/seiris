@@ -83,6 +83,8 @@ export default function SettingsPage() {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // ponytail: revoke previous preview before creating new
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
       setProfilePhoto(file);
       setPhotoPreview(URL.createObjectURL(file));
     }

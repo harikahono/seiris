@@ -36,7 +36,12 @@ export function useFocusTrap(isOpen: boolean) {
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      prev?.focus();
+      // ponytail: fallback ke sidebar/submit button kalo trigger udah unmount
+      if (document.body.contains(prev)) {
+        prev?.focus();
+      } else {
+        document.querySelector<HTMLElement>('button, [href], input, select, textarea')?.focus();
+      }
     };
   }, [isOpen]);
 

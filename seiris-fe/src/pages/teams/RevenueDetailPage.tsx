@@ -45,17 +45,22 @@ export default function RevenueDetailPage() {
 
   // Background refresh from Pusher — no skeleton
   const prevRefresh = useRef(0);
+  const activeRef = useRef(true);
   useEffect(() => {
     if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
     prevRefresh.current = refreshVersion;
+    if (!activeRef.current) return;
     setRefreshing(true);
     api
       .get<{ data: Revenue }>(`/teams/${teamId}/revenues/${revenueId}`)
-      .then((res) => setRevenue(res.data.data))
-      .catch(() => setNotFound(true))
-      .finally(() => setRefreshing(false));
+      .then((res) => { if (activeRef.current) setRevenue(res.data.data); })
+      .catch(() => { if (activeRef.current) setNotFound(true); })
+      .finally(() => { if (activeRef.current) setRefreshing(false); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
+
+  // Cleanup
+  useEffect(() => { return () => { activeRef.current = false; }; }, []);
 
   const projectName = revenue?.project_id
     ? projects.find((p) => p.id === revenue.project_id)?.name ?? null

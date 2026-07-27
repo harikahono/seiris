@@ -60,6 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("token");
     localStorage.removeItem("seiris_current_team_id");
     localStorage.setItem("seiris_teams_version", Date.now().toString());
+    // ponytail: BroadcastChannel lebih clean tp CustomEvent works cross-browser
+    window.dispatchEvent(new CustomEvent('seiris:teams-cleared'));
     setToken(null);
     setUser(null);
   };

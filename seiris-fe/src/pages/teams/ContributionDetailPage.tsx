@@ -49,7 +49,7 @@ export default function ContributionDetailPage() {
   }, [showDiffModal, diffClose]);
 
   const fetchData = useCallback(async (isBackground = false) => {
-    if (!teamId || !contributionId) return;
+    if (!teamId || !contributionId || !activeRef.current) return;
     if (isBackground) setRefreshing(true);
 
     try {
@@ -109,16 +109,21 @@ export default function ContributionDetailPage() {
     });
   };
 
-  // ── Realtime: refresh on Pusher event ──
+// ── Realtime: refresh on Pusher event ──
   const { refreshVersion } = useRealtime();
   const { projects } = useProjectContext();
   const prevRefresh = useRef(0);
+  const activeRef = useRef(true);
   useEffect(() => {
+    if (!activeRef.current) return;
     if (prevRefresh.current === 0) { prevRefresh.current = refreshVersion; return; }
     prevRefresh.current = refreshVersion;
-    fetchData(true); // true = background, jangan unmount skeleton
+    fetchData(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshVersion]);
+
+  // Cleanup
+  useEffect(() => { return () => { activeRef.current = false; }; }, []);
 
   if (initialLoading) {
     return (

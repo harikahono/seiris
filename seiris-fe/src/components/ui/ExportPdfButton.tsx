@@ -28,7 +28,8 @@ export default function ExportPdfButton({ teamId, projectId }: ExportPdfButtonPr
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      // ponytail: delay revoke biar browser sempet mulai download
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       toast.success("PDF berhasil diunduh");
     } catch {
       toast.error("Gagal mengunduh PDF");

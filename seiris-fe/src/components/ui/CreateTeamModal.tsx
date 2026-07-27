@@ -49,6 +49,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
   // ── Create handler ──
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
+    if (loadingCreate) return;
     setCreateErrors({});
 
     if (!name.trim()) {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { isAxiosError } from "axios";
@@ -150,6 +150,7 @@ export default function TeamMembersTab() {
   };
 
   const saveFmr = async (member: TeamMember) => {
+    if (savingFmr) return;
     setSavingFmr(true);
     try {
       const payload: Record<string, number | string> = { fmr: Number(fmrValue) };
@@ -216,17 +217,19 @@ export default function TeamMembersTab() {
   const { show: showExit, animClass: exitAnim, animateClose: exitClose } = useModalAnimation(!!exitingMember);
   const exitTrapRef = useFocusTrap(showExit);
 
-  // Escape nutup exit modal
+  const exitCancel = () => exitClose(() => { setExitingMember(null); setExitReason(""); });
+
+  // Escape nutup exit modal — pake ref biar gak stale
+  const exitCancelRef = useRef(exitCancel);
+  exitCancelRef.current = exitCancel;
   useEffect(() => {
     if (!showExit) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') exitCancel();
+      if (e.key === 'Escape') exitCancelRef.current();
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [showExit]);
-
-  const exitCancel = () => exitClose(() => { setExitingMember(null); setExitReason(""); });
 
   const handleExit = async () => {
     if (!exitingMember) return;
