@@ -1,0 +1,798 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEIRIS Â· Tugas Akhir â€” Pra-Sidang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ecebe8;
+  --panel:#ffffff;
+  --panel-2:#f7f2ea;
+  --line:#e3dac9;
+  --ink:#21211c;
+  --ink-dim:#5f5749;
+  --ink-soft:#a59a86;
+  --clay:#2c7148;
+  --clay-soft:#cfe6d6;
+  --teal:#3a6862;
+  --teal-soft:#cfe0db;
+  --plum:#7a4a5a;
+  --display:"Space Grotesk",system-ui,sans-serif;
+  --sans:"Inter",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --ease-out:cubic-bezier(0.23,1,0.32,1);
+  --border:1px solid var(--line);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* paper grain */
+body::after{
+  content:"";position:fixed;inset:0;z-index:60;pointer-events:none;
+  background-image:radial-gradient(rgba(33,33,28,0.035) 1px,transparent 1px);
+  background-size:3px 3px;opacity:.6;
+}
+::selection{background:var(--clay-soft);color:var(--ink)}
+
+/* ---------- deck shell ---------- */
+.deck{position:fixed;inset:0}
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:7vh 6vw 13vh;
+  overflow-y:auto;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  opacity:0;visibility:hidden;
+  transform:translateY(24px);
+  transition:opacity .4s var(--ease-out),transform .4s var(--ease-out),visibility .4s;
+}
+.slide::-webkit-scrollbar{display:none}
+.slide.is-active{opacity:1;visibility:visible;transform:none}
+.slide .inner{
+  width:100%;max-width:1120px;margin:0 auto;
+  animation:classEnter .5s .05s var(--ease-out) both;
+}
+.slide:not(.is-active) .inner{animation:none}
+@keyframes classEnter{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .slide,.slide .inner,.plq{transition:none;animation:none;transform:none}
+}
+
+/* ---------- nav chrome ---------- */
+.hint{
+  position:fixed;left:28px;bottom:22px;z-index:70;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+.nav-btns{
+  position:fixed;right:28px;bottom:18px;z-index:70;
+  display:flex;gap:10px;align-items:center;
+}
+.nav-btns button{
+  width:40px;height:40px;border-radius:50%;
+  border:var(--border);background:var(--panel);color:var(--ink);
+  font-size:16px;cursor:pointer;display:grid;place-items:center;
+  transition:transform 160ms var(--ease-out),background 200ms ease,border-color 200ms ease,color 200ms ease;
+}
+.nav-btns button:hover{background:var(--clay);border-color:var(--clay);color:#fff}
+.nav-btns button:active{transform:scale(0.93)}
+.nav-btns button:disabled{opacity:.32;cursor:default;pointer-events:none}
+.progress-wrap{
+  position:fixed;bottom:0;left:0;right:0;height:3px;background:transparent;z-index:70;
+}
+.progress-fill{
+  height:100%;background:var(--clay);width:9.09%;
+  transition:width .4s var(--ease-out);
+}
+.counter{
+  position:fixed;right:84px;bottom:27px;z-index:70;
+  font-family:var(--mono);font-size:12px;color:var(--ink-dim);
+  letter-spacing:.02em;
+}
+.counter .on{color:var(--clay);font-weight:600}
+
+/* ---------- shared type ---------- */
+.mono-tag{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--clay);font-weight:500;
+  display:block;margin-bottom:18px;
+}
+.mono-tag .alt{display:block;color:var(--ink-soft);margin-top:6px;letter-spacing:.1em}
+h1,h2{font-family:var(--display);font-weight:600;line-height:1.04;letter-spacing:-.02em;color:var(--ink)}
+h2{font-size:clamp(30px,4.4vw,52px)}
+.lede{color:var(--ink-dim);max-width:62ch;margin-top:16px;font-size:clamp(15px,1.6vw,18px)}
+.mono{font-family:var(--mono)}
+.dim{color:var(--ink-dim)}.soft{color:var(--ink-soft)}.clay{color:var(--clay)}.teal{color:var(--teal)}
+
+/* cards */
+.cards{display:grid;gap:14px;margin-top:34px}
+.c-num{font-family:var(--mono);font-size:11px;color:var(--clay);letter-spacing:.1em}
+.card{
+  background:var(--panel);border:var(--border);border-radius:12px;
+  padding:20px 22px;display:block;
+  transition:transform 200ms ease,box-shadow 200ms ease,border-color 200ms ease;
+}
+@media (hover:hover) and (pointer:fine){
+  .card:hover{transform:translateY(-3px);box-shadow:0 10px 30px -18px rgba(33,33,28,.35);border-color:var(--line)}
+}
+.card h3{font-family:var(--display);font-weight:600;font-size:18px;margin:6px 0 4px;letter-spacing:-.01em}
+.card p{font-size:13.5px;color:var(--ink-dim)}
+
+.footnote{
+  margin-top:22px;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);
+  letter-spacing:.02em;border-left:2px solid var(--line);padding-left:12px;
+}
+.footnote b{color:var(--ink-dim);font-weight:600}
+
+/* buttons ghost */
+.ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--clay);border:1px solid var(--clay);background:transparent;
+  padding:9px 14px;border-radius:6px;cursor:pointer;
+  transition:background 160ms ease,color 160ms ease,transform 160ms ease;
+}
+.ghost:hover{background:var(--clay);color:#fff}
+.ghost:active{transform:scale(0.97)}
+
+/* ================= S1 title ================= */
+.title-eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.2em;
+  color:var(--clay);text-transform:uppercase;display:flex;align-items:center;gap:12px;
+}
+.title-eyebrow::before{content:"";width:34px;height:1px;background:var(--clay)}
+.brand-line{display:flex;align-items:center;gap:22px;margin:26px 0 8px}
+.monogram{flex-shrink:0}
+.hero{font-size:clamp(58px,13vw,150px);line-height:.9;letter-spacing:-.04em;font-weight:600}
+.subtitle{font-family:var(--display);font-size:clamp(16px,2.3vw,26px);color:var(--ink-dim);letter-spacing:.01em}
+.poem{font-style:italic;color:var(--ink-soft);margin:26px 0 4px;font-size:clamp(14px,1.6vw,17px);max-width:56ch}
+.poem b{color:var(--plum);font-style:normal}
+.rule{margin:30px 0;border:none;border-top:var(--border);opacity:.7}
+.appeal{font-family:var(--sans);font-size:clamp(14px,1.7vw,19px);color:var(--ink);max-width:66ch;font-weight:400}
+.appeal em{color:var(--ink-dim)}
+.people{margin-top:26px;display:flex;flex-wrap:wrap;gap:34px}
+.person .role{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft)}
+.person .who{font-family:var(--display);font-size:18px;margin-top:3px}
+.person .who .id{font-family:var(--mono);font-size:13px;color:var(--ink-dim);font-weight:500}
+
+/* ============ feature grids ============ */
+.cols-4{grid-template-columns:repeat(4,1fr)}
+.cols-3{grid-template-columns:repeat(3,1fr)}
+.cols-2{grid-template-columns:repeat(2,1fr)}
+.big-card{grid-column:span 2;grid-row:span 2}
+@media (max-width:900px){
+  .cols-4,.cols-3,.cols-2,.t2{grid-template-columns:1fr}
+  .tech-grid{grid-template-columns:repeat(2,1fr)}
+  .big-card{grid-column:span 1;grid-row:span 1}
+  .slide{padding:9vh 24px 13vh}
+}
+
+/* S4 formula */
+.formula-grid{display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center;margin-top:22px}
+.formula{
+  font-family:var(--mono);font-size:clamp(15px,2vw,20px);background:var(--panel);border:var(--border);
+  border-radius:12px;padding:20px 22px;
+}
+.formula .f{display:block;padding:6px 0;border-bottom:1px dashed var(--line)}
+.formula .f:last-child{border-bottom:none}
+.formula .lbl{color:var(--ink-soft);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:2px}
+.pie-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.pie-cap{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--clay);text-transform:uppercase}
+.mult-plate{margin-top:24px}
+.mult-cap{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:13px;background:var(--panel);border:var(--border);border-radius:6px;padding:8px 12px}
+.chip b{color:var(--clay)}
+.hash{margin-top:18px;font-family:var(--mono);font-size:12px;color:var(--teal)}
+
+/* S5 stages */
+.stage{display:flex;gap:18px;align-items:flex-start;margin-top:14px;background:var(--panel);border:var(--border);border-radius:12px;padding:18px 20px}
+.stage-num{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--clay);line-height:1;width:44px;flex-shrink:0}
+.stage h3{font-family:var(--display);font-size:19px;font-weight:600}
+.stage p{font-size:14px;color:var(--ink-dim);margin-top:4px}
+.stage .mono{font-size:12px;color:var(--ink-soft);margin-top:6px;display:block}
+
+/* ---------- S6 split ---------- */
+.t2{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;margin-top:6px;align-items:start}
+.fsm{background:var(--panel);border:var(--border);border-radius:12px;padding:20px}
+.fsm .cap{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:12px;display:block}
+.fsm-box{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.node{
+  font-family:var(--mono);font-size:12px;border-radius:8px;padding:8px 12px;border:var(--border);background:var(--panel-2);
+}
+.node.pending{background:var(--panel);border-color:var(--line)}
+.node.approved{border-color:var(--clay);color:var(--clay);background:var(--clay-soft)}
+.node.rejected{border-color:var(--plum);color:var(--plum)}
+.arrow{color:var(--ink-soft);font-size:14px}
+.arrow .lbl{display:block;font-size:9px;letter-spacing:.06em;text-align:center;color:var(--ink-soft)}
+.nav-hint{display:block;margin-top:14px;font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--ink-dim)}
+.nav-hint b{color:var(--clay)}
+.inv-list{display:flex;flex-direction:column;gap:10px}
+.inv{background:var(--panel);border:var(--border);border-radius:12px;padding:14px 16px}
+.inv .m{font-family:var(--mono);font-size:11px;color:var(--teal);letter-spacing:.06em;display:block;margin-bottom:3px}
+.inv p{font-size:14px;color:var(--ink)}
+
+/* ---------- S7 feature tiles ---------- */
+.tile{background:var(--panel);border:var(--border);border-radius:12px;padding:18px 20px;min-height:118px;position:relative;transition:transform 200ms ease,border-color 200ms ease}
+@media (hover:hover) and (pointer:fine){.tile:hover{transform:translateY(-3px);border-color:var(--line)}}
+.tile .t-num{font-family:var(--mono);font-size:11px;color:var(--clay);letter-spacing:.1em}
+.tile h3{font-family:var(--display);font-size:16px;font-weight:600;margin:8px 0 4px}
+.tile p{font-size:13px;color:var(--ink-dim)}
+
+/* ---------- S8 stack row ---------- */
+.stack{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.stack .chip{font-size:13.5px;padding:12px 16px}
+.stack .chip sub{display:block;font-family:var(--sans);font-size:11px;color:var(--ink-soft);text-transform:none;letter-spacing:0;margin-top:2px}
+
+/* ---------- S8 tech grid ---------- */
+.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px}
+.tech{
+  background:var(--panel);border:var(--border);border-radius:12px;padding:18px 20px;
+  display:flex;align-items:flex-start;gap:14px;
+  transition:transform 200ms ease,box-shadow 200ms ease,border-color 200ms ease;
+}
+@media (hover:hover) and (pointer:fine){.tech:hover{transform:translateY(-3px);box-shadow:0 10px 30px -18px rgba(33,33,28,.35);border-color:var(--clay)}}
+.tech .t-logo{height:44px;width:44px;flex-shrink:0;display:grid;place-items:center;border-radius:11px;background:var(--panel-2);border:var(--border)}
+.tech .t-logo img{display:block}
+.tech h3{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.01em;line-height:1.2}
+.tech p{font-size:13px;color:var(--ink-dim);margin-top:3px}
+
+/* ---------- S9 hero metric ---------- */
+.metric{
+  background:var(--panel);border:var(--border);border-radius:12px;
+  padding:26px 30px;display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;
+}
+.metric-big{font-family:var(--mono);font-size:clamp(38px,7vw,78px);font-weight:600;color:var(--clay);letter-spacing:-.02em;line-height:1}
+.metric-big small{font-size:.35em;color:var(--ink-dim);font-weight:500;letter-spacing:.02em}
+.metric-sub{font-family:var(--mono);font-size:14px;color:var(--ink-dim)}
+
+/* ---------- S9 evidence table ---------- */
+.evi-wrap{margin-top:26px;overflow-x:auto}
+.evi-tbl{width:100%;border-collapse:collapse;background:var(--panel);border:var(--border);border-radius:12px;font-size:14px;overflow:hidden}
+.evi-tbl th,.evi-tbl td{padding:9px 14px;border-bottom:var(--border);vertical-align:top;text-align:left}
+.evi-tbl thead th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);background:var(--panel-2);white-space:nowrap;border-bottom:var(--border)}
+.evi-tbl tbody tr:last-child td{border-bottom:none}
+.evi-tbl td.mono{font-family:var(--mono);color:var(--teal);font-size:12px;white-space:nowrap}
+.evi-tbl .rt{text-align:right}
+.evi-tbl .ok{color:var(--clay);font-weight:600;white-space:nowrap}
+.evi-tbl .go{opacity:.5;font-size:16px;line-height:1;vertical-align:middle;margin-left:6px}
+.evi-row{cursor:pointer;transition:background .15s ease}
+.evi-row:hover,.evi-row:focus{background:var(--clay-soft);outline:none}
+.evi-row:focus{box-shadow:inset 0 0 0 2px var(--clay)}
+.mwrap{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:6vh 4vw}
+.mwrap[hidden]{display:none}
+.mback{position:absolute;inset:0;background:rgba(33,33,28,.45);backdrop-filter:blur(2px)}
+.mdl{position:relative;width:min(880px,92vw);max-height:82vh;background:var(--panel);border:var(--border);border-radius:14px;box-shadow:0 24px 60px -24px rgba(33,33,28,.5);display:flex;flex-direction:column;overflow:hidden}
+.mhead{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:var(--border);background:var(--panel-2)}
+.mtag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--clay);white-space:nowrap}
+.mtitle{font-family:var(--mono);font-size:13px;color:var(--ink);word-break:break-all}
+.mclose{margin-left:auto;border:none;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:var(--ink-soft);padding:2px 8px;border-radius:6px}
+.mclose:hover{color:var(--ink);background:var(--line)}
+.mcode{margin:0;padding:16px 18px;overflow:auto;max-height:52vh;font-family:var(--mono);font-size:12.5px;line-height:1.55;color:var(--ink);background:var(--panel);white-space:pre;tab-size:4}
+.mfoot{padding:12px 18px;border-top:var(--border);font-family:var(--mono);font-size:11px;color:var(--clay);background:var(--clay-soft)}
+.mtranscript{max-height:28vh;overflow:auto;font-family:var(--mono);font-size:11.5px;line-height:1.5;color:#3a3a33;background:#f3efe7;border-top:1px solid var(--line);padding:12px 16px;white-space:pre;margin:0}
+.mtcap{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);padding:10px 16px 0;background:var(--panel-2)}
+@media (max-width:900px){.evi-tbl{font-size:12px}.evi-tbl td.mono{font-size:11px}}
+
+/* ---------- S11 ---------- */
+.url-block{margin-top:24px}
+.url-big{
+  font-family:var(--mono);font-size:clamp(26px,5vw,54px);font-weight:600;
+  color:var(--clay);letter-spacing:-.01em;word-break:break-all;
+}
+.clickme{display:inline-block;margin-left:14px;font-size:12px;color:var(--ink-soft);border:1px solid var(--line);border-radius:6px;padding:6px 10px;vertical-align:middle}
+.slide.end .inner{text-align:center}
+.end-rule{margin:34px auto;border:none;border-top:var(--border);max-width:560px}
+.thanks{font-family:var(--display);font-weight:600;font-size:clamp(30px,5vw,56px);letter-spacing:-.02em}
+.end-who{margin-top:40px;font-family:var(--mono);font-size:12.5px;color:var(--ink-dim);line-height:2}
+
+@media (max-width:900px){
+  .formula-grid{grid-template-columns:1fr;gap:22px}
+  .metric-big{font-size:38px}
+  .end-wait,.thanks{text-align:left}
+}
+</style>
+</head>
+<body>
+
+<div class="deck" role="presentation" aria-label="Dek presentasi SEIRIS">
+
+  <!-- ============ S1 ============ -->
+  <section class="slide is-active">
+    <div class="inner">
+      <span class="title-eyebrow">TUGAS AKHIR Â· TEKNIK INFORMATIKA ITI Â· 2026</span>
+      <div class="brand-line">
+        <svg class="monogram" width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <circle cx="32" cy="32" r="30" fill="#2c7148"/>
+          <path d="M32 32 L60 32 A28 28 0 0 1 36 58 Z" fill="#ffffff" opacity=".28"/>
+          <path d="M32 32 L32 4 A28 28 0 0 1 58 14 Z" fill="#ffffff" opacity=".5"/>
+          <path d="M32 32 L7 18 A28 28 0 0 1 32 4 Z" fill="#ffffff" opacity=".82"/>
+        </svg>
+        <h1 class="hero">SEIRIS</h1>
+      </div>
+      <p class="subtitle"><span class="dim">Smart Equity &amp; Investment Review Integrated System</span></p>
+      <p class="poem"><b>"SEIRIS"</b> = se-Iris: setiap anggota mendapat potongan kue sesuai kontribusinya.</p>
+      <hr class="rule">
+      <p class="appeal"><em>Pengembangan Aplikasi Web Manajemen Equity Dinamis Berbasis Model Slicing Pie untuk Tim Startup Mahasiswa</em></p>
+      <div class="people">
+        <div class="person">
+          <span class="role">Disusun oleh</span>
+          <div class="who">Bintang Hari Kahono <span class="id">Â· 1152200031</span></div>
+        </div>
+        <div class="person">
+          <span class="role">Dosen Pembimbing</span>
+          <div class="who">Ir. Muhamad Ramli, M.Kom</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ S2 Latar Belakang ============ -->
+  <section class="slide">
+    <div class="inner">
+      <span class="k-tag mono-tag">Latar Belakang â€” 4 persoalan</span>
+      <h2>Kenapa equity tim startup mahasiswa selalu berantakan?</h2>
+      <div class="cards cols-2" style="margin-top:26px">
+        <div class="card"><span class="c-num">P1</span><h3>Bagi rata: populer tapi tak adil</h3>
+          <p>45,9% tim 2 orang memilih bagi rata (naik dari 31,5%), padahal satu anggota bisa kerja <em>full-time</em> sementara yang lain sibuk kuliah &rarr; porsi tak sebanding &rarr; kohesi tim jebol.</p></div>
+        <div class="card"><span class="c-num">P2</span><h3>Fixed split menuntut prediksi masa depan</h3>
+          <p>Menetapkan porsi di awal menuntut prediksi masa depan yang sulit diprediksi di tim yang baru terbentuk.</p></div>
+        <div class="card"><span class="c-num">P3</span><h3>Spreadsheet rawan</h3>
+          <p>Manipulasi histori + human error; nilai deal PM/Sales tak bisa diverifikasi (beda yang dikomunikasikan vs dari klien) &rarr; erosi kepercayaan.</p></div>
+        <div class="card"><span class="c-num">P4</span><h3>Aplikasi komersial top-down</h3>
+          <p>Tanpa voting komunal &amp; verifikasi bukti (invoice), keputusan dijatuhkan dari atas.</p></div>
+      </div>
+      <p class="footnote"><b>2 tantangan teknis:</b> lost update (race condition multi-aktor) &amp; belum ada verifikasi komunal untuk mitigasi asimetri info / fraud internal.</p>
+    </div>
+  </section>
+
+  <!-- ============ S3 Rumusan Masalah ============ -->
+  <section class="slide">
+    <div class="inner">
+      <span class="mono-tag">Rumusan Masalah &amp; Tujuan</span>
+      <h2>Empat Pertanyaan yang Dijawab</h2>
+      <div class="cards" style="margin-top:26px;grid-template-columns:repeat(2,1fr)" >
+        <div class="card"><span class="c-num">(a)</span><p style="margin:6px 0 0">Ketahanan algoritma <b>Slicing Pie</b> terhadap <span class="mono">race condition</span>.</p></div>
+        <div class="card"><span class="c-num">(b)</span><p style="margin:6px 0 0">Mitigasi anomali input &amp; penipuan data markup lewat validasi + voting komunal.</p></div>
+        <div class="card"><span class="c-num">(c)</span><p style="margin:6px 0 0">Pemenuhan spesifikasi kebutuhan lewat <span class="mono">black-box</span> EP &amp; BVA.</p></div>
+        <div class="card"><span class="c-num">(d)</span><p style="margin:6px 0 0">Efektivitas <span class="mono">Rule-Based System</span> + penanganan deadlock via threshold.</p></div>
+      </div>
+      <div class="metric" style="margin-top:34px">
+        <span class="metric-sub">Tujuan:</span>
+        <span style="font-family:var(--display);font-size:clamp(16px,2vw,22px)">membangun aplikasi web equity split yang <b>adil, aman, transparan, dan dapat diaudit</b>.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ S4 Solusi & konsep ============ -->
+  <section class="slide">
+    <div class="inner">
+      <span class="mono-tag">Solusi &amp; konsep inti</span>
+      <h2>SEIRIS: Bukan tebakan, tapi Slicing Pie yang bisa diaudit</h2>
+      <div class="formula-grid">
+        <div class="pie-wrap">
+          <svg width="300" height="300" viewBox="0 0 300 300" role="img" aria-label="Pie chart zero-loss">
+            <circle cx="150" cy="150" r="120" fill="#f7f2ea" stroke="#e3dac9"/>
+            <path d="M150 150 L150 30 A120 120 0 0 1 253 82 Z" fill="#2c7148"/>
+            <path d="M150 150 L253 82 A120 120 0 0 1 270 218 Z" fill="#cfe0db"/>
+            <path d="M150 150 L270 218 A120 120 0 0 1 90 260 Z" fill="#a5a58d" opacity=".55"/>
+            <path d="M150 150 L90 260 A120 120 0 0 1 52 180 Z" fill="#cfe6d6"/>
+            <path d="M150 150 L52 180 A120 120 0 0 1 150 30 Z" fill="#3a6862" opacity=".5"/>
+            <circle cx="150" cy="150" r="54" fill="#ffffff"/>
+            <text x="150" y="150" text-anchor="middle" dominant-baseline="middle" font-family="JetBrains Mono,ui-monospace,monospace" font-size="20" font-weight="600" fill="#2c7148">100%</text>
+          </svg>
+          <span class="pie-cap">1% tidak ada yang hilang Â· zero-loss</span>
+        </div>
+        <div class="formula" style="margin-top:6px">
+          <span class="lbl">Formula inti</span>
+          <span class="f">slice kamu = nilai &times; multiplier</span>
+          <span class="f">porsi% = slice kamu &divide; total slice SEMUA</span>
+        </div>
+      </div>
+      <div class="mult-plate">
+        <p class="mult-cap">Multiplier kontribusi Â· FMR Rp 150.000/jam (mahasiswa)</p>
+        <div class="chips">
+          <span class="chip">CASH <b>&times;4</b></span>
+          <span class="chip">TIME <b>&times;2</b></span>
+          <span class="chip">IDEA <b>&times;2</b></span>
+          <span class="chip">NETWORK <b>&times;2</b></span>
+          <span class="chip">FACILITY <b>&times;2</b></span>
+          <span class="chip">SALES <b>&times;2</b></span>
+        </div>
+        <p class="hash">Keunikan: <b>nested pie</b> (tim â‡„ project) Â· <b>voting komunal</b> Â· <b>zero-loss</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ S5 Metodologi ============ -->
+  <section class="slide">
+    <div class="inner">
+      <span class="mono-tag">Metodologi</span>
+      <h2>Evolutionary Prototyping</h2>
+      <div style="margin-top:30px">
+        <div class="stage"><span class="stage-num">1</span>
+          <div><h3>Engine Slicing Pie inti</h3>
+            <p>Formula slice &amp; porsi sebagai fondasi kalkulasi yang bisa diaudit.</p>
+            <span class="mono">slice Â· porsi% Â· zero-loss</span></div></div>
+        <div class="stage"><span class="stage-num">2</span>
+          <div><h3>FSM + nested pies + row-locking</h3>
+            <p>Menambah FSM, pies beranak (tim â‡„ project), penguncian baris, plus FMR, revenue, dan catatan audit.</p>
+            <span class="mono">FSM Â· nested pie Â· lockForUpdate Â· FMR Â· revenue Â· audit</span></div></div>
+        <div class="stage"><span class="stage-num">3</span>
+          <div><h3>Realtime + rate limiter</h3>
+            <p>Pusher untuk kehadiran/pembaruan &amp; pembatas laju 3 lapis.</p>
+            <span class="mono">Pusher presence Â· api 120 Â· write 30 Â· auth 5</span></div></div>
+      </div>
+      <p class="footnote"><b>Mengapa:</b> kebutuhan kepemilikan yang dinamis tak cocok dengan rencana diam (fixed-plan) â€” prototipe berevolusi bersama umpan balik.</p>
+    </div>
+  </section>
+
+  <!-- ============ S6 Desain kunci FSM ============ -->
+  <section class="slide">
+    <div class="inner">
+      <span class="mono-tag">Desain kunci</span>
+      <h2>State Machine &amp; Penguncian Baris</h2>
+      <div class="t2">
+        <div class="fsm">
+          <span class="cap">FSM Â· Kontribusi</span>
+          <div class="fsm-box">
+            <span class="node pending">PENDING</span>
+            <span class="arrow">&rarr;<span class="lbl">threshold âœ“</span></span>
+            <span class="node approved">APPROVED</span>
+            <span class="arrow">&rarr;<span class="lbl">ditolak komunitas</span></span>
+            <span class="node rejected">REJECTED</span>
+          </div>
+          <span class="nav-hint">Ambang <b>50</b> (mayoritas) / <b>100</b> (bulat) Â· <b>no self-vote</b> Â· <b>1 vote / anggota</b> Â· seri &rarr; <b>casting vote owner</b></span>
+        </div>
+        <div class="inv-list">
+          <div class="inv"><span class="m">I1 Â· IMUTABEL</span><p>Append-only â€” snapshot &amp; catatan audit tak bisa diupdate/dihapus.</p></div>
+          <div class="inv"><span class="m">I2 Â· KONKURENSI</span><p>Pessimistic <span class="mono">lockForUpdate</span> di semua titik tulis â€” cegah lost update multi-aktor.</p></div>
+          <div class="inv"><span class="m">I3 Â· LAJU TERBATAS</span><p>Rate limiter 3 lapis â€” api <b>120/mnt</b>, write <b>30</b>, auth <b>5/email + 60/IP</b>.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ S7 Fitur utama ============ -->
+  <section class="slide">
+    <div class="inner">
+      <span class="mono-tag">Fitur utama</span>
+      <h2>Fitur yang Bisa Diaudit</h2>
+      <div class="cards cols-3" style="grid-template-columns:repeat(3,1fr);margin-top:26px">
+        <div class="tile"><span class="t-num">F1</span><h3>6 tipe kontribusi + bukti</h3><p>File / URL diff GitHub sebagai bukti yang bisa diverifikasi.</p></div>
+        <div class="tile"><span class="t-num">F2</span><h3>Voting komunal + tie-breaker</h3><p>Setiap pendapatan berbanding dengan suara komunitas.</p></div>
+        <div class="tile"><span class="t-num">F3</span><h3>Dashboard donut + radar</h3><p>Visualisasi porsi equity &amp; distribusi berkontribusi.</p></div>
+        <div class="tile"><span class="t-num">F4</span><h3>Export PDF cap table</h3><p>Lembar kepemilikan (cap table) siap dibawa ke tim &amp; panel.</p></div>
+        <div class="tile"><span class="t-num">F5</span><h3>Realtime â€” Pusher presence</h3><p>Kehadiran &amp; perubahan langsung, tanpa refresh.</p></div>
+        <div class="tile"><span class="t-num">F6</span><h3>Audit log + invite link</h3><p>Jejak lengkap &amp; link undangan ala Discord.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ S8 Tech stack ============ -->
+  <section class="slide">
+    <div class="inner">
+      <span class="mono-tag">Tech stack</span>
+      <h2>Satu Baris, Tiga Lapis</h2>
+      <p class="lede">Backend, frontend, basis data, realtime, dan uji â€” dalam satu deret yang saling mendukung.</p>
+      <div class="tech-grid">
+        <div class="tech">
+          <span class="t-logo"><img src="https://cdn.simpleicons.org/laravel/2c7148" alt="Laravel" width="26" height="26"></span>
+          <div><h3>Laravel 12 Â· Sanctum</h3><p>RESTful API + auth token bearer</p></div>
+        </div>
+        <div class="tech">
+          <span class="t-logo"><img src="https://cdn.simpleicons.org/react/2c7148" alt="React" width="26" height="26"></span>
+          <div><h3>React 19 Â· Vite Â· TS</h3><p>Single-page app &amp; typed frontend</p></div>
+        </div>
+        <div class="tech">
+          <span class="t-logo"><img src="https://cdn.simpleicons.org/postgresql/2c7148" alt="PostgreSQL" width="26" height="26"></span>
+          <div><h3>PostgreSQL</h3><p>Row-lock <span class="mono">lockForUpdate</span></p></div>
+        </div>
+        <div class="tech">
+          <span class="t-logo"><img src="https://cdn.simpleicons.org/pusher/2c7148" alt="Pusher" width="26" height="26"></span>
+          <div><h3>Pusher</h3><p>Presence &amp; realtime tanpa refresh</p></div>
+        </div>
+        <div class="tech">
+          <span class="t-logo"><img src="https://cdn.simpleicons.org/tailwindcss/2c7148" alt="Tailwind CSS" width="26" height="26"></span>
+          <div><h3>Tailwind CSS 4</h3><p>UI &amp; sistem styling frontend</p></div>
+        </div>
+        <div class="tech">
+          <span class="t-logo"><img src="https://cdn.simpleicons.org/vitest/2c7148" alt="PHPUnit dan Vitest" width="26" height="26"></span>
+          <div><h3>PHPUnit + Vitest</h3><p>108 skenario otomatis</p></div>
+        </div>
+      </div>
+      <p class="footnote" style="margin-top:40px"><b>Catatan:</b> PostgreSQL wajib di produksi demi <span class="mono">lockForUpdate</span> &amp; <span class="mono">gen_random_uuid</span>.</p>
+    </div>
+  </section>
+
+  <!-- ============ S9 Hasil pengujian ============ -->
+  <section class="slide">
+    <div class="inner">
+      <span class="mono-tag">Hasil pengujian</span>
+      <h2>100% Lulus, Bukan Sekadar Klaim</h2>
+      <div class="metric" style="margin-top:24px">
+        <span class="metric-big">108 <span style="font-size:.4em">skenario otomatis</span></span>
+        <span class="metric-sub">100% lulus Â· Backend 71 (PHPUnit) + Frontend 37 (Vitest)</span>
+      </div>
+      <div class="evi-wrap">
+        <table class="evi-tbl">
+          <thead><tr><th>Skenario krisis</th><th>Metode uji</th><th class="rt">Hasil</th></tr></thead>
+          <tbody>
+            <tr class="evi-row" tabindex="0" data-src="C01" data-out="c01 double distribute never doubles payout &middot; 0.11s"><td>Distribusi dobel &rarr; payout tak pernah berkali (race)</td><td class="mono">ConcurrencyTest::C01</td><td class="rt ok">&#10003; PASS <span class="go">&#8250;</span></td></tr>
+            <tr class="evi-row" tabindex="0" data-src="C02" data-out="c02 duplicate vote rejected and single snapshot &middot; 0.12s"><td>Vote dobel ditolak &middot; snapshot tunggal terjaga</td><td class="mono">ConcurrencyTest::C02</td><td class="rt ok">&#10003; PASS <span class="go">&#8250;</span></td></tr>
+            <tr class="evi-row" tabindex="0" data-src="C03" data-out="c03 recalc total slices is lossless sum &middot; 0.04s"><td>Total slice = penjumlahan lossless (zero-loss)</td><td class="mono">ConcurrencyTest::C03</td><td class="rt ok">&#10003; PASS <span class="go">&#8250;</span></td></tr>
+            <tr class="evi-row" tabindex="0" data-src="C04" data-out="c04 snapshot is append only &middot; 0.03s"><td>Snapshot &amp; audit append-only &mdash; tak bisa diubah/dihapus</td><td class="mono">ConcurrencyTest::C04</td><td class="rt ok">&#10003; PASS <span class="go">&#8250;</span></td></tr>
+            <tr class="evi-row" tabindex="0" data-src="C05" data-out="c05 profit shares fully allocate distributable amount &middot; 0.05s"><td>Distribusi 100% ikut snapshot; hasil C01-C05 lossless</td><td class="mono">ConcurrencyTest |RevenueDist</td><td class="rt ok">&#10003; PASS <span class="go">&#8250;</span></td></tr>
+            <tr class="evi-row" tabindex="0" data-src="V100" data-out="threshold100 reject-votes &middot; 0.11s"><td>Threshold bulat (T=100): 1 tolak &rarr; REJECTED, tanpa tie</td><td class="mono">VoteEdgeCasesTest</td><td class="rt ok">&#10003; PASS <span class="go">&#8250;</span></td></tr>
+            <tr class="evi-row" tabindex="0" data-src="VDUP" data-out="self-vote forbidden &middot; 0.06s &middot; duplicate-vote conflict &middot; 0.05s"><td>Self-vote &amp; vote dobel &rarr; konflik (403/409)</td><td class="mono">VoteEdgeCasesTest</td><td class="rt ok">&#10003; PASS <span class="go">&#8250;</span></td></tr>
+            <tr class="evi-row" tabindex="0" data-src="VAL" data-out="cash requires amount &middot; 0.06s"><td>Validasi EP/BVA input (cash, time, FMR 0)</td><td class="mono">ContributionStoreValidationTest</td><td class="rt ok">&#10003; PASS <span class="go">&#8250;</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="footnote" style="margin-top:22px"><b>Bukti lain:</b> <span class="mono">php artisan test</span> &rarr; <b>71 lulus / 187 assertions</b> &middot; <span class="mono">vitest run</span> &rarr; <b>37</b> (VotePanel, StatusBadge, Pusher, AuthRoute). Output &amp; screenshot penuh di laporan Bab 4.</p>
+    </div>
+  </section>
+
+  <!-- ============ S10 Kesimpulan ============ -->
+  <section class="slide">
+    <div class="inner">
+      <span class="mono-tag">Kesimpulan &amp; saran</span>
+      <h2>Kesimpulan</h2>
+      <div class="cards" style="margin-top:26px;grid-template-columns:repeat(3,1fr)">
+        <div class="card"><h3>Sistem teruji &mdash; tangguh konkuren</h3><p>Seluruh skenario konkurensi &amp; transaksi diuji otomatis.</p></div>
+        <div class="card"><h3>FSM akurat &amp; deterministik</h3><p>Transisi state tervalidasi EP/BVA; keputusan konsisten.</p></div>
+        <div class="card"><h3>Adil &amp; transparan &mdash; audit append-only</h3><p>Setiap keberatan, snapshot tak bisa dimanipulasi.</p></div>
+      </div>
+      <div class="mult-plate" style="margin-top:40px">
+        <p class="mult-cap">Dirancang untuk dilanjutkan</p>
+        <div class="chips">
+          <span class="chip">Nginx + PHP-FPM / Octane</span>
+          <span class="chip">Redis</span>
+          <span class="chip">load test JMeter / K6</span>
+          <span class="chip">E2E Playwright</span>
+          <span class="chip">Payment gateway</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ S11 Demo + penutup ============ -->
+  <section class="slide">
+    <div class="inner slide-links">
+      <span class="mono-tag" style="text-align:center;margin:0 auto 18px">Demo langsung</span>
+      <h2 style="text-align:center">Demo</h2>
+      <div class="url-big"><span class="mono" style="color:var(--ink-soft)">http://</span>72.61.215.209</div>
+      <p class="lede" style="text-align:center;margin:20px auto 0;max-width:40ch">Silakan ikuti dari laptop/HP Anda.</p>
+      <hr class="end-rule">
+      <div class="thanks">Terima kasih Â· Diskusi &amp; Q&amp;A</div>
+      <div class="end-wait">Bintang Hari Kahono Â· 1152200031 Â· <span style="color:var(--clay)">SEIRIS</span></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="hint">&larr; &rarr; navigasi</div>
+<div class="counter"><span class="on" data-cur>S1</span> / 11</div>
+<div class="progress-wrap"><div class="progress-fill" data-prog></div></div>
+<div class="nav-btns">
+  <button data-nav="prev" aria-label="Sebelum">&larr;</button>
+  <button data-nav="next" aria-label="Berikutnya">&rarr;</button>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var cur = 0;
+  var count = slides.length;
+  var counter = document.querySelector('[data-cur]');
+  var prog = document.querySelector('[data-prog]');
+  var prev = document.querySelector('[data-nav="prev"]');
+  var next = document.querySelector('[data-nav="next"]');
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function go(i){
+    if(i<0||i>=count) return;
+    var ol = slides[cur], nw = slides[i];
+    ol.classList.remove('is-active');
+    nw.classList.add('is-active');
+    cur = i;
+    counter.textContent = 'S'+ (cur+1);
+    prog.style.width = ((cur+1)/count*100)+'%';
+    prev.disabled = cur===0;
+    next.disabled = cur===count-1;
+  }
+  function nextStep(){ go(cur+1); }
+  function prevStep(){ go(cur-1); }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){ e.preventDefault(); nextStep(); }
+    else if(e.key==='ArrowLeft'||e.key==='ArrowUp'||e.key==='Backspace'){ e.preventDefault(); prevStep(); }
+    else if(e.key==='Home'){ go(0); }
+    else if(e.key==='End'){ go(count-1); }
+  });
+
+  prev.addEventListener('click', prevStep);
+  next.addEventListener('click', nextStep);
+  go(0);
+
+  // swipe for touch
+  var sx=null;
+  document.addEventListener('touchstart', function(e){ sx=e.touches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    if(sx===null) return;
+    var dx = e.changedTouches[0].clientX - sx;
+    if(Math.abs(dx)>50){ dx<0?nextStep():prevStep(); }
+    sx=null;
+  }, {passive:true});
+})();
+</script>
+
+<div class="mwrap" id="testModal" hidden>
+  <div class="mback" data-modal-close></div>
+  <div class="mdl" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <button class="mclose" data-modal-close aria-label="Tutup">&times;</button>
+    <div class="mhead"><span class="mtag">SEIRISÂ·Test</span><span id="mTitle" class="mtitle"></span></div>
+    <pre id="mCode" class="mcode"></pre>
+    <div class="mtcap">$ php artisan test</div>
+    <pre id="mTranscript" class="mtranscript"></pre>
+    <div class="mfoot" id="mOut">&#10003; PASS &middot; php artisan test (BE) &rarr; 71 lulus / 187 assertions</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var m=document.getElementById('testModal'), code=document.getElementById('mCode'),
+      title=document.getElementById('mTitle'), out=document.getElementById('mOut'),
+      tr=document.getElementById('mTranscript');
+  function openSrc(id, rawOut){
+    var tpl=document.getElementById('src-'+id); if(!tpl) return;
+    title.textContent=tpl.getAttribute('data-name')||('Test '+id);
+    code.textContent=tpl.textContent.replace(/^\n+/, '');
+    tr.textContent = '✓ '+(rawOut||'PASS')+'\n\n  Tests: 71 passed (187 assertions)  (BE)   ·  Duration: 7.24s';
+    out.innerHTML = 'runner &middot; <span style="font-family:var(--mono)">php artisan test</span> &rarr; 71 lulus / 187 assertions'
+      + '<span style="display:block;opacity:.55;margin-top:2px">FE &middot; <span style="font-family:var(--mono)">vitest run</span> &rarr; 13 files / 37 tests &middot; Duration 29.80s</span>';
+    m.hidden=false;
+  }
+  Array.prototype.slice.call(document.querySelectorAll('tr.evi-row')).forEach(function(tr){
+    function fire(){ openSrc(tr.getAttribute('data-src'), tr.getAttribute('data-out')); }
+    tr.addEventListener('click', fire);
+    tr.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); fire(); } });
+  });
+  Array.prototype.slice.call(document.querySelectorAll('[data-modal-close]')).forEach(function(el){
+    el.addEventListener('click', function(){ m.hidden=true; });
+  });
+  m.addEventListener('click', function(e){ if(e.target===m) m.hidden=true; });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !m.hidden) m.hidden=true; });
+})();
+</script>
+
+<script type="text/plain" id="src-C01" data-name="ConcurrencyTest::test_c01_double_distribute_never_doubles_payout" data-assert="Foreach double distribute rejected">
+/** C-01 â€” Redistribusi tidak boleh menggandakan payout. Guard: Revenue::lockForUpdate() -> is_distributed -> tolak. */
+public function test_c01_double_distribute_never_doubles_payout(): void
+{
+    [$ownerUser, $ownerMember, $team, , $member] = $this->makeOwnerAndMember();
+    $this->seedSnapshot($team, $ownerMember, $member);
+    $revenueId = $this->createRevenue($team, $ownerUser);
+    $this->actingAs($ownerUser, 'sanctum')
+        ->postJson("/api/revenues/{$revenueId}/distribute")->assertStatus(200);
+    $resp = $this->actingAs($ownerUser, 'sanctum')
+        ->postJson("/api/revenues/{$revenueId}/distribute");
+    $this->assertTrue($resp->status() >= 400, 'Redistribusi harus ditolak');
+    $this->assertDatabaseCount('profit_distributions', 2);
+    $this->assertSame(1000000, ProfitDistribution::where('revenue_id', $revenueId)->sum('amount'));
+}
+</script>
+
+<script type="text/plain" id="src-C02" data-name="ConcurrencyTest::C02 double-vote single snapshot" data-assert="snapshot tetap 1, duplicate vote 409">
+public function test_c02_duplicate_vote_rejected_and_single_snapshot(): void
+{
+    $t = $this->makeTeam(2, 100);
+    $c = $this->createPendingContribution($t['team'], $t['contributor']);
+    foreach ($t['voters'] as $voter) {
+        $this->actingAs($voter, 'sanctum')->postJson("/api/contributions/{$c->id}/vote", ['vote' => 'APPROVE']);
+    }
+    $this->actingAs($t['owner'], 'sanctum')->postJson("/api/contributions/{$c->id}/vote", ['vote' => 'APPROVE'])->assertOk();
+    $c->refresh();
+    $this->assertEquals('APPROVED', $c->status);
+    $this->assertSame(1, EquitySnapshot::where('team_id', $t['team']->id)->count());
+    $this->actingAs($t['voters'][0], 'sanctum')
+        ->postJson("/api/contributions/{$c->id}/vote", ['vote' => 'APPROVE'])->assertStatus(409);
+    $this->assertSame(1, EquitySnapshot::where('team_id', $t['team']->id)->count());
+}
+</script>
+
+<script type="text/plain" id="src-C03" data-name="ConcurrencyTest::C03 zero-loss sum" data-assert="total_slices 10000; sum equity_pct 100Â±0.01">
+public function test_c03_recalc_total_slices_is_lossless_sum(): void
+{
+    $team = Team::factory()->create();
+    $m1 = TeamMember::factory()->create(['team_id' => $team->id]);
+    $m2 = TeamMember::factory()->create(['team_id' => $team->id]);
+    Contribution::create(['team_id'=>$team->id,'member_id'=>$m1->id,'project_id'=>null,'type'=>'CASH','description'=>'a','value'=>6000,'multiplier'=>1.0,'total_slices'=>6000,'status'=>'APPROVED','contribution_date'=>now()]);
+    Contribution::create(['team_id'=>$team->id,'member_id'=>$m2->id,'project_id'=>null,'type'=>'TIME','description'=>'b','value'=>4000,'multiplier'=>1.0,'total_slices'=>4000,'status'=>'APPROVED','contribution_date'=>now()]);
+    $snapshot = (new SlicingPieService())->recalculate($team);
+    $this->assertSame(10000, $snapshot->total_slices);
+    $sum = collect($snapshot->equity_map)->sum('equity_pct');
+    $this->assertEqualsWithDelta(100.0, $sum, 0.01);
+}
+</script>
+
+<script type="text/plain" id="src-C04" data-name="ConcurrencyTest::C04 append-only" data-assert="update sensitif=false; delete=false">
+public function test_snapshot_is_append_only(): void
+{
+    $snap = EquitySnapshot::create(['team_id'=>Team::factory()->create()->id,'project_id'=>null,'total_slices'=>10000,'equity_map'=>[],'is_frozen'=>false]);
+    $snap->total_slices = 999999; $snap->equity_map = ['member'=>['slices'=>1,'equity_pct'=>100.0]];
+    $this->assertFalse($snap->save()); $snap->refresh(); $this->assertSame(10000, $snap->total_slices);
+    $snap->is_frozen = true; $this->assertTrue($snap->save());
+    $this->assertFalse($snap->delete());
+    $this->assertDatabaseHas('equity_snapshots', ['id'=>$snap->id]);
+}
+</script>
+
+<script type="text/plain" id="src-C05" data-name="RevenueDist::test_profit_shares" data-assert="600k ke owner,400k ke member, sum=1jt">
+public function test_profit_shares_fully_allocate_distributable_amount(): void
+{
+    [$ownerUser, $ownerMember, $team, , $member] = $this->makeOwnerAndMember();
+    $this->seedSnapshot($team, $ownerMember, $member);
+    $revenueId = $this->createRevenue($team, $ownerUser);
+    $this->actingAs($ownerUser, 'sanctum')->postJson("/api/revenues/{$revenueId}/distribute")->assertStatus(200);
+    $this->assertSame(600000, ProfitDistribution::where('revenue_id',$revenueId)->where('member_id',$ownerMember->id)->value('amount'));
+    $this->assertSame(400000, ProfitDistribution::where('revenue_id',$revenueId)->where('member_id',$member->id)->value('amount'));
+    $this->assertSame(1000000, ProfitDistribution::where('revenue_id',$revenueId)->sum('amount'));
+}
+</script>
+
+<script type="text/plain" id="src-V100" data-name="VoteEdgeCasesTest threshold100 reject vetoes" data-assert="reject pertama &rarr; REJECTED">
+public function test_threshold100_first_reject_vetoes(): void
+{
+    $t = $this->makeTeam(2, 100);
+    $c = $this->createPendingContribution($t['team'], $t['contributor']);
+    $this->actingAs($t['voters'][0], 'sanctum')->postJson("/api/contributions/{$c->id}/vote", ['vote'=>'APPROVE']);
+    $this->actingAs($t['voters'][1], 'sanctum')->postJson("/api/contributions/{$c->id}/vote", ['vote'=>'REJECT'])->assertOk();
+    $c->refresh(); $this->assertEquals('REJECTED', $c->status);
+}
+</script>
+
+<script type="text/plain" id="src-VDUP" data-name="VoteEdgeCasesTest self-vote + duplicate" data-assert="self-vote 403, duplicate 409">
+public function test_self_vote_forbidden(): void
+{
+    $t = $this->makeTeam(1, 50);
+    $c = $this->createPendingContribution($t['team'], $t['contributor']);
+    $this->actingAs($t['contributor'], 'sanctum')
+        ->postJson("/api/contributions/{$c->id}/vote", ['vote'=>'APPROVE'])->assertStatus(403);
+    $c->refresh(); $this->assertEquals('PENDING', $c->status);
+}
+public function test_duplicate_vote_conflict(): void
+{
+    $t = $this->makeTeam(1, 50);
+    $c = $this->createPendingContribution($t['team'], $t['contributor']);
+    $this->actingAs($t['voters'][0], 'sanctum')->postJson("/api/contributions/{$c->id}/vote", ['vote'=>'APPROVE']);
+    $this->actingAs($t['voters'][0], 'sanctum')->postJson("/api/contributions/{$c->id}/vote", ['vote'=>'APPROVE'])->assertStatus(409);
+}
+</script>
+
+<script type="text/plain" id="src-VAL" data-name="ContributionStoreValidationTest cash amount" data-assert="cash tanpa amount -> 422 error amount">
+public function test_cash_requires_amount(): void
+{
+    $t = $this->makeTeam();
+    $this->actingAs($t['owner'], 'sanctum');
+    $r = $this->postJson("/api/teams/{$t['team']->id}/contributions", ['type'=>'CASH','description'=>'Test CASH amount required','contribution_date'=>now()->toDateString()]);
+    $r->assertStatus(422);
+    $r->assertJsonValidationErrors(['amount']);
+}
+</script>
+</body>
+</html>

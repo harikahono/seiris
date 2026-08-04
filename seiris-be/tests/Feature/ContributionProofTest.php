@@ -122,7 +122,7 @@ class ContributionProofTest extends TestCase
         // Fake GitHub diff response
         $rawDiff = "diff --git a/file.txt b/file.txt\nindex 111..222 100644\n--- a/file.txt\n+++ b/file.txt\n@@ -1 +1 @@\n-Old\n+New\n";
         Http::fake([
-            'https://github.com/example/repo/pull/42.diff' => Http::response($rawDiff, 200),
+            'https://github.com/example/repo/pull/42.patch' => Http::response($rawDiff, 200),
         ]);
 
         $response = $this->getJson(
