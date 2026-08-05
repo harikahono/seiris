@@ -189,6 +189,8 @@ h2{font-size:clamp(30px,4.4vw,52px)}
 .formula .f{display:block;padding:6px 0;border-bottom:1px dashed var(--line)}
 .formula .f:last-child{border-bottom:none}
 .formula .lbl{color:var(--ink-soft);font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:2px}
+.formula .f-scope{font-size:.72em;color:var(--ink-soft)}
+.formula .f-scope b{color:var(--ink-soft);font-family:var(--display);letter-spacing:.05em;text-transform:none}
 .pie-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
 .pie-cap{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--clay);text-transform:uppercase}
 .mult-plate{margin-top:24px}
@@ -452,8 +454,10 @@ body.notes-on .slide.is-active .notes h4{margin:0 0 6px;color:#ffd166;font-size:
         </div>
         <div class="formula" style="margin-top:6px">
           <span class="lbl">Formula inti</span>
-          <span class="f">slice kamu = nilai &times; multiplier</span>
-          <span class="f">porsi% = slice kamu &divide; total slice SEMUA</span>
+          <span class="f">slice<sub>i</sub> = nilai<sub>i</sub> &times; multiplier<sub>i</sub></span>
+          <span class="f">porsi% = slice<sub>i</sub> &divide; total slice (scope)</span>
+          <span class="f f-scope"><b>Pie project</b> &nbsp;equity<sub>p</sub>(i) = slice<sub>p</sub>(i) &divide; T<sub>p</sub></span>
+          <span class="f"><b>Pie tim</b> &nbsp;&nbsp;equity<sub>T</sub>(i) = slice<sub>T</sub>(i) &divide; T<sub>T</sub>, &nbsp;T<sub>T</sub> = &Sigma; seluruh project</span>
         </div>
       </div>
       <div class="mult-plate">
@@ -475,6 +479,12 @@ body.notes-on .slide.is-active .notes h4{margin:0 0 6px;color:#ffd166;font-size:
 <b>Jawaban 1 menit FMR:</b> FMR = nilai wajar 1 jam kerja anggota, seolah digaji pasar. Semua kontribusi dinormalisasi ke slice = nilai x pengali risiko. Porsi = slice kamu : total slice semua. Formula Slicing Pie Mike Moyer.
 
 <b>Slice = alat ukur fiktif.</b> Bukan uang/saham. Yang penting RATIO, bukan angka mutlak. Pie selalu 100% (zero-loss).
+
+<b>Rumus per-scope (kalau ditanya "rumus per project & per tim?"):</b>
+- Satu kontribusi: slice_i = nilai x multiplier.
+- <b>Pie project (p):</b> equity_p(i) = slice_p(i) / T_p, dgn T_p = Σ slice semua member di project itu. Scope hanya kontribusi APPROVED milik project tsb.
+- <b>Pie tim (induk):</b> equity_T(i) = slice_T(i) / T_T, dgn T_T = Σ slice seluruh project + kontribusi tim-level. Tim = agregat SEMUA project (aktif & frozen) — inilah zero-loss di level tim.
+- Contoh Kopi Nusantara jadi bukti: total pie tim 19.740.000 = penjumlahan seluruh project + tim-level.
 
 <b>Contoh hitung cepat:</b> A TIME 10 jam x 50rb = 1jt slice; B CASH 250rb x4 = 1jt; C IDEA 5 jam x 100rb = 1jt. Total 3jt -&gt; masing-masing 33,33%.
 
