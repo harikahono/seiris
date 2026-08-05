@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SEIRIS Â· Tugas Akhir â€” Pra-Sidang</title>
+<title>SEIRIS · Tugas Akhir — Pra-Sidang</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -205,25 +205,69 @@ h2{font-size:clamp(30px,4.4vw,52px)}
 .stage p{font-size:14px;color:var(--ink-dim);margin-top:4px}
 .stage .mono{font-size:12px;color:var(--ink-soft);margin-top:6px;display:block}
 
-/* ---------- S6 split ---------- */
-.t2{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;margin-top:6px;align-items:start}
-.fsm{background:var(--panel);border:var(--border);border-radius:12px;padding:20px}
-.fsm .cap{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:12px;display:block}
-.fsm-box{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.node{
-  font-family:var(--mono);font-size:12px;border-radius:8px;padding:8px 12px;border:var(--border);background:var(--panel-2);
+/* ---------- S5 interactive metodologi diagram (compact, no scroll) ---------- */
+.meth-slide .inner{max-width:94vw;height:100%;display:flex;flex-direction:column;justify-content:center;gap:clamp(10px,2vh,20px)}
+.meth{display:flex;flex-direction:column;--acc:var(--clay);--acc-soft:var(--clay-soft)}
+.meth-layout{display:flex;gap:clamp(14px,1.6vw,26px);align-items:stretch;justify-content:center;min-height:0}
+.meth-diagram{display:flex;align-items:stretch;gap:clamp(12px,1.4vw,22px);background:var(--panel);border:var(--border);border-radius:14px;padding:clamp(16px,2vh,24px) clamp(18px,2vw,28px)}
+.meth-box{border:1.5px solid var(--acc);background:#fff;color:var(--ink);font-weight:600;font-size:clamp(14px,1.35vw,19px);text-align:center;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 rgba(44,113,72,.15);cursor:pointer;transition:all .2s var(--ease-out);user-select:none;line-height:1.15;font-family:inherit}
+.meth-box:hover{background:var(--acc-soft);transform:translateY(-2px)}
+.meth-box:focus-visible{outline:3px solid var(--teal);outline-offset:2px;background:var(--acc-soft)}
+.meth-box.active{background:var(--acc);color:#fff;box-shadow:0 0 0 3px rgba(44,113,72,.25)}
+.meth-outline{align-self:center;width:clamp(110px,11vw,160px);height:clamp(60px,7.5vh,92px);border-radius:6px}
+.meth-concurrent{flex:1;background:var(--acc-soft);border-radius:12px;padding:clamp(14px,1.6vh,20px);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.meth-concurrent-title{font-family:var(--display);font-weight:700;font-size:clamp(14px,1.5vw,20px);color:var(--ink);margin-bottom:clamp(8px,1.2vh,16px);letter-spacing:.02em}
+.meth-grid{display:grid;grid-template-columns:clamp(120px,13.5vw,180px) clamp(30px,3.2vw,50px) clamp(130px,15vw,195px);grid-template-rows:1fr clamp(16px,1.8vh,24px) 1fr clamp(16px,1.8vh,24px) 1fr;align-items:center;justify-items:center;min-height:0}
+.meth-oval{width:clamp(114px,12vw,165px);height:clamp(46px,5.8vh,70px);border-radius:999px}
+.meth-rect{width:clamp(122px,12.5vw,170px);height:clamp(46px,5.8vh,70px);border-radius:6px}
+.meth-stacked{position:relative}
+.meth-stacked::before,.meth-stacked::after{content:"";position:absolute;width:100%;height:100%;border:1.5px solid var(--acc);background:#fff;border-radius:6px;z-index:0}
+.meth-stacked::before{top:-3px;left:3px}.meth-stacked::after{top:-6px;left:6px}
+.meth-stacked span{z-index:1;position:relative}
+.meth-stacked.active::before,.meth-stacked.active::after{background:var(--acc-soft)}
+.meth svg{overflow:visible}
+.meth svg line{stroke:#5f5749;stroke-width:1.4}
+.meth svg path{fill:#5f5749}
+.meth-diagram > svg{align-self:center}
+.meth-panel{align-self:stretch;flex:0 1 34vw;background:var(--panel);border:var(--border);border-left:5px solid var(--acc);border-radius:14px;padding:clamp(16px,2vw,28px);overflow:hidden}
+.meth-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.meth-badge{background:var(--acc-soft);color:var(--acc);padding:3px 11px;border-radius:999px;font-size:clamp(10px,1.1vw,13px);font-weight:700;font-family:var(--mono);white-space:nowrap}
+.meth-title{font-family:var(--display);font-size:clamp(15px,1.55vw,20px);font-weight:700;margin:0;color:var(--ink);line-height:1.2}
+.meth-content{font-size:clamp(12px,1.2vw,15px);line-height:1.5;color:var(--ink-dim)}
+.meth-content ul,.meth-content ol{margin:6px 0 0 18px}
+.meth-content li{margin-bottom:4px}
+.meth-content code{font-family:var(--mono);font-size:.95em;color:var(--clay)}
+.meth-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.meth-tag{background:var(--panel-2);color:var(--ink-dim);padding:2px 9px;border-radius:5px;font-size:clamp(9px,1vw,12px);font-family:var(--mono);font-weight:600}
+.meth-hint{margin-top:2px;text-align:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--ink-soft)}
+@media (max-width:1000px){
+  .meth-slide .inner{height:auto;justify-content:flex-start}
+  .meth-layout{flex-direction:column;align-items:center}
+  .meth-panel{flex:none;width:100%;max-height:34vh;overflow-y:auto}
 }
-.node.pending{background:var(--panel);border-color:var(--line)}
-.node.approved{border-color:var(--clay);color:var(--clay);background:var(--clay-soft)}
-.node.rejected{border-color:var(--plum);color:var(--plum)}
-.arrow{color:var(--ink-soft);font-size:14px}
-.arrow .lbl{display:block;font-size:9px;letter-spacing:.06em;text-align:center;color:var(--ink-soft)}
-.nav-hint{display:block;margin-top:14px;font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--ink-dim)}
-.nav-hint b{color:var(--clay)}
-.inv-list{display:flex;flex-direction:column;gap:10px}
-.inv{background:var(--panel);border:var(--border);border-radius:12px;padding:14px 16px}
-.inv .m{font-family:var(--mono);font-size:11px;color:var(--teal);letter-spacing:.06em;display:block;margin-bottom:3px}
-.inv p{font-size:14px;color:var(--ink)}
+
+/* ---------- S6 FSM interaktif (gaya S5 .meth) ---------- */
+.fsm-stage{flex:1;min-width:0;display:flex;flex-direction:column;gap:clamp(8px,1vh,14px);background:var(--panel);border:var(--border);border-radius:14px;padding:clamp(14px,1.8vh,22px) clamp(16px,2vw,26px)}
+.fsm-stage .cap{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--ink-soft);text-transform:uppercase}
+.fsm-scroll{flex:1;overflow-x:auto;scrollbar-width:none;display:flex;align-items:stretch}
+.fsm-scroll::-webkit-scrollbar{display:none}
+.fsm-canvas{position:relative;flex:1 0 640px;aspect-ratio:640/360;min-height:300px}
+.fsm-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.fsm-lbl{font-family:var(--mono);font-size:9.5px;fill:#5f5749;paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round}
+.fsm-node{position:absolute;z-index:3;transform:translate(-50%,-50%);border:1.5px solid var(--clay);background:#fff;color:var(--ink);font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;border-radius:8px;padding:6px 8px;box-shadow:2px 2px 0 rgba(44,113,72,.15);cursor:pointer;transition:all .2s var(--ease-out);user-select:none;line-height:1.15;font-family:inherit;font-size:clamp(11px,1vw,14px)}
+.fsm-node:hover{background:var(--clay-soft);transform:translate(-50%,-50%) translateY(-2px)}
+.fsm-node:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.fsm-node.active{background:var(--clay);color:#fff;border-color:var(--clay);box-shadow:0 0 0 3px rgba(44,113,72,.25)}
+.fsm-node.dark{border-color:var(--ink);background:#5f5749;color:#fff}
+.fsm-node.ok{border-color:var(--clay);background:var(--clay-soft)}
+.fsm-node.no{border-color:var(--plum);background:#ecdbe0}
+.fsm-node.teal{border-color:var(--teal);background:var(--teal-soft)}
+.fsm-node.seri{width:72px;height:72px;border-radius:10px;border-color:var(--teal);transform:translate(-50%,-50%) rotate(45deg)}
+.fsm-node.seri b{transform:rotate(-45deg)}
+.fsm-node.seri:hover{transform:translate(-50%,-50%) rotate(45deg) translateY(-2px)}
+.fsm-node.start{width:22px;height:22px;border-radius:50%;background:var(--ink);border-color:var(--ink);box-shadow:none}
+.fsm-guard{position:absolute;z-index:2;left:21.9%;top:76%;transform:translate(-50%,-50%);width:100px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:7px 9px;font-family:var(--mono);font-size:8.5px;line-height:1.45;color:var(--ink-dim);pointer-events:none}
+.fsm-guard b{display:block;font-size:7.5px;letter-spacing:.14em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:2px}
 
 /* ---------- S7 feature tiles ---------- */
 .tile{background:var(--panel);border:var(--border);border-radius:12px;padding:18px 20px;min-height:118px;position:relative;transition:transform 200ms ease,border-color 200ms ease}
@@ -304,6 +348,16 @@ h2{font-size:clamp(30px,4.4vw,52px)}
   .metric-big{font-size:38px}
   .end-wait,.thanks{text-align:left}
 }
+/* ===== speaker notes (toggle N) ===== */
+.slide .notes{display:none}
+body.notes-on .slide.is-active .notes{
+  display:block;position:fixed;left:16px;right:16px;bottom:16px;z-index:50;
+  background:rgba(17,19,20,.94);color:#e8e0d0;border:1px solid #4a4d50;border-radius:10px;
+  padding:12px 16px;font-family:var(--mono);font-size:13px;line-height:1.55;
+  max-height:38vh;overflow:auto;white-space:pre-wrap;
+}
+body.notes-on .slide.is-active .notes b{color:#ffd166}
+body.notes-on .slide.is-active .notes h4{margin:0 0 6px;color:#ffd166;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -313,7 +367,7 @@ h2{font-size:clamp(30px,4.4vw,52px)}
   <!-- ============ S1 ============ -->
   <section class="slide is-active">
     <div class="inner">
-      <span class="title-eyebrow">TUGAS AKHIR Â· TEKNIK INFORMATIKA ITI Â· 2026</span>
+      <span class="title-eyebrow">TUGAS AKHIR · TEKNIK INFORMATIKA ITI · 2026</span>
       <div class="brand-line">
         <svg class="monogram" width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
           <circle cx="32" cy="32" r="30" fill="#2c7148"/>
@@ -330,7 +384,7 @@ h2{font-size:clamp(30px,4.4vw,52px)}
       <div class="people">
         <div class="person">
           <span class="role">Disusun oleh</span>
-          <div class="who">Bintang Hari Kahono <span class="id">Â· 1152200031</span></div>
+          <div class="who">Bintang Hari Kahono <span class="id">· 1152200031</span></div>
         </div>
         <div class="person">
           <span class="role">Dosen Pembimbing</span>
@@ -343,19 +397,19 @@ h2{font-size:clamp(30px,4.4vw,52px)}
   <!-- ============ S2 Latar Belakang ============ -->
   <section class="slide">
     <div class="inner">
-      <span class="k-tag mono-tag">Latar Belakang â€” 4 persoalan</span>
+      <span class="k-tag mono-tag">Latar Belakang — 4 persoalan</span>
       <h2>Kenapa equity tim startup mahasiswa selalu berantakan?</h2>
       <div class="cards cols-2" style="margin-top:26px">
         <div class="card"><span class="c-num">P1</span><h3>Bagi rata: populer tapi tak adil</h3>
-          <p>45,9% tim 2 orang memilih bagi rata (naik dari 31,5%), padahal satu anggota bisa kerja <em>full-time</em> sementara yang lain sibuk kuliah &rarr; porsi tak sebanding &rarr; kohesi tim jebol.</p></div>
-        <div class="card"><span class="c-num">P2</span><h3>Fixed split menuntut prediksi masa depan</h3>
-          <p>Menetapkan porsi di awal menuntut prediksi masa depan yang sulit diprediksi di tim yang baru terbentuk.</p></div>
-        <div class="card"><span class="c-num">P3</span><h3>Spreadsheet rawan</h3>
-          <p>Manipulasi histori + human error; nilai deal PM/Sales tak bisa diverifikasi (beda yang dikomunikasikan vs dari klien) &rarr; erosi kepercayaan.</p></div>
+          <p>45,9% tim 2 orang memilih bagi rata (naik dari 31,5%) &mdash; padahal satu anggota bisa kerja <em>full-time</em> sementara yang lain sibuk kuliah &rarr; porsi tak sebanding &rarr; kohesi tim menurun.</p></div>
+        <div class="card"><span class="c-num">P2</span><h3>Kontrak statis tak mengikuti perubahan</h3>
+          <p>Kesepakatan porsi di awal gagal mengakomodasi perubahan kontribusi seiring waktu; fixed split menuntut prediksi masa depan yang sulit diprediksi tim baru.</p></div>
+        <div class="card"><span class="c-num">P3</span><h3>Spreadsheet rawan &amp; tak bisa diaudit</h3>
+          <p>Manipulasi histori + human error; nilai deal PM/Sales tak bisa diverifikasi (selisih yang dikomunikasikan vs dari klien) &rarr; erosi kepercayaan tim.</p></div>
         <div class="card"><span class="c-num">P4</span><h3>Aplikasi komersial top-down</h3>
-          <p>Tanpa voting komunal &amp; verifikasi bukti (invoice), keputusan dijatuhkan dari atas.</p></div>
+          <p>Tanpa voting komunal &amp; verifikasi bukti (invoice), keputusan dijatuhkan dari atas &rarr; fraud internal tak termitigasi.</p></div>
       </div>
-      <p class="footnote"><b>2 tantangan teknis:</b> lost update (race condition multi-aktor) &amp; belum ada verifikasi komunal untuk mitigasi asimetri info / fraud internal.</p>
+      <p class="footnote"><b>2 tantangan teknis:</b> (1) <b>lost update</b> saat &le;8 aktor menginput / memicu kalkulasi ulang secara konkuren &middot; (2) belum ada <b>verifikasi komunal deterministik</b> untuk mitigasi asimetri informasi &amp; fraud internal.</p>
     </div>
   </section>
 
@@ -365,10 +419,10 @@ h2{font-size:clamp(30px,4.4vw,52px)}
       <span class="mono-tag">Rumusan Masalah &amp; Tujuan</span>
       <h2>Empat Pertanyaan yang Dijawab</h2>
       <div class="cards" style="margin-top:26px;grid-template-columns:repeat(2,1fr)" >
-        <div class="card"><span class="c-num">(a)</span><p style="margin:6px 0 0">Ketahanan algoritma <b>Slicing Pie</b> terhadap <span class="mono">race condition</span>.</p></div>
-        <div class="card"><span class="c-num">(b)</span><p style="margin:6px 0 0">Mitigasi anomali input &amp; penipuan data markup lewat validasi + voting komunal.</p></div>
-        <div class="card"><span class="c-num">(c)</span><p style="margin:6px 0 0">Pemenuhan spesifikasi kebutuhan lewat <span class="mono">black-box</span> EP &amp; BVA.</p></div>
-        <div class="card"><span class="c-num">(d)</span><p style="margin:6px 0 0">Efektivitas <span class="mono">Rule-Based System</span> + penanganan deadlock via threshold.</p></div>
+        <div class="card"><span class="c-num">(a)</span><p style="margin:6px 0 0">Sejauh mana ketahanan algoritma <b>Slicing Pie</b> mencegah inkonsistensi data akibat <span class="mono">race condition</span>?</p></div>
+        <div class="card"><span class="c-num">(b)</span><p style="margin:6px 0 0">Bagaimana sistem memitigasi anomali input &amp; <b>markup</b> nilai lewat validasi aplikasi + voting komunal?</p></div>
+        <div class="card"><span class="c-num">(c)</span><p style="margin:6px 0 0">Sejauh mana sistem sesuai spesifikasi fungsional berdasarkan <span class="mono">black-box</span> EP &amp; BVA?</p></div>
+        <div class="card"><span class="c-num">(d)</span><p style="margin:6px 0 0">Sejauh mana efektivitas <span class="mono">Rule-Based System</span> menangani <b>deadlock / tie-breaker</b> via threshold?</p></div>
       </div>
       <div class="metric" style="margin-top:34px">
         <span class="metric-sub">Tujuan:</span>
@@ -394,7 +448,7 @@ h2{font-size:clamp(30px,4.4vw,52px)}
             <circle cx="150" cy="150" r="54" fill="#ffffff"/>
             <text x="150" y="150" text-anchor="middle" dominant-baseline="middle" font-family="JetBrains Mono,ui-monospace,monospace" font-size="20" font-weight="600" fill="#2c7148">100%</text>
           </svg>
-          <span class="pie-cap">1% tidak ada yang hilang Â· zero-loss</span>
+          <span class="pie-cap">1% tidak ada yang hilang · zero-loss</span>
         </div>
         <div class="formula" style="margin-top:6px">
           <span class="lbl">Formula inti</span>
@@ -403,7 +457,7 @@ h2{font-size:clamp(30px,4.4vw,52px)}
         </div>
       </div>
       <div class="mult-plate">
-        <p class="mult-cap">Multiplier kontribusi Â· FMR Rp 150.000/jam (mahasiswa)</p>
+        <p class="mult-cap">Multiplier kontribusi · FMR Rp 150.000/jam (mahasiswa)</p>
         <div class="chips">
           <span class="chip">CASH <b>&times;4</b></span>
           <span class="chip">TIME <b>&times;2</b></span>
@@ -412,58 +466,147 @@ h2{font-size:clamp(30px,4.4vw,52px)}
           <span class="chip">FACILITY <b>&times;2</b></span>
           <span class="chip">SALES <b>&times;2</b></span>
         </div>
-        <p class="hash">Keunikan: <b>nested pie</b> (tim â‡„ project) Â· <b>voting komunal</b> Â· <b>zero-loss</b>.</p>
+        <p class="hash">Keunikan: <b>nested pie</b> (tim → project) · <b>voting komunal</b> · <b>zero-loss</b>.</p>
       </div>
     </div>
+    <!-- notes S4 -->
+    <aside class="notes">
+<h4>Catatan S4 — FMR &amp; Duit (kritik terberat)</h4>
+<b>Jawaban 1 menit FMR:</b> FMR = nilai wajar 1 jam kerja anggota, seolah digaji pasar. Semua kontribusi dinormalisasi ke slice = nilai x pengali risiko. Porsi = slice kamu : total slice semua. Formula Slicing Pie Mike Moyer.
+
+<b>Slice = alat ukur fiktif.</b> Bukan uang/saham. Yang penting RATIO, bukan angka mutlak. Pie selalu 100% (zero-loss).
+
+<b>Contoh hitung cepat:</b> A TIME 10 jam x 50rb = 1jt slice; B CASH 250rb x4 = 1jt; C IDEA 5 jam x 100rb = 1jt. Total 3jt -&gt; masing-masing 33,33%.
+
+<b>Kritik "FMR subjektif, app cuma CRUD":</b>
+- SEIRIS = wasit, bukan pembuat aturan. Judgment manusia tetap di puncak (by design).
+- Yang diautomasi = PROSES + enforcement: FmrProposal (ajukan-&gt;owner approve-&gt;audit), slices immutable, no self-vote, bad-leaver otomatis, cap 150k 3 lapis enforcement.
+- Trust dipindah ke mayoritas (voting), bukan dihilangkan. Kecurangan jadi mahal &amp; terdeteksi.
+- Multiplier x4/x2 = default Moyer, bukan turunan data: "tugas app membuat multiplier apapun jadi enforceable".
+
+<b>Frame kemenangan:</b> "SEIRIS membuat penilaian manusia dapat diaudit, konsisten, bebas-race. Formula dari Moyer, enforcement-nya yang dibangun di TA."
+    </aside>
   </section>
 
   <!-- ============ S5 Metodologi ============ -->
-  <section class="slide">
+  <section class="slide meth-slide">
     <div class="inner">
       <span class="mono-tag">Metodologi</span>
       <h2>Evolutionary Prototyping</h2>
-      <div style="margin-top:30px">
-        <div class="stage"><span class="stage-num">1</span>
-          <div><h3>Engine Slicing Pie inti</h3>
-            <p>Formula slice &amp; porsi sebagai fondasi kalkulasi yang bisa diaudit.</p>
-            <span class="mono">slice Â· porsi% Â· zero-loss</span></div></div>
-        <div class="stage"><span class="stage-num">2</span>
-          <div><h3>FSM + nested pies + row-locking</h3>
-            <p>Menambah FSM, pies beranak (tim â‡„ project), penguncian baris, plus FMR, revenue, dan catatan audit.</p>
-            <span class="mono">FSM Â· nested pie Â· lockForUpdate Â· FMR Â· revenue Â· audit</span></div></div>
-        <div class="stage"><span class="stage-num">3</span>
-          <div><h3>Realtime + rate limiter</h3>
-            <p>Pusher untuk kehadiran/pembaruan &amp; pembatas laju 3 lapis.</p>
-            <span class="mono">Pusher presence Â· api 120 Â· write 30 Â· auth 5</span></div></div>
+      <div class="meth">
+        <div class="meth-layout">
+          <div class="meth-diagram">
+            <div class="meth-box meth-outline" id="meth-outline" tabindex="0" role="button" aria-pressed="true" onclick="showMeth('outline')">Outline<br>Description</div>
+            <svg viewBox="0 0 36 20" style="width:clamp(36px,4vw,64px);height:clamp(56px,7.5vh,90px)"><defs><marker id="methhead" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5f5749"/></marker></defs><line x1="0" y1="10" x2="30" y2="10" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/></svg>
+            <div class="meth-concurrent">
+              <div class="meth-concurrent-title">Concurrent Activities</div>
+              <div class="meth-grid">
+                <div class="meth-box meth-oval" id="meth-spec" style="grid-row:1;grid-column:1" tabindex="0" role="button" aria-pressed="false" onclick="showMeth('activities')">Specification</div>
+                <svg viewBox="0 0 46 20" style="grid-row:1;grid-column:2;width:100%;height:100%"><line x1="4" y1="6" x2="38" y2="6" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/><line x1="42" y1="14" x2="8" y2="14" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/></svg>
+                <div class="meth-box meth-rect" id="meth-initial" style="grid-row:1;grid-column:3" tabindex="0" role="button" aria-pressed="false" onclick="showMeth('initial')">Initial Version</div>
+
+                <svg viewBox="0 0 20 22" style="grid-row:2;grid-column:1;width:24px;height:100%"><line x1="7" y1="2" x2="7" y2="16" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/><line x1="13" y1="20" x2="13" y2="6" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/></svg>
+
+                <div class="meth-box meth-oval" id="meth-dev" style="grid-row:3;grid-column:1" tabindex="0" role="button" aria-pressed="false" onclick="showMeth('activities')">Development</div>
+                <svg viewBox="0 0 46 20" style="grid-row:3;grid-column:2;width:100%;height:100%"><line x1="4" y1="6" x2="38" y2="6" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/><line x1="42" y1="14" x2="8" y2="14" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/></svg>
+                <div class="meth-box meth-rect meth-stacked" id="meth-inter" style="grid-row:3;grid-column:3" tabindex="0" role="button" aria-pressed="false" onclick="showMeth('intermediate')"><span>Intermediate<br>Versions</span></div>
+
+                <svg viewBox="0 0 20 22" style="grid-row:4;grid-column:1;width:24px;height:100%"><line x1="7" y1="2" x2="7" y2="16" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/><line x1="13" y1="20" x2="13" y2="6" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/></svg>
+
+                <div class="meth-box meth-oval" id="meth-val" style="grid-row:5;grid-column:1" tabindex="0" role="button" aria-pressed="false" onclick="showMeth('activities')">Validation</div>
+                <svg viewBox="0 0 46 20" style="grid-row:5;grid-column:2;width:100%;height:100%"><line x1="4" y1="10" x2="38" y2="10" stroke="#5f5749" stroke-width="2" marker-end="url(#methhead)"/></svg>
+                <div class="meth-box meth-rect" id="meth-final" style="grid-row:5;grid-column:3" tabindex="0" role="button" aria-pressed="false" onclick="showMeth('final')">Final Version</div>
+              </div>
+            </div>
+          </div>
+          <div class="meth-panel" id="meth-panel"></div>
+        </div>
       </div>
-      <p class="footnote"><b>Mengapa:</b> kebutuhan kepemilikan yang dinamis tak cocok dengan rencana diam (fixed-plan) â€” prototipe berevolusi bersama umpan balik.</p>
     </div>
   </section>
 
-  <!-- ============ S6 Desain kunci FSM ============ -->
-  <section class="slide">
+<!-- ============ S6 Desain kunci FSM ============ -->
+  <section class="slide meth-slide">
     <div class="inner">
       <span class="mono-tag">Desain kunci</span>
-      <h2>State Machine &amp; Penguncian Baris</h2>
-      <div class="t2">
-        <div class="fsm">
-          <span class="cap">FSM Â· Kontribusi</span>
-          <div class="fsm-box">
-            <span class="node pending">PENDING</span>
-            <span class="arrow">&rarr;<span class="lbl">threshold âœ“</span></span>
-            <span class="node approved">APPROVED</span>
-            <span class="arrow">&rarr;<span class="lbl">ditolak komunitas</span></span>
-            <span class="node rejected">REJECTED</span>
+      <h2>State Machine & Penguncian Baris</h2>
+      <div class="meth">
+        <div class="meth-layout">
+          <div class="fsm-stage">
+            <span class="cap">FSM · Kontribusi</span>
+            <div class="fsm-scroll">
+              <div class="fsm-canvas">
+<svg class="fsm-svg" viewBox="0 0 640 360" role="img" aria-label="State machine kontribusi: create() menuju PENDING dengan guard; cabang approvePct, rejectPct, dan vote seri menuju APPROVED atau REJECTED; tie-breaker owner sebagai penentu; APPROVED memicu Equity Updated via lockForUpdate">
+                  <defs>
+                    <marker id="fsmhead" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                      <path d="M 0 1 L 10 5 L 0 9 z" fill="#5f5749"/>
+                    </marker>
+                    <marker id="fsmheadteal" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2c7148"/>
+                    </marker>
+                  </defs>
+
+                  <!-- Start -> Pending -->
+                  <line x1="30" y1="180" x2="52" y2="180" stroke="#5f5749" stroke-width="1.8" marker-end="url(#fsmhead)"/>
+
+                  <!-- Pending -> Approved (Atas) -->
+                  <path d="M 142 153 L 142 53 L 340 53" style="fill:none" stroke="#5f5749" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#fsmhead)"/>
+                  <text x="240" y="42" class="fsm-lbl" text-anchor="middle">approvePct &ge; threshold / auto-approve</text>
+
+                  <!-- Pending -> Rejected (Bawah) -->
+                  <path d="M 142 207 L 142 311 L 340 311" style="fill:none" stroke="#5f5749" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#fsmhead)"/>
+                  <text x="240" y="302" class="fsm-lbl" text-anchor="middle">rejectPct &gt; 100&minus;threshold / exitMember()</text>
+
+                  <!-- Pending -> Seri -->
+                  <line x1="182" y1="180" x2="242" y2="180" stroke="#5f5749" stroke-width="1.8" marker-end="url(#fsmhead)"/>
+                  <text x="212" y="166" class="fsm-lbl" text-anchor="middle">vote seri 50:50</text>
+                  <text x="212" y="176" class="fsm-lbl" text-anchor="middle">&amp; selesai</text>
+
+                  <!-- Seri -> Approved (Tiebreaker Setuju) -->
+                  <path d="M 285 144 L 285 53 L 340 53" style="fill:none" stroke="#5f5749" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#fsmhead)"/>
+                  <text x="325" y="100" class="fsm-lbl" text-anchor="start">tie-breaker: setuju</text>
+
+                  <!-- Seri -> Rejected (Tiebreaker Tolak) -->
+                  <path d="M 285 216 L 285 311 L 340 311" style="fill:none" stroke="#5f5749" stroke-width="1.8" stroke-linejoin="round" marker-end="url(#fsmhead)"/>
+                  <text x="325" y="260" class="fsm-lbl" text-anchor="start">tie-breaker: tolak</text>
+
+                  <!-- Approved -> Equity Updated -->
+                  <line x1="394" y1="80" x2="394" y2="118" style="stroke:#2c7148;stroke-width:1.8" stroke="#2c7148" marker-end="url(#fsmheadteal)"/>
+                  <text x="408" y="96" class="fsm-lbl" text-anchor="start">lockForUpdate()</text>
+                  <text x="408" y="108" class="fsm-lbl" text-anchor="start">recalculate + broadcast</text>
+                </svg>
+
+                <div class="fsm-node start" style="left:3.9%;top:50%" data-fsm="start" tabindex="0" role="button" aria-pressed="false" onclick="showFsm('start')"></div>
+                <div class="fsm-node dark" style="left:18%;top:50%;width:110px;height:54px" data-fsm="pending" tabindex="0" role="button" aria-pressed="false" onclick="showFsm('pending')">PENDING</div>
+                <div class="fsm-node seri" style="left:44.5%;top:50%" data-fsm="seri" tabindex="0" role="button" aria-pressed="false" onclick="showFsm('seri')"><b>SERI?</b></div>
+                <div class="fsm-node ok" style="left:61.6%;top:14.7%;width:120px;height:50px" data-fsm="approved" tabindex="0" role="button" aria-pressed="false" onclick="showFsm('approved')">APPROVED</div>
+                <div class="fsm-node no" style="left:61.6%;top:86.4%;width:120px;height:50px" data-fsm="rejected" tabindex="0" role="button" aria-pressed="false" onclick="showFsm('rejected')">REJECTED</div>
+                <div class="fsm-node teal" style="left:64.8%;top:39.7%;width:150px;height:44px" data-fsm="equity" tabindex="0" role="button" aria-pressed="false" onclick="showFsm('equity')">Equity Updated<br><span style="font-size:.78em;font-weight:500">recalc + broadcast</span></div>
+
+                <div class="fsm-guard"><b>Guard</b>no self-vote &middot; 1 vote / anggota<br>frozen &rarr; blokir</div>
+              </div>
+            </div>
+            <div class="meth-hint">klik node untuk detail</div>
           </div>
-          <span class="nav-hint">Ambang <b>50</b> (mayoritas) / <b>100</b> (bulat) Â· <b>no self-vote</b> Â· <b>1 vote / anggota</b> Â· seri &rarr; <b>casting vote owner</b></span>
-        </div>
-        <div class="inv-list">
-          <div class="inv"><span class="m">I1 Â· IMUTABEL</span><p>Append-only â€” snapshot &amp; catatan audit tak bisa diupdate/dihapus.</p></div>
-          <div class="inv"><span class="m">I2 Â· KONKURENSI</span><p>Pessimistic <span class="mono">lockForUpdate</span> di semua titik tulis â€” cegah lost update multi-aktor.</p></div>
-          <div class="inv"><span class="m">I3 Â· LAJU TERBATAS</span><p>Rate limiter 3 lapis â€” api <b>120/mnt</b>, write <b>30</b>, auth <b>5/email + 60/IP</b>.</p></div>
+          <div class="meth-panel" id="fsm-panel"></div>
         </div>
       </div>
     </div>
+    <!-- notes S6 -->
+    <aside class="notes">
+<h4>Catatan S6 — FSM &amp; Tie-Breaker</h4>
+<b>Skrip 5-tuple (15 detik):</b> FSM = M = (Q, Sigma, delta, q0, F). Q = {PENDING, APPROVED, REJECTED}. Sigma = {vote_approve, vote_reject}. q0 = PENDING. F = {APPROVED, REJECTED} (terminal). delta = tabel transisi: PENDING + vote_approve + approvePct &gt; threshold -&gt; APPROVED.
+
+<b>Guard:</b> status harus PENDING, bukan self-vote (403), bukan vote ganda (409), tim/project tidak frozen.
+
+<b>Tabel seri (hafal):</b> tim 3 = pemilih 2, bisa 1-1; tim 4 = 3 pemilih, tidak bisa; tim 5 = 4 pemilih, bisa 2-2; tim 6 = 5, tidak; tim 7 = 6, bisa 3-3.
+
+<b>Trace 2-2 (T=50):</b> approvePct 50 &amp; rejectPct 50 -&gt; keduanya GAGAL syarat strict &gt; 50 -&gt; BUKAN approved/rejected -&gt; masuk tie-breaker. 2-2 TIDAK auto-reject di T=50. Di T=100, 1 reject = veto langsung.
+
+<b>Tie-breaker:</b> suara owner jadi penentu (bukan vote baru). Owner = pencatat -&gt; fallback anggota terlama. Hasil -&gt; audit tie_breaker_resolved + recalc.
+
+<b>Jebakan "test tie-breaker-nya mana?":</b> jujur: belum ada test otomatis, jalur diverifikasi manual lewat trace kode; rencana tambah test 2-2 sebelum sidang. JANGAN klaim teruji.
+    </aside>
   </section>
 
   <!-- ============ S7 Fitur utama ============ -->
@@ -476,7 +619,7 @@ h2{font-size:clamp(30px,4.4vw,52px)}
         <div class="tile"><span class="t-num">F2</span><h3>Voting komunal + tie-breaker</h3><p>Setiap pendapatan berbanding dengan suara komunitas.</p></div>
         <div class="tile"><span class="t-num">F3</span><h3>Dashboard donut + radar</h3><p>Visualisasi porsi equity &amp; distribusi berkontribusi.</p></div>
         <div class="tile"><span class="t-num">F4</span><h3>Export PDF cap table</h3><p>Lembar kepemilikan (cap table) siap dibawa ke tim &amp; panel.</p></div>
-        <div class="tile"><span class="t-num">F5</span><h3>Realtime â€” Pusher presence</h3><p>Kehadiran &amp; perubahan langsung, tanpa refresh.</p></div>
+        <div class="tile"><span class="t-num">F5</span><h3>Realtime — Pusher presence</h3><p>Kehadiran &amp; perubahan langsung, tanpa refresh.</p></div>
         <div class="tile"><span class="t-num">F6</span><h3>Audit log + invite link</h3><p>Jejak lengkap &amp; link undangan ala Discord.</p></div>
       </div>
     </div>
@@ -487,15 +630,15 @@ h2{font-size:clamp(30px,4.4vw,52px)}
     <div class="inner">
       <span class="mono-tag">Tech stack</span>
       <h2>Satu Baris, Tiga Lapis</h2>
-      <p class="lede">Backend, frontend, basis data, realtime, dan uji â€” dalam satu deret yang saling mendukung.</p>
+      <p class="lede">Backend, frontend, basis data, realtime, dan uji — dalam satu deret yang saling mendukung.</p>
       <div class="tech-grid">
         <div class="tech">
           <span class="t-logo"><img src="https://cdn.simpleicons.org/laravel/2c7148" alt="Laravel" width="26" height="26"></span>
-          <div><h3>Laravel 12 Â· Sanctum</h3><p>RESTful API + auth token bearer</p></div>
+          <div><h3>Laravel 12 · Sanctum</h3><p>RESTful API + auth token bearer</p></div>
         </div>
         <div class="tech">
           <span class="t-logo"><img src="https://cdn.simpleicons.org/react/2c7148" alt="React" width="26" height="26"></span>
-          <div><h3>React 19 Â· Vite Â· TS</h3><p>Single-page app &amp; typed frontend</p></div>
+          <div><h3>React 19 · Vite · TS</h3><p>Single-page app &amp; typed frontend</p></div>
         </div>
         <div class="tech">
           <span class="t-logo"><img src="https://cdn.simpleicons.org/postgresql/2c7148" alt="PostgreSQL" width="26" height="26"></span>
@@ -516,6 +659,18 @@ h2{font-size:clamp(30px,4.4vw,52px)}
       </div>
       <p class="footnote" style="margin-top:40px"><b>Catatan:</b> PostgreSQL wajib di produksi demi <span class="mono">lockForUpdate</span> &amp; <span class="mono">gen_random_uuid</span>.</p>
     </div>
+    <!-- notes S8 -->
+    <aside class="notes">
+<h4>Catatan S8 — Concurrency &amp; Stack</h4>
+- lockForUpdate = SELECT FOR UPDATE (pessimistic row lock). Butuh PostgreSQL (SQLite no-op).
+- MVCC: PostgreSQL simpan multi-version tiap baris, baca konsisten tanpa blokir.
+- Isolation: READ COMMITTED + locking selektif, BUKAN SERIALIZABLE (performa).
+- Deadlock dicegah urutan kunci konsisten: tim -&gt; kontribusi -&gt; snapshot.
+- Lost update = anomali utama yang dicegah (2 vote bersamaan).
+- Rate limiter 3 lapis: api 120/mnt, write 30/mnt, auth 5/email + 60/IP.
+- Append-only ledger, BUKAN event sourcing/CQRS penuh — jangan overclaim.
+- Laravel Sanctum 2 mode: cookie (SPA) + bearer (mobile).
+    </aside>
   </section>
 
   <!-- ============ S9 Hasil pengujian ============ -->
@@ -525,7 +680,7 @@ h2{font-size:clamp(30px,4.4vw,52px)}
       <h2>100% Lulus, Bukan Sekadar Klaim</h2>
       <div class="metric" style="margin-top:24px">
         <span class="metric-big">108 <span style="font-size:.4em">skenario otomatis</span></span>
-        <span class="metric-sub">100% lulus Â· Backend 71 (PHPUnit) + Frontend 37 (Vitest)</span>
+        <span class="metric-sub">100% lulus · Backend 71 (PHPUnit) + Frontend 37 (Vitest)</span>
       </div>
       <div class="evi-wrap">
         <table class="evi-tbl">
@@ -544,6 +699,17 @@ h2{font-size:clamp(30px,4.4vw,52px)}
       </div>
       <p class="footnote" style="margin-top:22px"><b>Bukti lain:</b> <span class="mono">php artisan test</span> &rarr; <b>71 lulus / 187 assertions</b> &middot; <span class="mono">vitest run</span> &rarr; <b>37</b> (VotePanel, StatusBadge, Pusher, AuthRoute). Output &amp; screenshot penuh di laporan Bab 4.</p>
     </div>
+    <!-- notes S9 -->
+    <aside class="notes">
+<h4>Catatan S9 — Testing</h4>
+<b>Jawaban 1 menit blackbox:</b> uji perilaku via input-&gt;output tanpa lihat kode internal; EP = 1 wakil per partisi (efisien); BVA = nilai batas +-1 (bug di tepi).
+
+<b>Angka REAL (pakai ini kalau ditanya):</b> 108 skenario (71 BE + 37 FE), 100% pass. Jangan sebut angka tabel yang beda.
+
+<b>BVA wajib hafal:</b> amount 999/1000/1001; hours 0,4/0,5/744/745 (744 = 31 hari x 24 jam); commission_rate -1/0/100/101; password min 8; FMR 0-150.000.
+
+<b>Kalau ditanya "kenapa EP/BVA?":</b> validasi input lengkap &amp; efisien; EP pilih 1 kasus per kelompok, BVA sasar garis batas karena bug cenderung di situ.
+    </aside>
   </section>
 
   <!-- ============ S10 Kesimpulan ============ -->
@@ -567,6 +733,17 @@ h2{font-size:clamp(30px,4.4vw,52px)}
         </div>
       </div>
     </div>
+    <!-- notes S10 -->
+    <aside class="notes">
+<h4>Catatan S10 — Keterbatasan (pasti ditanya)</h4>
+Akui duluan (dari 4.5.4):
+- Test concurrency masih simulasi sekuensial -&gt; "validasi logika &amp; urutan kunci; load test K6/JMeter di saran".
+- SQLite di test tidak simulasi row-lock asli -&gt; "locking asli teruji di PostgreSQL produksi".
+- Tidak ada E2E UI otomatis -&gt; "saran Playwright/Cypress".
+- BVA tidak uji semua kombinasi batas -&gt; "difokuskan input berisiko tinggi".
+
+Red flag lain: SUS di daftar referensi tapi belum diuji formal -&gt; "usability tidak diuji formal, fokus fungsional; rencana SUS iterasi lanjutan" (jangan mengaku pernah jalan). Jumlah test konsisten: pakai angka real 108 skenario / 100% pass.
+    </aside>
   </section>
 
   <!-- ============ S11 Demo + penutup ============ -->
@@ -574,17 +751,30 @@ h2{font-size:clamp(30px,4.4vw,52px)}
     <div class="inner slide-links">
       <span class="mono-tag" style="text-align:center;margin:0 auto 18px">Demo langsung</span>
       <h2 style="text-align:center">Demo</h2>
-      <div class="url-big"><span class="mono" style="color:var(--ink-soft)">http://</span>72.61.215.209</div>
+      <div class="url-big" style="text-align:center"><span class="mono" style="color:var(--ink-soft)">http://</span>72.61.215.209</div>
       <p class="lede" style="text-align:center;margin:20px auto 0;max-width:40ch">Silakan ikuti dari laptop/HP Anda.</p>
       <hr class="end-rule">
-      <div class="thanks">Terima kasih Â· Diskusi &amp; Q&amp;A</div>
-      <div class="end-wait">Bintang Hari Kahono Â· 1152200031 Â· <span style="color:var(--clay)">SEIRIS</span></div>
+      <div class="thanks" style="text-align:center">Terima kasih · Diskusi &amp; Q&amp;A</div>
+      <div class="end-wait" style="text-align:center">Bintang Hari Kahono · 1152200031 · <span style="color:var(--clay)">SEIRIS</span></div>
     </div>
+    <!-- notes S11 -->
+    <aside class="notes">
+<h4>Catatan S11 — Demo live (angka Kopi Nusantara)</h4>
+5 anggota, 2 project (nested pies): Raka owner 75rb/jam, Dinda marketing 60rb, Budi pendana 40rb, Citra desainer 55rb, Fajar sales 50rb.
+
+Total pie tim = 19.740.000 slice: Raka 9jt (45,59%), Budi 6jt (30,39%), Citra 3,3jt (16,71%), Dinda 1,2jt (6,08%), Fajar 240rb (1,22%).
+
+Revenue 5jt dibagi sesuai snapshot terbaru: Raka 2.279.500, Budi 1.519.500, Citra 835.500, Dinda 304.000, Fajar 61.000.
+
+<b>Alur demo:</b> buat team -&gt; set FMR -&gt; catat kontribusi -&gt; vote sampai APPROVED -&gt; snapshot naik -&gt; catat revenue -&gt; distribute -&gt; profit_distributions muncul.
+
+<b>Kalau dosen minta contoh:</b> ceritain 1 kontribusi (Dinda SALES deal 5jt komisi 2% = 100rb -&gt; 200rb slice), porsi semua bergeser tanpa negosiasi ulang = kekuatan dynamic equity.
+    </aside>
   </section>
 
 </div>
 
-<div class="hint">&larr; &rarr; navigasi</div>
+<div class="hint">&larr; &rarr; navigasi &middot; <b>N</b> = catatan</div>
 <div class="counter"><span class="on" data-cur>S1</span> / 11</div>
 <div class="progress-wrap"><div class="progress-fill" data-prog></div></div>
 <div class="nav-btns">
@@ -623,6 +813,7 @@ h2{font-size:clamp(30px,4.4vw,52px)}
     else if(e.key==='ArrowLeft'||e.key==='ArrowUp'||e.key==='Backspace'){ e.preventDefault(); prevStep(); }
     else if(e.key==='Home'){ go(0); }
     else if(e.key==='End'){ go(count-1); }
+    else if(e.key==='n'||e.key==='N'){ document.body.classList.toggle('notes-on'); }
   });
 
   prev.addEventListener('click', prevStep);
@@ -645,7 +836,7 @@ h2{font-size:clamp(30px,4.4vw,52px)}
   <div class="mback" data-modal-close></div>
   <div class="mdl" role="dialog" aria-modal="true" aria-labelledby="mTitle">
     <button class="mclose" data-modal-close aria-label="Tutup">&times;</button>
-    <div class="mhead"><span class="mtag">SEIRISÂ·Test</span><span id="mTitle" class="mtitle"></span></div>
+    <div class="mhead"><span class="mtag">SEIRIS·Test</span><span id="mTitle" class="mtitle"></span></div>
     <pre id="mCode" class="mcode"></pre>
     <div class="mtcap">$ php artisan test</div>
     <pre id="mTranscript" class="mtranscript"></pre>
@@ -681,7 +872,7 @@ h2{font-size:clamp(30px,4.4vw,52px)}
 </script>
 
 <script type="text/plain" id="src-C01" data-name="ConcurrencyTest::test_c01_double_distribute_never_doubles_payout" data-assert="Foreach double distribute rejected">
-/** C-01 â€” Redistribusi tidak boleh menggandakan payout. Guard: Revenue::lockForUpdate() -> is_distributed -> tolak. */
+/** C-01 — Redistribusi tidak boleh menggandakan payout. Guard: Revenue::lockForUpdate() -> is_distributed -> tolak. */
 public function test_c01_double_distribute_never_doubles_payout(): void
 {
     [$ownerUser, $ownerMember, $team, , $member] = $this->makeOwnerAndMember();
@@ -715,7 +906,7 @@ public function test_c02_duplicate_vote_rejected_and_single_snapshot(): void
 }
 </script>
 
-<script type="text/plain" id="src-C03" data-name="ConcurrencyTest::C03 zero-loss sum" data-assert="total_slices 10000; sum equity_pct 100Â±0.01">
+<script type="text/plain" id="src-C03" data-name="ConcurrencyTest::C03 zero-loss sum" data-assert="total_slices 10000; sum equity_pct 100±0.01">
 public function test_c03_recalc_total_slices_is_lossless_sum(): void
 {
     $team = Team::factory()->create();
@@ -793,6 +984,117 @@ public function test_cash_requires_amount(): void
     $r->assertStatus(422);
     $r->assertJsonValidationErrors(['amount']);
 }
+</script>
+
+<script>
+(function(){
+  var methData = {
+    outline: {
+      badge: "Gambaran Umum (Ide Kasar)",
+      title: "Outline Description — Aplikasi SEIRIS",
+      content: "<strong>SEIRIS</strong> — aplikasi web manajemen ekuitas dinamis untuk tim startup mahasiswa.<br><br><strong>Masalah:</strong> pembagian saham awal (fixed equity) sering memicu konflik seiring berjalannya waktu karena kontribusi antar founder tidak seimbang.<br><br><strong>Solusi kasar:</strong> terapkan model matematis <em>Slicing Pie</em> — sistem mencatat kontribusi nyata (modal tunai, jam kerja, ide, alat) lalu menghitung persentase kepemilikan secara dinamis, adil &amp; transparan.",
+      tags: ["SEIRIS","Slicing Pie","Dynamic Equity","Startup Mahasiswa","Ide Kasar"]
+    },
+    activities: {
+      badge: "Siklus Simultan",
+      title: "Concurrent Activities (Specification, Dev, Validation)",
+      content: "Tiga aktivitas berjalan paralel untuk membentuk tiap versi prototipe:<ul><li><strong>Specification</strong> — terjemahkan aturan Slicing Pie &amp; alur keputusan ke spesifikasi logika.</li><li><strong>Development</strong> — pengodean incremental &amp; penguatan arsitektur.</li><li><strong>Validation</strong> — pengujian <em>human-in-the-loop</em> (user/founder) untuk umpan balik.</li></ul>",
+      tags: ["Specification","Development","Validation","Human-in-the-Loop"]
+    },
+    initial: {
+      badge: "Iterasi 1",
+      title: "Initial Version — Core Slicing Pie Engine",
+      content: "Fokus fungsi paling mendasar:<ul><li><strong>Engine matematis</strong> — translasi rumus Fair Market Value ke basis data, kalkulasi pengali aset (CASH ×4, non-tunai ×2).</li><li><strong>UI dasar</strong> — dashboard React: input kontribusi, hitung ekuitas, voting manual.</li></ul>",
+      tags: ["Slicing Pie Engine","CASH x4 / non-cash x2","React Dashboard","Voting Manual"]
+    },
+    intermediate: {
+      badge: "Iterasi 2",
+      title: "Intermediate Version — FSM, Nested Pies &amp; Konkurensi",
+      content: "Ekspansi dari masukan versi awal:<ul><li><strong>FSM</strong> — rule-based voting persetujuan komunal.</li><li><strong>Nested Pies</strong> — 1 tim banyak project (<code>ProjectMember</code>), ekuitas terisolasi.</li><li><strong>Pessimistic locking</strong> — <code>lockForUpdate()</code> cegah anomali data pada transaksi kritis.</li><li><strong>Fitur</strong> — FMR, profit distribution, audit log <em>append-only</em>.</li></ul>",
+      tags: ["FSM","Nested Pies","lockForUpdate()","FMR","Append-only Audit"]
+    },
+    final: {
+      badge: "Iterasi 3",
+      title: "Final Version — Real-time &amp; Penguatan Sistem",
+      content: "Penyempurnaan menuju skala produksi:<ul><li><strong>Real-time broadcast</strong> — sinkronisasi ekuitas ke seluruh anggota via WebSocket (Pusher &amp; <code>pusher-js</code>).</li><li><strong>Keamanan &amp; performa</strong> — rate limiting (120 req/menit) &amp; isolasi data multi-tenant (UUIDv4).</li><li><strong>Validasi</strong> — siap uji <em>black-box</em> &amp; verifikasi FSM.</li></ul>",
+      tags: ["Pusher WebSocket","Presence Channel","Rate Limiting 120/m","UUIDv4","Black-box Test"]
+    }
+  };
+  function showMeth(key){
+    document.querySelectorAll('.meth-box').forEach(function(el){el.classList.remove('active');});
+    if(key === 'activities'){
+      ['meth-spec','meth-dev','meth-val'].forEach(function(id){var b=document.getElementById(id); if(b) b.classList.add('active');});
+    } else {
+      var b=document.getElementById('meth-'+key); if(b) b.classList.add('active');
+    }
+    var item = methData[key], panel = document.getElementById('meth-panel');
+    var tags = item.tags.map(function(t){return '<span class="meth-tag">'+t+'</span>';}).join('');
+    panel.innerHTML = '<div class="meth-header"><span class="meth-badge">'+item.badge+'</span><h3 class="meth-title">'+item.title+'</h3></div><div class="meth-content">'+item.content+'</div><div class="meth-tags">'+tags+'</div>';
+  }
+  window.showMeth = showMeth;
+  showMeth('outline');
+})();
+</script>
+
+<script>
+(function(){
+  var fsmData = {
+    overview: {
+      badge: "Ikhtisar",
+      title: "Alur Vote &amp; Jaminan",
+      content: "<ol><li><strong>Catat</strong> — kontribusi masuk <code>PENDING</code>, slice langsung terkunci.</li><li><strong>Vote</strong> — anggota lain approve/reject; pencatat dilarang vote diri sendiri.</li><li><strong>Hitung</strong> — <code>approvePct = setuju &divide; total hak suara</code>, dicek ke threshold <b>50</b> (mayoritas) / <b>100</b> (bulat).</li><li><strong>Approve</strong> — lolos &rarr; <code>APPROVED</code> &rarr; audit log + recalculate + snapshot baru.</li><li><strong>Seri 50:50</strong> — keduanya gagal syarat &gt; threshold &rarr; casting vote owner jadi penentu.</li></ol>",
+      tags: ["PENDING","threshold 50 / 100","append-only","snapshot baru"]
+    },
+    start: {
+      badge: "Event",
+      title: "create() · POST /contributions",
+      content: "Kontribusi baru (CASH / TIME / IDEA / NETWORK / FACILITY / SALES) dicatat anggota:<ul><li>Status langsung <strong>PENDING</strong> — belum memengaruhi pie.</li><li>Slice dihitung &amp; langsung <strong>terkunci</strong> (immutable).</li><li>Anggota lain mulai bisa mem-vote.</li></ul>",
+      tags: ["6 tipe kontribusi","PENDING","slice immutable"]
+    },
+    pending: {
+      badge: "State",
+      title: "PENDING — menunggu keputusan komunal",
+      content: "State awal dengan <strong>guard</strong> di tiap transisi keluar:<ul><li><strong>No self-vote</strong> — pencatat dilarang vote kontribusinya sendiri (403).</li><li><strong>1 vote / anggota</strong> — vote ganda ditolak (409).</li><li><strong>Frozen &rarr; blokir</strong> — tim/project yang di-freeze tak bisa divote.</li><li>Vote hanya dari <em>project members</em> (project-scoped).</li></ul>",
+      tags: ["guard","403 self-vote","409 vote ganda","is_frozen"]
+    },
+    approved: {
+      badge: "State Terminal",
+      title: "APPROVED — lolos mayoritas",
+      content: "Transisi langsung dari PENDING saat:<ul><li><code>approvePct &ge; threshold</code> — 50 (mayoritas) / 100 (bulat).</li><li>Atau <strong>auto-approve</strong> pada tim kecil / aturan khusus.</li></ul>Konsekuensi: audit log &rarr; <code>recalculate()</code> &rarr; snapshot equity baru. Pie &amp; porsi seluruh anggota berubah.",
+      tags: ["approvePct ≥ T","auto-approve","recalculate"]
+    },
+    rejected: {
+      badge: "State Terminal",
+      title: "REJECTED — ditolak",
+      content: "Transisi langsung dari PENDING saat:<ul><li><code>rejectPct &gt; 100&minus;threshold</code> — di T=100 satu tolak langsung <strong>veto</strong>.</li><li>Atau <code>exitMember()</code> — anggota keluar, kontribusi dibatalkan.</li></ul>Kontribusi tidak masuk pie; histori tetap tercatat di audit.",
+      tags: ["rejectPct > 100−T","veto T=100","exitMember()"]
+    },
+    seri: {
+      badge: "Decision",
+      title: "SERI? — tie 50:50",
+      content: "Masuk saat <code>approve == reject</code> dan seluruh hak suara habis:<ul><li>Tim 3 (2 pemilih) &rarr; bisa 1-1 &middot; tim 5 (4) &rarr; bisa 2-2 &middot; tim 7 (6) &rarr; bisa 3-3.</li><li>2-2 di T=50 <strong>bukan</strong> auto-reject — keduanya gagal syarat strict &gt; 50.</li></ul><strong>Casting vote owner</strong> jadi penentu (bukan vote baru); owner = pencatat &rarr; fallback anggota terlama. Hasil dicatat di audit <code>tie_breaker_resolved</code> + recalc.",
+      tags: ["tie-breaker","casting vote owner","2-2 bukan auto-reject"]
+    },
+    equity: {
+      badge: "Efek Samping",
+      title: "Equity Updated — recalc &amp; broadcast",
+      content: "Setelah APPROVED, urutan kunci konsisten (tim &rarr; kontribusi &rarr; snapshot):<ul><li><code>lockForUpdate()</code> — pessimistic row lock cegah <em>lost update</em>.</li><li><code>recalculate()</code> &rarr; snapshot baru <strong>append-only</strong>.</li><li>Broadcast realtime via <strong>Pusher</strong> — semua anggota melihat porsi baru tanpa refresh.</li></ul>",
+      tags: ["lockForUpdate()","lost update","Pusher","append-only"]
+    }
+  };
+  var panel = document.getElementById('fsm-panel');
+  var nodeSel = '.fsm-node';
+  function showFsm(key){
+    document.querySelectorAll(nodeSel).forEach(function(el){ el.classList.remove('active'); });
+    var node = document.querySelector('.fsm-node[data-fsm="'+key+'"]');
+    if(node) node.classList.add('active');
+    var item = fsmData[key] || fsmData.overview;
+    var tags = item.tags.map(function(t){ return '<span class="meth-tag">'+t+'</span>'; }).join('');
+    panel.innerHTML = '<div class="meth-header"><span class="meth-badge">'+item.badge+'</span><h3 class="meth-title">'+item.title+'</h3></div><div class="meth-content">'+item.content+'</div><div class="meth-tags">'+tags+'</div>';
+  }
+  window.showFsm = showFsm;
+  showFsm('overview');
+})();
 </script>
 </body>
 </html>
