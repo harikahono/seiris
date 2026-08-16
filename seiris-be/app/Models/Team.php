@@ -35,8 +35,9 @@ class Team extends Model
     protected function casts(): array
     {
         return [
-            'is_frozen' => 'boolean',
-            'frozen_at' => 'datetime',
+            'is_frozen'      => 'boolean',
+            'frozen_at'      => 'datetime',
+            'commission_rate' => 'decimal:2',
         ];
     }
 

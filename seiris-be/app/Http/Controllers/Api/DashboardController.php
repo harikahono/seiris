@@ -73,7 +73,7 @@ class DashboardController extends Controller
                     'my_slices' => $mySlices,
                     'total_team_slices' => $totalSlices,
                     'pending_approvals_count' => $pendingCount,
-                    'total_members' => $team->members()->count(),
+                    'total_members' => $team->members->count(),
                     'logo_url' => $team->logo_url,
                     'created_at' => $team->created_at->toIso8601String(),
                 ];

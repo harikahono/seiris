@@ -6,6 +6,7 @@ use App\Events\TeamUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\JoinTeamRequest;
 use App\Http\Requests\Team\StoreTeamRequest;
+use App\Http\Requests\Team\UpdateTeamRequest;
 use App\Http\Requests\Team\UpdateFmrRequest;
 use App\Http\Resources\TeamMemberResource;
 use App\Http\Resources\TeamResource;
@@ -118,7 +119,7 @@ class TeamController extends Controller
      * PUT /api/teams/{team}
      * Update nama/deskripsi tim — hanya owner
      */
-    public function update(StoreTeamRequest $request, Team $team): JsonResponse
+    public function update(UpdateTeamRequest $request, Team $team): JsonResponse
     {
         Gate::authorize('update', $team);
 
@@ -393,14 +394,17 @@ class TeamController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         }
 
-        AuditLogService::logFromRequest(
-            request:     $request,
-            teamId:      $team->id,
-            action:      'equity.frozen',
-            subjectType: Team::class,
-            subjectId:   $team->id,
-            payload:     ['snapshot_id' => $snapshot->id],
-        );
+        // Audit log via afterCommit — pastikan freeze sudah committed
+        DB::afterCommit(function () use ($request, $team, $snapshot) {
+            AuditLogService::logFromRequest(
+                request:     $request,
+                teamId:      $team->id,
+                action:      'equity.frozen',
+                subjectType: Team::class,
+                subjectId:   $team->id,
+                payload:     ['snapshot_id' => $snapshot->id],
+            );
+        });
 
         broadcast(new TeamUpdated($team, 'team.frozen', $request->user()->name ?? ''))->toOthers();
 
