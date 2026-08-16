@@ -62,7 +62,7 @@ class ContributionController extends Controller
 
         if ($request->filled('search')) {
             $searchTerm = '%' . $request->search . '%';
-            $query->where(function ($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm, $request) {
                 $q->where('description', 'ilike', $searchTerm)
                   ->orWhereHas('member.user', function ($uq) use ($searchTerm) {
                       $uq->where('name', 'ilike', $searchTerm);
@@ -72,12 +72,11 @@ class ContributionController extends Controller
                   ->orWhereHas('approvals.member.user', function ($uq) use ($searchTerm) {
                       $uq->where('name', 'ilike', $searchTerm);
                   });
+                // Value search (numeric exact match) — inside closure supaya gak escape team_id filter
+                if (is_numeric($request->search)) {
+                    $q->orWhere('value', (int) $request->search);
+                }
             });
-
-            // Value search (numeric exact match)
-            if (is_numeric($request->search)) {
-                $query->orWhere('value', (int) $request->search);
-            }
         }
 
         $perPage = min((int) $request->input('per_page', 6), 50);

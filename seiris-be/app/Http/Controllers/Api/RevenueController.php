@@ -252,20 +252,40 @@ class RevenueController extends Controller
                 throw new \RuntimeException('Revenue sudah didistribusikan oleh proses lain.');
             }
 
-            $distributions = [];
-
+            // Largest-remainder method: floor semua share, sisa distribusi ke equity terbesar
+            // supaya sum(shares) == distributable_amount (gak ada uang hilang)
+            $members = [];
+            $totalAssigned = 0;
             foreach ($snapshot->equity_map as $memberId => $data) {
-                $amount = (int) round(
-                    $revenue->distributable_amount * ($data['equity_pct'] / 100)
-                );
+                $exact = $revenue->distributable_amount * ($data['equity_pct'] / 100);
+                $floored = (int) floor($exact);
+                $remainder = $exact - $floored;
+                $members[$memberId] = [
+                    'equity_pct' => $data['equity_pct'],
+                    'amount'     => $floored,
+                    'remainder'  => $remainder,
+                ];
+                $totalAssigned += $floored;
+            }
 
+            // Distribute leftover rupiah ke anggota dengan fractional terbesar
+            $leftover = $revenue->distributable_amount - $totalAssigned;
+            uasort($members, fn($a, $b) => $b['remainder'] <=> $a['remainder']);
+            foreach ($members as $memberId => &$m) {
+                if ($leftover <= 0) break;
+                $m['amount']++;
+                $leftover--;
+            }
+            unset($m);
+
+            $distributions = [];
+            foreach ($members as $memberId => $m) {
                 $dist = ProfitDistribution::create([
                     'revenue_id'          => $revenue->id,
                     'member_id'           => $memberId,
-                    'equity_pct_snapshot' => $data['equity_pct'],
-                    'amount'              => $amount,
+                    'equity_pct_snapshot' => $m['equity_pct'],
+                    'amount'              => $m['amount'],
                 ]);
-
                 $distributions[] = $dist;
             }
 
