@@ -17,7 +17,7 @@ class Team extends Model
 
     protected $fillable = [
         'owner_id', 'name', 'description',
-        'invite_code', 'approval_threshold',
+        'invite_code', 'approval_threshold', 'commission_rate',
         'is_frozen', 'frozen_at',
         'logo_path',
     ];

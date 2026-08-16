@@ -13,6 +13,7 @@ import ProjectSelector from "@/components/teams/ProjectSelector";
 import { Check, X, Pencil, Loader2, Send, ChevronDown, ChevronUp, LogOut, Info, Lock, ShieldAlert } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useModalAnimation } from "@/hooks/useModalAnimation";
+import MoneyInput from "@/components/ui/MoneyInput";
 
 export default function TeamMembersTab() {
   const { team, currentUserId, fetchTeam, isOwner } = useOutletContext<TeamContext>();
@@ -292,12 +293,11 @@ export default function TeamMembersTab() {
 
             {proposingFmr ? (
               <div className="flex items-center gap-2">
-                <input
-                  type="number"
+                <MoneyInput
                   value={proposedFmrValue}
-                  onChange={(e) => setProposedFmrValue(e.target.value)}
-                  className="w-28 rounded border border-accent bg-gray-800 px-2.5 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none"
+                  onChange={setProposedFmrValue}
                   placeholder={String(currentMember.fmr || "50000")}
+                  className="w-28 text-xs"
                   autoFocus
                 />
                   <button
@@ -369,11 +369,10 @@ export default function TeamMembersTab() {
                   <div className="flex items-center gap-1">
                     {editingFmr === member.id ? (
                       <>
-                        <input
-                          type="number"
+                        <MoneyInput
                           value={fmrValue}
-                          onChange={(e) => setFmrValue(e.target.value)}
-                          className="w-24 rounded border border-accent bg-gray-800 px-2 py-1 text-xs text-white"
+                          onChange={setFmrValue}
+                          className="w-24 text-xs"
                           autoFocus
                         />
                         <button

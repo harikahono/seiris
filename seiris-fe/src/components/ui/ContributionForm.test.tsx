@@ -23,7 +23,7 @@ describe("ContributionForm", () => {
 
   it("submits a CASH contribution with the correct payload", async () => {
     render(
-      <ContributionForm teamId="t1" fmr={50000} open onClose={onClose} onCreated={onCreated} />,
+      <ContributionForm teamId="t1" fmr={50000} commissionRate={50} open onClose={onClose} onCreated={onCreated} />,
     );
     const user = userEvent.setup();
 
@@ -33,7 +33,7 @@ describe("ContributionForm", () => {
       screen.getByPlaceholderText("Deskripsi kontribusi (min 5 karakter)"),
       "Modal awal",
     );
-    await user.type(screen.getByPlaceholderText("Contoh: 500000"), "1000000");
+    await user.type(screen.getByPlaceholderText("500.000"), "1000000");
 
     await user.click(screen.getByRole("button", { name: /Buat Kontribusi/i }));
 

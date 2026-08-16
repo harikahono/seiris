@@ -19,6 +19,7 @@ class StoreTeamRequest extends FormRequest
             'description'        => ['nullable', 'string', 'max:500'],
             'approval_threshold' => ['nullable', 'in:50,100'],
             'fmr'                => ['nullable', 'integer', 'min:0', 'max:' . config('seiris.max_student_fmr')],
+            'commission_rate'    => ['nullable', 'numeric', 'min:0', 'max:100'],
         ];
     }
 
@@ -33,6 +34,9 @@ class StoreTeamRequest extends FormRequest
             'fmr.integer'              => 'FMR harus berupa angka.',
             'fmr.min'                  => 'FMR tidak boleh negatif.',
             'fmr.max'                  => 'FMR maksimal Rp ' . number_format((int) config('seiris.max_student_fmr'), 0, ',', '.') . '/jam (batas mahasiswa).',
+            'commission_rate.numeric'  => 'Rate komisi harus berupa angka.',
+            'commission_rate.min'      => 'Rate komisi minimal 0%.',
+            'commission_rate.max'      => 'Rate komisi maksimal 100%.',
         ];
     }
 

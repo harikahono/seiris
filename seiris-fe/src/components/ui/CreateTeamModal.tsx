@@ -23,6 +23,7 @@ interface CreateFieldErrors {
   name?: string;
   description?: string;
   approval_threshold?: string;
+  commission_rate?: string;
   fmr?: string;
 }
 
@@ -34,6 +35,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
   const [description, setDescription] = useState("");
   const [approvalThreshold, setApprovalThreshold] = useState<ApprovalThreshold>("50");
   const [fmr, setFmr] = useState("150000");
+  const [commissionRate, setCommissionRate] = useState("50");
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [createErrors, setCreateErrors] = useState<CreateFieldErrors>({});
 
@@ -63,6 +65,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
         name: name.trim(),
         description: description.trim() || undefined,
         approval_threshold: approvalThreshold,
+        commission_rate: commissionRate ? Number(commissionRate) : undefined,
         fmr: fmr ? Number(fmr) : undefined,
       };
       const { data: res } = await api.post("/teams", payload);
@@ -118,6 +121,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
     setName("");
     setDescription("");
     setApprovalThreshold("50");
+    setCommissionRate("50");
     setFmr("150000");
     setLoadingCreate(false);
     setCreateErrors({});
@@ -229,6 +233,23 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
                   </label>
                 ))}
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="team-commission" className="mb-1.5 block text-sm font-medium text-gray-300" title="Persentase komisi untuk kontribusi sales — ditetapkan owner">
+                Komisi Sales (%) <span className="text-gray-500">(opsional)</span>
+              </label>
+              <input
+                id="team-commission"
+                type="number"
+                min="0"
+                max="100"
+                placeholder="50"
+                value={commissionRate}
+                onChange={(e) => setCommissionRate(e.target.value)}
+                className={createInputClass("commission_rate")}
+              />
+              {createErrors.commission_rate && <p className="mt-1 text-xs text-red-500">{createErrors.commission_rate}</p>}
             </div>
 
             <div>

@@ -69,7 +69,7 @@ vi.mock("@/api/axios", () => ({
 }));
 
 const mockOutletCtx = {
-  team: { id: "t1", members_count: 2, members: [{ user: { id: "u1" }, fmr: 50000, project_fmr: null }] },
+  team: { id: "t1", members_count: 2, members: [{ user: { id: "u1" }, fmr: 50000, project_fmr: null }], commission_rate: 50 },
   fmr: 50000,
   isOwner: true,
 };

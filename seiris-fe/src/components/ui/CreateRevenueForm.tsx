@@ -9,6 +9,7 @@ import { Loader2, X, Upload, Plus, Trash2 } from "lucide-react";
 import type { RevenueDeduction } from "@/types";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useModalAnimation } from "@/hooks/useModalAnimation";
+import MoneyInput from "@/components/ui/MoneyInput";
 
 interface CreateRevenueFormProps {
   teamId: string;
@@ -161,9 +162,7 @@ export default function CreateRevenueForm({ teamId, projectId, open, onClose, on
 
           <div>
             <label htmlFor="rev-amount" className="mb-1 block text-sm font-medium text-gray-300">Total Revenue (Rp)</label>
-            <input id="rev-amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-              placeholder="1000000" />
+            <MoneyInput id="rev-amount" value={amount} onChange={setAmount} placeholder="1.000.000" />
             {errors.amount && <p className="mt-1 text-xs text-red-500">{errors.amount}</p>}
           </div>
 

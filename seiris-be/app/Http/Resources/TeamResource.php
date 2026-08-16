@@ -17,6 +17,7 @@ class TeamResource extends JsonResource
             'description'        => $this->description,
             'invite_code'        => $this->invite_code,
             'approval_threshold' => $this->approval_threshold,
+            'commission_rate'    => (float) $this->commission_rate,
             'is_frozen'          => $this->is_frozen,
             'frozen_at'          => $this->frozen_at?->toISOString(),
             'logo_url'           => $this->logo_url,

@@ -159,18 +159,13 @@ class ContributionController extends Controller
             ], 422);
         }
 
-        // Hitung value berdasarkan tipe kontribusi + FMR (per-project atau global)
-        $value = $this->calculateValue($request, $member, $fmr);
-
-        // Hitung slices
-        // Handle optional proof upload
+        // Handle optional proof upload (di luar transaction — file I/O, no race)
         $proofPath = null;
         if ($request->hasFile('proof')) {
             $proofPath = $request->file('proof')->store('contributions', 'public');
         }
-        $slicesData = SlicingPieService::calculateSlices($request->type, $value);
 
-            $contribution = DB::transaction(function () use ($request, $team, $member, $value, $slicesData, $project, $proofPath) {
+            $contribution = DB::transaction(function () use ($request, $team, $member, $project, $proofPath, $fmr) {
             // LOCK: Ambil data tim dengan row-level lock untuk mencegah race condition
             // saat multiple kontribusi dibuat/diproses bersamaan untuk tim yang sama
             $lockedTeam = DB::table('teams')
@@ -181,6 +176,11 @@ class ContributionController extends Controller
             if (!$lockedTeam) {
                 throw new \RuntimeException('Tim tidak ditemukan saat proses kontribusi.');
             }
+
+            // Hitung value & slices DI DALAM transaction setelah lock — pastikan rate fresh
+            $commissionRate = (float) ($lockedTeam->commission_rate ?? 50);
+            $value = $this->calculateValue($request, $member, $fmr, $commissionRate);
+            $slicesData = SlicingPieService::calculateSlices($request->type, $value);
 
             $contribution = Contribution::create([
                 'team_id'           => $team->id,
@@ -196,7 +196,7 @@ class ContributionController extends Controller
                 'contribution_date' => $request->contribution_date,
                 'deal_value'        => $request->deal_value,
                 'estimated_value'   => $request->estimated_value,
-                'commission_rate'   => $request->commission_rate,
+                'commission_rate'   => $commissionRate,
                 'proof_path'        => $proofPath,
                 'source_url'        => $request->input('source_url'),
             ]);
@@ -387,7 +387,7 @@ class ContributionController extends Controller
      * IDEA/NETWORK: hours * fmr (nilai setara jam kerja)
      * SALES: (deal - estimasi) × rate%
      */
-    private function calculateValue(StoreContributionRequest $request, TeamMember $member, ?int $fmrOverride = null): int
+    private function calculateValue(StoreContributionRequest $request, TeamMember $member, ?int $fmrOverride = null, float $commissionRate = 50): int
     {
         $fmr = $fmrOverride ?? $member->fmr;
         return match ($request->type) {
@@ -395,7 +395,7 @@ class ContributionController extends Controller
             'CASH', 'FACILITY'        => (int) $request->amount,
             'SALES'                   => (int) round(
                 max(0, $request->deal_value - $request->estimated_value)
-                * $request->commission_rate / 100
+                * $commissionRate / 100
             ),
             default => 0,
         };

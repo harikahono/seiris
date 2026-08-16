@@ -50,7 +50,7 @@
 | Method | Path | Throttle | Body | Res / Error |
 |--------|------|----------|------|-------------|
 | GET | `/teams/{team}` | — | `project_id?` (lampirkan project_fmr) | `{data:TeamResource}` / 403 |
-| PUT | `/teams/{team}` | write | name?, description?, approval_threshold?, fmr? | 200 `{message, data}` / 403 (bukan owner) / 422 |
+| PUT | `/teams/{team}` | write | name?, description?, approval_threshold?, commission_rate?, fmr? | 200 `{message, data}` / 403 (bukan owner) / 422 |
 | PUT | `/teams/{team}/members/{member}/fmr` | write | fmr(0..MAX), project_id? | 200 `{message, data}` / 404 / 403 inactive / 409 project frozen |
 | POST | `/teams/{team}/freeze` | write | — | 200 `{message, data}` / 409 already frozen atau ada project aktif / 422 |
 | POST | `/teams/{team}/members/{member}/exit` | write | exit_reason?, leaver_type(good\|bad) | 200 `{message}` / 403 owner / 409 already exited |
@@ -61,7 +61,7 @@
 | Method | Path | Throttle | Body | Res |
 |--------|------|----------|------|-----|
 | GET | `/teams/{team}/contributions` | — | `status?`, `page` | paginasi ContributionResource |
-| POST | `/teams/{team}/contributions` | write | type, description, contribution_date, proof? (file, pdf/jpg/png max 5MB), source_url? (regex: github PR/commit URL), + per-type (TIME/IDEA/NETWORK: hours; CASH/FACILITY: amount; SALES: deal_value,estimated_value,commission_rate) | 201 `{message, data}` / 403 frozen / 422 FMR=0 (TIME/IDEA/NETWORK) |
+| POST | `/teams/{team}/contributions` | write | type, description, contribution_date, proof? (file, pdf/jpg/png max 5MB), source_url? (regex: github PR/commit URL), + per-type (TIME/IDEA/NETWORK: hours; CASH/FACILITY: amount; SALES: deal_value,estimated_value) | 201 `{message, data}` / 403 frozen / 422 FMR=0 (TIME/IDEA/NETWORK) |
 | GET | `/teams/{team}/contributions/{contribution}` | — | — | `{data:ContributionResource}` / 404 |
 | POST | `/teams/{team}/contributions/{contribution}/proof` | write | proof? (file), source_url? (regex) | 200 `{data:ContributionResource}` / 422 not PENDING / 403 unauthorized |
 | GET | `/teams/{team}/contributions/{contribution}/github-diff` | — | — | `{files:[{filename,patch}]}` (cached 1 hari) / 422 no source_url / 502 GitHub unreachable |
@@ -110,7 +110,7 @@
 | GET | `/teams/{team}/projects/{project}` | project.member | — | `{data:ProjectResource}` (load contributions, revenues) |
 | POST | `/teams/{team}/projects/{project}/freeze` | write | — | 200 `{message, data}` / 403 / 409 already frozen / 422 |
 | GET | `/teams/{team}/projects/{project}/contributions` | project.member | `status?`,`page` | paginasi ContributionResource (scope project) |
-| POST | `/teams/{team}/projects/{project}/contributions` | write | spt contribution tim | 201 `{message, data}` / 403 bukan roster |
+| POST | `/teams/{team}/projects/{project}/contributions` | write | spt contribution tim (commission_rate diabaikan dari client, pakai team setting) | 201 `{message, data}` / 403 bukan roster |
 | GET | `/teams/{team}/projects/{project}/contributions/{contribution}` | project.member | — | `{data:ContributionResource}` |
 | POST | `/teams/{team}/projects/{project}/contributions/{contribution}/proof` | write | proof? (file), source_url? (regex) | 200 `{data:ContributionResource}` / 422 / 403 |
 | GET | `/teams/{team}/projects/{project}/contributions/{contribution}/github-diff` | — | — | `{files:[{filename,patch}]}` (cached) / 422 / 502 |

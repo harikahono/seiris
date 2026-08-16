@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { CONTRIBUTION_TYPES, STATUS_STYLES } from "@/lib/contribution";
 import { cn } from "@/lib/utils";
 import { parseErrors } from "@/lib/parseErrors";
-import { formatRp } from "@/lib/constants";
+import { formatRp, formatThousand } from "@/lib/constants";
 
 describe("contribution lib", () => {
   it("exposes the 6 contribution types", () => {
@@ -55,5 +55,22 @@ describe("parseErrors", () => {
 describe("constants.formatRp", () => {
   it("formats a value as Rupiah", () => {
     expect(formatRp(1000000)).toBe("Rp 1.000.000");
+  });
+});
+
+describe("constants.formatThousand", () => {
+  it("formats plain digits with thousand separators", () => {
+    expect(formatThousand("150000")).toBe("150.000");
+    expect(formatThousand("1000000")).toBe("1.000.000");
+  });
+
+  it("strips non-digit chars before formatting", () => {
+    expect(formatThousand("1.000.000")).toBe("1.000.000");
+    expect(formatThousand("Rp 500000")).toBe("500.000");
+  });
+
+  it("returns empty string for empty or non-numeric input", () => {
+    expect(formatThousand("")).toBe("");
+    expect(formatThousand("abc")).toBe("");
   });
 });

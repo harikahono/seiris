@@ -69,6 +69,7 @@ export interface Team {
   logo_url: string | null;
   invite_code: string;
   approval_threshold: ApprovalThreshold;
+  commission_rate: number;
   is_frozen: boolean;
   frozen_at: string | null;
   owner: User;
@@ -81,6 +82,7 @@ export interface CreateTeamPayload {
   name: string;
   description?: string;
   approval_threshold?: ApprovalThreshold;
+  commission_rate?: number;
   fmr?: number;
 }
 

@@ -27,6 +27,7 @@
 
 ## Domain traps
 - **FMR = 0 memblokir** kontribusi `TIME`/`IDEA`/`NETWORK` (controller). `CASH`/`FACILITY`/`SALES` tetap boleh.
+- **SALES `commission_rate` = team-level setting**, bukan per-kontribusi. Owner set di Create Team / Team Settings (0–100%). FE tidak punya slider — ContributionForm kirim `deal_value` + `estimated_value` saja. BE resolve rate dari `$team->commission_rate` (default 50%). Client boleh kirim `commission_rate` di body — **diabaikan** oleh controller.
 - **Append-only:** `AuditLog`, `EquitySnapshot` (hanya `is_frozen` yg mutable), `ProfitDistribution`, `Contribution` (delete diblokir + `total_slices` immutable). Jangan bikin endpoint update/delete untuk ini.
 - **Freeze tim diblokir bila ada project aktif.** Freeze project dulu.
 - **Tie-breaker hanya saat semua voter sudah vote.** Jangan panggil `handleTieBreaker` sebelum itu.

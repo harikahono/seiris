@@ -74,7 +74,7 @@ class TeamController extends Controller
                 action:      'team.created',
                 subjectType: Team::class,
                 subjectId:   $team->id,
-                payload:     ['name' => $team->name],
+                payload:     ['name' => $team->name, 'commission_rate' => $team->commission_rate],
             );
 
             return $team;
@@ -126,6 +126,7 @@ class TeamController extends Controller
             'name'               => $request->name,
             'description'        => $request->description,
             'approval_threshold' => $request->approval_threshold ?? $team->approval_threshold,
+            'commission_rate'    => $request->commission_rate ?? $team->commission_rate,
         ]);
 
         AuditLogService::logFromRequest(
@@ -134,7 +135,7 @@ class TeamController extends Controller
             action:      'team.updated',
             subjectType: Team::class,
             subjectId:   $team->id,
-            payload:     $request->only(['name', 'description', 'approval_threshold']),
+            payload:     $request->only(['name', 'description', 'approval_threshold', 'commission_rate']),
         );
 
         broadcast(new TeamUpdated($team, 'team.updated', $request->user()->name ?? ''))->toOthers();

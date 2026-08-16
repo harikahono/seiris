@@ -390,6 +390,7 @@ export default function ContributionsTab() {
             teamId={teamId}
             projectId={currentProjectId}
             fmr={fmr}
+            commissionRate={team.commission_rate ?? 50}
             open={showForm}
             onClose={() => setShowForm(false)}
             onCreated={() => {

@@ -9,7 +9,7 @@ Semua type ada di satu file. Yang sering dipakai:
 | Interface | Field penting |
 |-----------|---------------|
 | `User` | id, name, email, avatar, created_at, **has_github_token** (`boolean\|undefined`), **profile_photo_url** (`string\|null`) |
-| `Team` | id, name, description, invite_code, approval_threshold (`"50"\|"100"`), is_frozen, frozen_at, owner, members[], members_count |
+| `Team` | id, name, description, invite_code, approval_threshold (`"50"\|"100"`), **commission_rate** (float, default 50), is_frozen, frozen_at, owner, members[], members_count |
 | `TeamMember` | id, role (`"owner"\|"member"`), fmr, **project_fmr** (`number\|null`, per-project FMR), status (`"active"\|"exited"`), exited_at, user, joined_at |
 | `ProjectItem` | id, team_id, name, description, is_frozen, frozen_at, created_at, updated_at |
 | `Contribution` | id, **project_id** (`string\|null`), type (`ContributionType`), description, value, multiplier (`string`), total_slices, status (`"PENDING"\|"APPROVED"\|"REJECTED"`), contribution_date, deal_value/estimated_value/commission_rate (SALES), member, approvals[], approvals_count, hours?, **proof_url** (`string\|null`), **source_url** (`string\|null`) |
@@ -22,7 +22,7 @@ Semua type ada di satu file. Yang sering dipakai:
 | `FmrProposal` | id, proposed_fmr, status (`"PENDING"\|"APPROVED"\|"REJECTED"`), member, reviewer, created_at, reviewed_at |
 | `AuditLogItem` | id, action, actor, subject_type, subject_id, payload, ip_address, created_at |
 
-Payload types: `LoginPayload`, `RegisterPayload`, `CreateTeamPayload`, `CreateContributionPayload` (proof?: `File`, source_url?: `string`), `VotePayload`, `CreateRevenuePayload` (proof?: `File`). Pagination: `PaginatedData<T> = { data, meta:{current_page,last_page,total} }`.
+Payload types: `LoginPayload`, `RegisterPayload`, `CreateTeamPayload` (**commission_rate?**: 0–100), `CreateContributionPayload` (proof?: `File`, source_url?: `string`), `VotePayload`, `CreateRevenuePayload` (proof?: `File`). Pagination: `PaginatedData<T> = { data, meta:{current_page,last_page,total} }`.
 
 ## BE models (12, semua `HasUuids`)
 

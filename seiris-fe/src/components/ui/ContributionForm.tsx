@@ -10,11 +10,13 @@ import { X, Loader2, ArrowLeft, AlertTriangle, Upload } from "lucide-react";
 import type { ContributionType } from "@/types";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useModalAnimation } from "@/hooks/useModalAnimation";
+import MoneyInput from "@/components/ui/MoneyInput";
 
 interface ContributionFormProps {
   teamId: string;
   projectId?: string | null;
   fmr: number;
+  commissionRate: number;
   open: boolean;
   onClose: () => void;
   onCreated: () => void;
@@ -33,7 +35,7 @@ interface FieldErrors {
   source_url?: string;
 }
 
-export default function ContributionForm({ teamId, projectId, fmr, open, onClose, onCreated }: ContributionFormProps) {
+export default function ContributionForm({ teamId, projectId, fmr, commissionRate, open, onClose, onCreated }: ContributionFormProps) {
   const basePath = projectId
     ? `/teams/${teamId}/projects/${projectId}`
     : `/teams/${teamId}`;
@@ -45,7 +47,6 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
   const [amount, setAmount] = useState("");
   const [dealValue, setDealValue] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("");
-  const [commissionRate, setCommissionRate] = useState("50");
   const [loading, setLoading] = useState(false);
   // optional proof & source URL
   const [proofFile, setProofFile] = useState<File | null>(null);
@@ -81,7 +82,12 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
   const requiresAmount = type && ["CASH", "FACILITY"].includes(type);
   const isSales = type === "SALES";
 
-  const canSubmitForm = type && description.trim().length >= 5 && contributionDate;
+  const canSubmitForm = type
+    && description.trim().length >= 5
+    && contributionDate
+    && (requiresHours ? Number(hours) >= 0.5 : true)
+    && (requiresAmount ? Number(amount) >= 1000 : true)
+    && (isSales ? dealValue.trim() !== "" && estimatedValue.trim() !== "" : true);
 
   const selectType = (t: ContributionType) => {
     if (t === "TIME" || t === "IDEA" || t === "NETWORK") {
@@ -118,7 +124,6 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
       if (isSales) {
         formData.append('deal_value', String(Number(dealValue)));
         formData.append('estimated_value', String(Number(estimatedValue)));
-        formData.append('commission_rate', String(Number(commissionRate)));
       } else {
         if (requiresHours) formData.append('hours', String(Number(hours)));
         if (requiresAmount) formData.append('amount', String(Number(amount)));
@@ -156,7 +161,6 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
       setAmount("");
       setDealValue("");
       setEstimatedValue("");
-      setCommissionRate("50");
       setProofFile(null);
       setSourceUrl("");
       setErrors({});
@@ -310,14 +314,11 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
                   <label className="mb-1.5 block text-sm font-medium text-gray-300">
                     Nominal <span className="text-gray-500">(min Rp 1.000)</span>
                   </label>
-                  <input
-                    type="number"
-                    min="1000"
-                    placeholder="Contoh: 500000"
+                  <MoneyInput
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    required
-                    className={inputClass("amount")}
+                    onChange={setAmount}
+                    placeholder="500.000"
+                    min={1000}
                   />
                   {errors.amount && <p className="mt-1 text-xs text-red-500">{errors.amount}</p>}
                   {amount && !errors.amount && (
@@ -336,54 +337,28 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="mb-1 block text-sm font-medium text-gray-300">Estimasi Tim (Rp)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Estimasi awal"
+                      <MoneyInput
                         value={estimatedValue}
-                        onChange={(e) => setEstimatedValue(e.target.value)}
-                        required
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                        onChange={setEstimatedValue}
+                        placeholder="600.000"
                       />
                       {errors.estimated_value && <p className="mt-1 text-xs text-red-500">{errors.estimated_value}</p>}
                     </div>
                     <div>
                       <label className="mb-1 block text-sm font-medium text-gray-300">Deal Client (Rp)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Nilai deal"
+                      <MoneyInput
                         value={dealValue}
-                        onChange={(e) => setDealValue(e.target.value)}
-                        required
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                        onChange={setDealValue}
+                        placeholder="1.000.000"
                       />
                       {errors.deal_value && <p className="mt-1 text-xs text-red-500">{errors.deal_value}</p>}
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-gray-300" title="Persentase markup yang menjadi komisi kamu (dari deal − estimasi)">
+                    <label className="mb-1 block text-sm font-medium text-gray-300" title="Persentase komisi — ditetapkan owner di pengaturan tim">
                       Komisi Rate: <span className="text-accent font-bold">{commissionRate}%</span>
                     </label>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-500 w-6 text-right">0%</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={commissionRate}
-                        onChange={(e) => setCommissionRate(e.target.value)}
-                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer
-                          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#e07820] [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
-                          [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#e07820] [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer"
-                        style={{
-                          background: `linear-gradient(to right, #e07820 ${commissionRate}%, #374151 ${commissionRate}%)`,
-                        }}
-                        required
-                      />
-                      <span className="text-xs text-gray-500 w-6">100%</span>
-                    </div>
-                    {errors.commission_rate && <p className="mt-1 text-xs text-red-500">{errors.commission_rate}</p>}
+                    <p className="text-[11px] text-gray-500">Ditetapkan oleh owner di Pengaturan Tim</p>
                   </div>
                   {dealValue && estimatedValue && commissionRate && (
                     (() => {
@@ -405,7 +380,7 @@ export default function ContributionForm({ teamId, projectId, fmr, open, onClose
               <button
                 type="submit"
                 disabled={loading || !canSubmitForm}
-                title={!canSubmitForm ? "Lengkapi deskripsi (min 5 karakter) dan tanggal kontribusi" : undefined}
+                title={!canSubmitForm ? "Lengkapi semua field yang diperlukan sesuai tipe kontribusi" : undefined}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97]"
               >
                 {loading && <Loader2 className="size-4 animate-spin" />}

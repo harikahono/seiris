@@ -16,6 +16,7 @@ interface FieldErrors {
   name?: string;
   description?: string;
   approval_threshold?: string;
+  commission_rate?: string;
 }
 
 function SectionHeader({ label }: { label: string }) {
@@ -35,6 +36,7 @@ export default function TeamSettingsTab() {
   const [name, setName] = useState(team.name);
   const [description, setDescription] = useState(team.description ?? "");
   const [approvalThreshold, setApprovalThreshold] = useState<ApprovalThreshold>(team.approval_threshold);
+  const [commissionRate, setCommissionRate] = useState(String(team.commission_rate ?? 50));
   const [saving, setSaving] = useState(false);
   // C5: state logo
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -130,6 +132,7 @@ export default function TeamSettingsTab() {
         name: name.trim(),
         description: description.trim() || null,
         approval_threshold: approvalThreshold,
+        commission_rate: Number(commissionRate),
       });
       toast.success("Tim berhasil diperbarui");
       fetchTeam();
@@ -330,6 +333,24 @@ export default function TeamSettingsTab() {
                 </label>
               ))}
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="settings-commission" className="mb-1.5 block text-sm font-medium text-gray-300" title="Persentase markup yang menjadi komisi sales">
+              Komisi Sales (%)
+            </label>
+            <input
+              id="settings-commission"
+              type="number"
+              min="0"
+              max="100"
+              placeholder="50"
+              value={commissionRate}
+              onChange={(e) => setCommissionRate(e.target.value)}
+              disabled={team.is_frozen}
+              className={cn(inputBase, errClass("commission_rate"))}
+            />
+            {errors.commission_rate && <p className="mt-1 text-xs text-red-500">{errors.commission_rate}</p>}
           </div>
 
           <div className="!mt-6 flex items-center justify-end gap-3 border-t border-white/5 pt-5">

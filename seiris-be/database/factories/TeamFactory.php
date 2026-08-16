@@ -22,6 +22,7 @@ class TeamFactory extends Factory
             'description' => fake()->sentence(),
             'invite_code' => strtoupper(Str::random(8)),
             'approval_threshold' => 50,
+            'commission_rate' => 50.00,
             'is_frozen' => false,
         ];
     }

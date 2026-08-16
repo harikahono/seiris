@@ -37,9 +37,10 @@ class StoreContributionRequest extends FormRequest
                 break;
 
             case 'SALES':
-                $rules['deal_value']       = ['required', 'integer', 'min:0', 'max:999999999'];
-                $rules['estimated_value']  = ['required', 'integer', 'min:0', 'max:999999999'];
-                $rules['commission_rate']  = ['required', 'numeric', 'min:0', 'max:100'];
+                $rules['deal_value']       = ['required', 'integer', 'min:1', 'max:999999999'];
+                $rules['estimated_value']  = ['required', 'integer', 'min:1', 'max:999999999'];
+                // ponytail: commission_rate diabaikan — backend paksa pakai rate dari tim
+                $rules['commission_rate']  = ['nullable', 'numeric', 'min:0', 'max:100'];
                 break;
         }
 
@@ -61,10 +62,9 @@ class StoreContributionRequest extends FormRequest
             'amount.required'            => 'Nominal wajib diisi.',
             'amount.min'                 => 'Nominal minimal Rp 1.000.',
             'deal_value.required'        => 'Nilai deal wajib diisi.',
+            'deal_value.min'             => 'Nilai deal minimal Rp 1.',
             'estimated_value.required'   => 'Estimasi tim wajib diisi.',
-            'commission_rate.required'   => 'Rate komisi wajib diisi.',
-            'commission_rate.min'        => 'Rate komisi minimal 0%.',
-            'commission_rate.max'        => 'Rate komisi maksimal 100%.',
+            'estimated_value.min'        => 'Estimasi tim minimal Rp 1.',
         ];
     }
 
