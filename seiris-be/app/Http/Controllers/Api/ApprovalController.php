@@ -148,6 +148,8 @@ class ApprovalController extends Controller
         if ($result->status === 'APPROVED') {
             try {
                 $snapshot = EquitySnapshot::where('team_id', $team->id)
+                    ->when($contribution->project_id, fn($q) => $q->where('project_id', $contribution->project_id))
+                    ->when(!$contribution->project_id, fn($q) => $q->whereNull('project_id'))
                     ->latest()
                     ->first();
 

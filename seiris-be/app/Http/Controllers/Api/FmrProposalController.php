@@ -206,7 +206,16 @@ class FmrProposalController extends Controller
         }
 
         DB::transaction(function () use ($request, $proposal, $team) {
-            $proposal->update([
+            // Lock proposal row — cegah race approve+reject concurrent
+            $locked = FmrProposal::where('id', $proposal->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$locked->isPending()) {
+                throw new \RuntimeException('ALREADY_RESOLVED');
+            }
+
+            $locked->update([
                 'status'      => 'REJECTED',
                 'reviewed_by' => $request->user()->id,
                 'reviewed_at' => now(),
@@ -217,10 +226,10 @@ class FmrProposalController extends Controller
                 teamId:      $team->id,
                 action:      'fmr.rejected',
                 subjectType: FmrProposal::class,
-                subjectId:   $proposal->id,
+                subjectId:   $locked->id,
                 payload:     [
-                    'proposed_fmr' => $proposal->proposed_fmr,
-                    'member_id'    => $proposal->member_id,
+                    'proposed_fmr' => $locked->proposed_fmr,
+                    'member_id'    => $locked->member_id,
                 ],
             );
         });

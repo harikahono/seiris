@@ -92,7 +92,8 @@ class RevenueController extends Controller
             $proofPath = $request->file('proof')->store('revenues', 'public');
         }
 
-        $revenue = DB::transaction(function () use ($request, $team, $member, $proofPath, $project) {
+        try {
+            $revenue = DB::transaction(function () use ($request, $team, $member, $proofPath, $project) {
             $deductions = $request->deductions ?? [];
             $totalDeductions = collect($deductions)->sum('amount');
             $distributable = $request->distributable_amount ?? ($request->amount - $totalDeductions);
@@ -126,6 +127,13 @@ class RevenueController extends Controller
 
             return $revenue;
         });
+        } catch (\Throwable $e) {
+            // Cleanup proof file kalau transaction gagal
+            if ($proofPath) {
+                \Storage::disk('public')->delete($proofPath);
+            }
+            throw $e;
+        }
 
         broadcast(new TeamUpdated($team, 'revenue.created', $request->user()->name ?? ''))->toOthers();
 
@@ -236,20 +244,24 @@ class RevenueController extends Controller
         }
 
         // ponytail: owner boleh distribute langsung dari pending; request member (toast) opsional
-        // Snapshot equity terbaru untuk scope revenue ini (project kalau ada, else tim)
-        $snapshot = $revenue->distributableSnapshot();
-
-        if (!$snapshot) {
+        // Quick check — kalau gak ada snapshot sama sekali, return 422 dulu
+        if (!$revenue->distributableSnapshot()) {
             return response()->json([
                 'message' => 'Belum ada equity snapshot. Pastikan ada kontribusi yang sudah diapprove.',
             ], 422);
         }
 
-        $distributions = DB::transaction(function () use ($request, $revenue, $team, $snapshot) {
+        $distributions = DB::transaction(function () use ($request, $revenue, $team) {
             // M2: lock row supaya concurrent distribute aman (hindari 500 dari unique constraint)
             $locked = Revenue::where('id', $revenue->id)->lockForUpdate()->first();
             if ($locked->is_distributed) {
                 throw new \RuntimeException('Revenue sudah didistribusikan oleh proses lain.');
+            }
+
+            // Re-fetch snapshot SETELAH lock — pastikan equity fresh (bisa berubah di antara fetch)
+            $snapshot = $revenue->distributableSnapshot();
+            if (!$snapshot) {
+                throw new \RuntimeException('Snapshot hilang saat proses distribusi.');
             }
 
             // Largest-remainder method: floor semua share, sisa distribusi ke equity terbesar

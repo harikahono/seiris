@@ -144,7 +144,7 @@ class ContributionController extends Controller
         }
 
         // Bug 1 fix — FMR = 0 tidak boleh log TIME/IDEA/NETWORK
-        if (in_array($request->type, ['TIME', 'IDEA', 'NETWORK']) && $fmr === 0) {
+        if (in_array($request->type, ['TIME', 'IDEA', 'NETWORK']) && empty($fmr)) {
             return response()->json([
                 'message' => 'FMR kamu belum diset oleh owner untuk ' . ($project ? 'project ini' : 'tim') . '. Minta owner set FMR kamu terlebih dahulu.',
             ], 422);
@@ -164,6 +164,7 @@ class ContributionController extends Controller
             $proofPath = $request->file('proof')->store('contributions', 'public');
         }
 
+        try {
             $contribution = DB::transaction(function () use ($request, $team, $member, $project, $proofPath, $fmr) {
             // LOCK: Ambil data tim dengan row-level lock untuk mencegah race condition
             // saat multiple kontribusi dibuat/diproses bersamaan untuk tim yang sama
@@ -217,6 +218,13 @@ class ContributionController extends Controller
 
             return $contribution;
         });
+        } catch (\Throwable $e) {
+            // Cleanup proof file kalau transaction gagal
+            if ($proofPath) {
+                \Storage::disk('public')->delete($proofPath);
+            }
+            throw $e;
+        }
 
         // Broadcast ke anggota lain biar实时
         try {
@@ -287,6 +295,10 @@ class ContributionController extends Controller
         // source_url validation handled by regex rule above
         $proofPath = null;
         if ($request->hasFile('proof')) {
+            // Hapus proof lama jika ada — cegah orphan file
+            if ($contribution->proof_path) {
+                \Storage::disk('public')->delete($contribution->proof_path);
+            }
             $proofPath = $request->file('proof')->store('contributions', 'public');
         }
         // F-3: update dengan WHERE status guard — cegah stale status race

@@ -434,7 +434,7 @@ class TeamController extends Controller
             return response()->json(['message' => 'Owner tidak bisa dikeluarkan dari tim.'], 403);
         }
 
-        $leaverType = in_array($request->leaver_type, ['good', 'bad']) ? $request->leaver_type : null;
+        $leaverType = in_array($request->leaver_type, ['good', 'bad']) ? $request->leaver_type : 'good';
 
         try {
             DB::transaction(function () use ($request, $team, $member, $leaverType) {
