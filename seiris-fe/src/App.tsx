@@ -17,6 +17,7 @@ import TeamSettingsTab from "@/components/teams/TeamSettingsTab";
 import ContributionDetailPage from "@/pages/teams/ContributionDetailPage";
 import RevenueDetailPage from "@/pages/teams/RevenueDetailPage";
 import MemberDetailPage from "@/pages/teams/MemberDetailPage";
+import ReportPage from "@/pages/teams/ReportPage";
 import LandingPage from "@/pages/LandingPage";
 import SettingsPage from "@/pages/SettingsPage";
 import JoinPage from "@/pages/JoinPage";
@@ -42,6 +43,7 @@ export default function App() {
             <Route path="/register" element={<AuthPage />} />
             <Route path="/join/:inviteCode" element={<JoinPage />} />
             <Route element={<ProtectedRoute />}>
+              <Route path="/teams/:teamId/report" element={<ReportPage />} />
               <Route element={<RealtimeProvider><DashboardLayout /></RealtimeProvider>}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/settings" element={<SettingsPage />} />

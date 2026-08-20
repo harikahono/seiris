@@ -95,7 +95,6 @@
 |--------|------|----------|------|
 | GET | `/teams/{team}/equity` | — | inline `{snapshot_id, total_slices, equity_map[], slices_by_type, is_frozen, calculated_at}` (TIDAK pakai resource) |
 | GET | `/teams/{team}/equity/history` | — | paginasi snapshot inline |
-| GET | `/teams/{team}/equity/export` | write | **PDF download** (`application/pdf`, `SEIRIS_*.pdf`) / 404 bila tak ada snapshot |
 
 ## Audit Log (`team.member`)
 | Method | Path | Res |

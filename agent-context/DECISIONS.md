@@ -34,7 +34,7 @@
 
 ## Database & Deploy
 - **ADR-023 PostgreSQL-only** — `gen_random_uuid()`, `lockForUpdate()` butuh PostgreSQL; SQLite hanya untuk test. ✅
-- **ADR-024 PDF export** — `barryvdh/laravel-dompdf` + font DejaVu Sans. ✅
+- **ADR-024 PDF export** — ~~`barryvdh/laravel-dompdf` + font DejaVu Sans~~ **SUPERSEDED (ADR-029)**. Dihapus: backend `equity/export`, blade `equity-report`, dep dompdf → diganti laporan `ReportPage` di FE (print browser, `/teams/:teamId/report`). ✅
 - **ADR-025 Backend jalan CLI SAPI** — `php artisan serve`, bukan php-fpm → upload limit di `php-cli/php.ini`, nginx butuh `client_max_body_size`. ✅
 - **ADR-026 Proof field naming** — Contribution menggunakan `proof_path` + `proof_url` (mirrored dari Revenue). Legacy `invoice_*`/`actual_amount` di‑drop, jangan gunakan lagi. ✅
 - **ADR-027 Public invite preview** — `GET /teams/invite/{inviteCode}` publik (tanpa auth) agar calon anggota bisa lihat info tim sebelum login. Data terbatas (nama, deskripsi, jumlah anggota, owner) — tidak bocorkan invite_code atau data sensitif. ✅
@@ -59,3 +59,4 @@
 - **ADR-041 Event-driven logout sync, ganti polling** — `TeamContext.tsx` polling localStorage tiap 500ms. Diganti `window.addEventListener('storage')` (cross-tab) + `CustomEvent('seiris:teams-cleared')` (same-tab). Nol interval, nol polling. Commit `edaf35c`. ✅
 - **ADR-042 activeRef guard untuk setState setelah unmount** — Detail pages (RevenueDetailPage, ContributionDetailPage, MemberDetailPage, DashboardPage) punya realtime fetch tanpa guard. `useRef(true)`, cleanup set false, tiap fetch handler cek `if (!activeRef.current) return`. Cegah React 18+ warning dan state corruption. Commit `edaf35c`. ✅
 - **ADR-043 fetchingRef guard untuk realtime vs pagination race** — RevenueTab & ContributionsTab punya 2 useEffect (page change + realtime). `fetchingRef.current = true` sebelum fetch di page effect, realtime effect skip kalo `fetchingRef.current === true`. Cegah nampilin data dari page berbeda. Commit `edaf35c`. ✅
+- **ADR-029 PDF export pindah ke FE (browser print)** — dompdf jelek render SVG/emoji/font (pie chart rusak, tofu). Export `equity/export` + blade `equity-report` + `barryvdh/laravel-dompdf` dihapus. Gantinya `ReportPage` (`/teams/:teamId/report?project=&print=1`) — halaman React light-theme, pie SVG + bar chart + tabel kontribusi/revenue, `window.print()` → browser render → "Save as PDF". `document.title` jadi nama file. Nol dependency baru. ✅

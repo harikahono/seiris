@@ -12,7 +12,7 @@ Implementasi sistem distribusi ekuitas tim berdasarkan prinsip **Slicing Pie**, 
 | Frontend | React 19, Vite 8, TypeScript 6, Tailwind 4 |
 | Auth | Sanctum (token-based) |
 | Broadcasting | Pusher (presence channels) |
-| PDF | barryvdh/laravel-dompdf |
+| PDF | Browser print (FE `ReportPage` → "Save as PDF") |
 | DB | SQLite/PostgreSQL (row-level locking butuh PG) |
 | Package | pnpm (FE), Composer (BE) |
 
@@ -121,7 +121,6 @@ composer run test            # config:clear → php artisan test (PHPUnit, SQLit
 | POST | `/api/fmr-proposals/{proposal}/reject` | Owner only |
 | GET | `/api/teams/{team}/equity` | Team member |
 | GET | `/api/teams/{team}/equity/history` | Team member |
-| GET | `/api/teams/{team}/equity/export` | Team member |
 | GET | `/api/teams/{team}/audit-logs` | Team member |
 | GET/POST | `/api/teams/{team}/projects` | Team member / Owner |
 | GET/POST | `/api/teams/{team}/projects/{project}/contributions` | Project member |

@@ -115,7 +115,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         // Equity
         Route::get('teams/{team}/equity',                         [EquityController::class, 'current']);
         Route::get('teams/{team}/equity/history',                 [EquityController::class, 'history']);
-        Route::get('teams/{team}/equity/export',                  [EquityController::class, 'export'])->middleware('throttle:write');
 
         // Audit Log
         Route::get('teams/{team}/audit-logs',                     [AuditLogController::class, 'index']);
@@ -146,7 +145,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
             // Equity scoped ke project
             Route::get('equity',                                  [EquityController::class, 'current']);
             Route::get('equity/history',                          [EquityController::class, 'history']);
-            Route::get('equity/export',                           [EquityController::class, 'export'])->middleware('throttle:write');
 
             // Project members — roster (owner only)
             Route::post('members',                                [ProjectController::class, 'addMember'])->middleware('throttle:write');
