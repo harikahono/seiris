@@ -639,7 +639,6 @@ class ComprehensiveDemoSeeder extends Seeder
                 [
                     'proposed_fmr' => $def[2],
                     'status'       => $def[3],
-                    'proposed_by'  => $member->user_id,
                 ]
             );
 
