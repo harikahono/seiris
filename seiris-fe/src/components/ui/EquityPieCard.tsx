@@ -19,8 +19,11 @@ export default function EquityPieCard({ members, totalSlices, isFrozen }: Equity
   const chartConfig = useMemo(() => {
     const config: ChartConfig = {};
     members.forEach((m, i) => {
+      const tag = m.status === "exited"
+        ? ` (Keluar${m.leaver_type ? ` · ${m.leaver_type === "bad" ? "Bad" : "Good"}` : ""})`
+        : "";
       config[m.member_id] = {
-        label: m.name,
+        label: m.name + tag,
         colors: {
           light: [PALETTE[i % PALETTE.length]],
           dark: [PALETTE[i % PALETTE.length]],

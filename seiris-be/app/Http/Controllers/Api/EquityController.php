@@ -40,6 +40,8 @@ class EquityController extends Controller
                         'member_id'        => $m->id,
                         'name'             => $m->user->name,
                         'role'             => $m->role,
+                        'status'           => 'active',
+                        'leaver_type'      => null,
                         'slices'           => 0,
                         'equity_pct'       => 0,
                         'profile_photo_url' => $m->user->profile_photo_url,
@@ -51,7 +53,8 @@ class EquityController extends Controller
             ]);
         }
 
-        $members = $team->activeMembers()->with('user')->get()->keyBy('id');
+        // ponytail: pakai members() (active + exited) supaya leaver dengan sisa slice tampil nama, bukan "Unknown"
+        $members = $team->members()->with('user')->get()->keyBy('id');
         $enriched = [];
 
         foreach ($snapshot->equity_map as $memberId => $data) {
@@ -60,6 +63,8 @@ class EquityController extends Controller
                 'member_id'        => $memberId,
                 'name'             => $member?->user?->name ?? 'Unknown',
                 'role'             => $member?->role ?? 'member',
+                'status'           => $member?->status ?? 'active',
+                'leaver_type'      => $member?->leaver_type ?? null,
                 'slices'           => $data['slices'],
                 'equity_pct'       => $data['equity_pct'],
                 'profile_photo_url' => $member?->user?->profile_photo_url,

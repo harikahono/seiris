@@ -187,6 +187,8 @@ export interface EquityMemberEntry {
   member_id: string;
   name: string;
   role: TeamRole;
+  status?: "active" | "exited";
+  leaver_type?: "good" | "bad" | null;
   slices: number;
   equity_pct: number;
   profile_photo_url: string | null;
