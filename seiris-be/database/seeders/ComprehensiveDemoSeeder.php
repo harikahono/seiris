@@ -23,10 +23,12 @@ use Illuminate\Support\Str;
  * Seeder komprehensif dengan data realistis pasar Indonesia 2026.
  *
  * 3 Tim, beragam:
- * - FMR realistis (Rp 75k–250k/jam berdasarkan riset pasar)
+ * - FMR realistis (Rp 75k–150k/jam, cap MAX_STUDENT_FMR)
  * - 6 tipe kontribusi (CASH, TIME, IDEA, NETWORK, FACILITY, SALES)
  * - Good & bad leaver dengan skenario berbeda
- * - Project frozen & aktif
+ * - Tim 1: investor round → freeze (bake ke cap table)
+ * - Tim 2: agency, project delivered tapi tim aktif
+ * - Tim 3: pre-seed, fully dynamic
  * - Revenue terdistribusi & belum terdistribusi
  * - Voting komplit & partial
  */
@@ -57,65 +59,71 @@ class ComprehensiveDemoSeeder extends Seeder
     ];
 
     // ── FMR (Fair Market Rate) realistis pasar Indonesia 2026 ──────────────
-    // Junior: 75k–100k, Mid: 100k–150k, Senior: 150k–200k, Lead: 200k–250k
+    // Cap: MAX_STUDENT_FMR = 150.000/jam. Variasi 75k–150k berdasarkan senioritas.
     private array $fmrDefs = [
-        'ahmad@nusantara.tech'   => 200000, // Senior full-stack (owner)
-        'dewi@nusantara.tech'    => 150000, // Mid frontend
-        'budi@nusantara.tech'    => 175000, // Senior backend
-        'siti@nusantara.tech'    => 120000, // Mid UI/UX
-        'rizky@nusantara.tech'   => 100000, // Junior devops
-        'maya@kreatif.studio'    => 225000, // Agency founder (lead)
-        'fajar@kreatif.studio'   => 150000, // Mid developer
-        'lestari@kreatif.studio' => 130000, // Mid designer
+        'ahmad@nusantara.tech'   => 150000, // Owner/lead full-stack
+        'dewi@nusantara.tech'    => 130000, // Mid frontend
+        'budi@nusantara.tech'    => 145000, // Senior backend
+        'siti@nusantara.tech'    => 110000, // Mid UI/UX
+        'rizky@nusantara.tech'   => 90000,  // Junior devops
+        'maya@kreatif.studio'    => 150000, // Agency founder (lead)
+        'fajar@kreatif.studio'   => 130000, // Mid developer
+        'lestari@kreatif.studio' => 120000, // Mid designer
         'andi@kreatif.studio'    => 90000,  // Junior content
-        'putri@startup.id'       => 180000, // Product owner (senior)
-        'gilang@startup.id'      => 200000, // CTO (senior)
+        'putri@startup.id'       => 150000, // Owner/product (senior)
+        'gilang@startup.id'      => 145000, // CTO (senior)
         'nina@startup.id'        => 110000, // Mid marketing
     ];
 
     // ── Teams ──────────────────────────────────────────────────────────────
     private array $teamDefs = [
         [
-            'name'        => 'Nusantara Tech',
-            'description' => 'Startup SaaS — platform kolaborasi tim untuk UMKM Indonesia',
-            'owner'       => 'ahmad@nusantara.tech',
-            'threshold'   => '50',
-            'fmr'         => 200000,
-            'commission'  => 50,
-            'members'     => [
+            'name'           => 'Nusantara Tech',
+            'description'    => 'Startup SaaS — platform kolaborasi tim untuk UMKM Indonesia',
+            'owner'          => 'ahmad@nusantara.tech',
+            'threshold'      => '50',
+            'fmr'            => 150000,
+            'commission'     => 50,
+            'members'        => [
                 'dewi@nusantara.tech'  => 'member',
                 'budi@nusantara.tech'  => 'member',
                 'siti@nusantara.tech'  => 'member',
                 'rizky@nusantara.tech' => 'member',
             ],
-            'projects' => ['SaaS Platform', 'Mobile App'],
+            'projects'       => ['SaaS Platform', 'Mobile App'],
+            'freezeTeam'     => true,   // investor round → bake ke cap table
+            'freezeProjects' => ['SaaS Platform', 'Mobile App'],
         ],
         [
-            'name'        => 'Kreatif Studio',
-            'description' => 'Digital agency — web development & branding untuk klien korporat',
-            'owner'       => 'maya@kreatif.studio',
-            'threshold'   => '100',
-            'fmr'         => 225000,
-            'commission'  => 60,
-            'members'     => [
+            'name'           => 'Kreatif Studio',
+            'description'    => 'Digital agency — web development & branding untuk klien korporat',
+            'owner'          => 'maya@kreatif.studio',
+            'threshold'      => '100',
+            'fmr'            => 150000,
+            'commission'     => 60,
+            'members'        => [
                 'fajar@kreatif.studio'   => 'member',
                 'lestari@kreatif.studio' => 'member',
                 'andi@kreatif.studio'    => 'member',
             ],
-            'projects' => ['Website Klien A', 'Branding Package B'],
+            'projects'       => ['Website Klien A', 'Branding Package B'],
+            'freezeTeam'     => false,  // agency aktif, tim gak di-freeze
+            'freezeProjects' => ['Website Klien A'],  // project delivered, tapi Branding B masih aktif
         ],
         [
-            'name'        => 'Startup Lokal',
-            'description' => 'Early-stage startup — aplikasi edtech untuk pelajar Indonesia',
-            'owner'       => 'putri@startup.id',
-            'threshold'   => '50',
-            'fmr'         => 180000,
-            'commission'  => 50,
-            'members'     => [
+            'name'           => 'Startup Lokal',
+            'description'    => 'Early-stage startup — aplikasi edtech untuk pelajar Indonesia',
+            'owner'          => 'putri@startup.id',
+            'threshold'      => '50',
+            'fmr'            => 150000,
+            'commission'     => 50,
+            'members'        => [
                 'gilang@startup.id' => 'member',
                 'nina@startup.id'   => 'member',
             ],
-            'projects' => ['MVP Development'],
+            'projects'       => ['MVP Development'],
+            'freezeTeam'     => false,  // pre-seed, masih dinamis
+            'freezeProjects' => [],     // belum ada yang di-freeze
         ],
     ];
 
@@ -131,15 +139,15 @@ class ComprehensiveDemoSeeder extends Seeder
 
         // TIME — fitur
         ['Nusantara Tech', 'SaaS Platform', 'dewi@nusantara.tech', 'TIME',
-         'UI/UX Dashboard Analytics (40 jam × Rp 150k)', 6000000, 'APPROVED',
+         'UI/UX Dashboard Analytics (40 jam × Rp 130k)', 5200000, 'APPROVED',
          ['ahmad@nusantara.tech'=>'APPROVE','siti@nusantara.tech'=>'APPROVE']],
 
         ['Nusantara Tech', 'SaaS Platform', 'budi@nusantara.tech', 'TIME',
-         'Backend REST API Modul User Management (35 jam × Rp 175k)', 6125000, 'APPROVED',
+         'Backend REST API Modul User Management (35 jam × Rp 145k)', 5075000, 'APPROVED',
          ['ahmad@nusantara.tech'=>'APPROVE','dewi@nusantara.tech'=>'APPROVE']],
 
         ['Nusantara Tech', 'SaaS Platform', 'siti@nusantara.tech', 'TIME',
-         'Design System & Component Library (25 jam × Rp 120k)', 3000000, 'APPROVED',
+         'Design System & Component Library (25 jam × Rp 110k)', 2750000, 'APPROVED',
          ['ahmad@nusantara.tech'=>'APPROVE','dewi@nusantara.tech'=>'APPROVE']],
 
         // IDEA — inovasi
@@ -173,7 +181,7 @@ class ComprehensiveDemoSeeder extends Seeder
         // TIM 1: Nusantara Tech / Mobile App
         // ═══════════════════════════════════════════════════════════════════
         ['Nusantara Tech', 'Mobile App', 'dewi@nusantara.tech', 'TIME',
-         'React Native Setup & Navigation (30 jam)', 4500000, 'APPROVED',
+         'React Native Setup & Navigation (30 jam × Rp 130k)', 3900000, 'APPROVED',
          ['ahmad@nusantara.tech'=>'APPROVE','siti@nusantara.tech'=>'APPROVE']],
 
         ['Nusantara Tech', 'Mobile App', 'siti@nusantara.tech', 'IDEA',
@@ -189,15 +197,15 @@ class ComprehensiveDemoSeeder extends Seeder
         // TIM 2: Kreatif Studio / Website Klien A
         // ═══════════════════════════════════════════════════════════════════
         ['Kreatif Studio', 'Website Klien A', 'maya@kreatif.studio', 'TIME',
-         'Project Planning & Client Onboarding (20 jam × Rp 225k)', 4500000, 'APPROVED',
+         'Project Planning & Client Onboarding (20 jam × Rp 150k)', 3000000, 'APPROVED',
          ['fajar@kreatif.studio'=>'APPROVE','lestari@kreatif.studio'=>'APPROVE']],
 
         ['Kreatif Studio', 'Website Klien A', 'fajar@kreatif.studio', 'TIME',
-         'Full-Stack Development Laravel + React (50 jam × Rp 150k)', 7500000, 'APPROVED',
+         'Full-Stack Development Laravel + React (50 jam × Rp 130k)', 6500000, 'APPROVED',
          ['maya@kreatif.studio'=>'APPROVE','lestari@kreatif.studio'=>'APPROVE']],
 
         ['Kreatif Studio', 'Website Klien A', 'lestari@kreatif.studio', 'TIME',
-         'UI/UX Design & Prototyping (35 jam × Rp 130k)', 4550000, 'APPROVED',
+         'UI/UX Design & Prototyping (35 jam × Rp 120k)', 4200000, 'APPROVED',
          ['maya@kreatif.studio'=>'APPROVE','fajar@kreatif.studio'=>'APPROVE']],
 
         ['Kreatif Studio', 'Website Klien A', 'andi@kreatif.studio', 'TIME',
@@ -238,11 +246,11 @@ class ComprehensiveDemoSeeder extends Seeder
         // TIM 3: Startup Lokal / MVP Development
         // ═══════════════════════════════════════════════════════════════════
         ['Startup Lokal', 'MVP Development', 'putri@startup.id', 'TIME',
-         'Product Research & PRD (30 jam × Rp 180k)', 5400000, 'APPROVED',
+         'Product Research & PRD (30 jam × Rp 150k)', 4500000, 'APPROVED',
          ['gilang@startup.id'=>'APPROVE','nina@startup.id'=>'APPROVE']],
 
         ['Startup Lokal', 'MVP Development', 'gilang@startup.id', 'TIME',
-         'Backend Architecture & API (60 jam × Rp 200k)', 12000000, 'APPROVED',
+         'Backend Architecture & API (60 jam × Rp 145k)', 8700000, 'APPROVED',
          ['putri@startup.id'=>'APPROVE','nina@startup.id'=>'APPROVE']],
 
         ['Startup Lokal', 'MVP Development', 'gilang@startup.id', 'CASH',
@@ -274,33 +282,24 @@ class ComprehensiveDemoSeeder extends Seeder
 
     // ── Revenue ────────────────────────────────────────────────────────────
     private array $revenueDefs = [
-        // Tim 1: 2 revenue (1 distributed, 1 pending)
+        // Tim 1: Angel investor round → freeze tim (bake ke cap table)
         ['Nusantara Tech', 'SaaS Platform', 'ahmad@nusantara.tech',
-         'Pendanaan Awal Angel Investor', 75000000, 60000000,
-         [['for'=>'Notaris & Legal','amount'=>8000000],['for'=>'Server setup','amount'=>5000000]],
+         'Angel Investor Round — PT Ventura Nusantara (pre-seed SaaS)',
+         200000000, 170000000,
+         [['for'=>'Legal & notaris','amount'=>15000000],['for'=>'Platform fee','amount'=>15000000]],
          true],
 
-        ['Nusantara Tech', 'Mobile App', 'ahmad@nusantara.tech',
-         'Revenue Freelance Project A', 25000000, 20000000,
-         [['for'=>'Tools & software','amount'=>3000000]],
-         false],
-
-        // Tim 2: 2 revenue (1 distributed, 1 pending)
+        // Tim 2: Website delivered, revenue terdistribusi
         ['Kreatif Studio', 'Website Klien A', 'maya@kreatif.studio',
          'Project Website PT Sejahtera', 25000000, 22000000,
          [['for'=>'Hosting 1 tahun','amount'=>2500000],['for'=>'Domain & SSL','amount'=>500000]],
          true],
 
-        ['Kreatif Studio', 'Branding Package B', 'maya@kreatif.studio',
-         'Branding Deal Brand B', 15000000, 12000000,
-         [['for'=>'Cetak brand book','amount'=>1500000]],
-         false],
-
-        // Tim 3: 1 revenue (distributed)
+        // Tim 3: Pre-seed grant, belum terdistribusi (tim belum frozen)
         ['Startup Lokal', 'MVP Development', 'putri@startup.id',
          'Hibah Indie Booster Pre-seed', 100000000, 85000000,
          [['for'=>'Pajak','amount'=>10000000],['for'=>'Legal & notaris','amount'=>5000000]],
-         true],
+         false],
     ];
 
     // ── Leavers (good & bad, beragam alasan) ───────────────────────────────
@@ -321,12 +320,12 @@ class ComprehensiveDemoSeeder extends Seeder
         ],
     ];
 
-    // ── FMR Proposals (beberapa approved, beberapa pending) ─────────────────
+    // ── FMR Proposals (cap 150rb) ──────────────────────────────────────────
     private array $fmrProposalDefs = [
-        // Tim 1: Dewi usul naik FMR dari 150k → 175k, approved
-        ['Nusantara Tech', 'dewi@nusantara.tech', 175000, 'APPROVED'],
-        // Tim 3: Gilang usul naik FMR dari 200k → 250k, pending
-        ['Startup Lokal', 'gilang@startup.id', 250000, 'PENDING'],
+        // Tim 1: Dewi usul naik FMR dari 130k → 150k, approved
+        ['Nusantara Tech', 'dewi@nusantara.tech', 150000, 'APPROVED'],
+        // Tim 3: Gilang usul naik FMR dari 145k → 150k, pending
+        ['Startup Lokal', 'gilang@startup.id', 150000, 'PENDING'],
     ];
 
     public function __construct()
@@ -543,18 +542,33 @@ class ComprehensiveDemoSeeder extends Seeder
     }
 
     // ── Create Frozen Snapshots ────────────────────────────────────────────
+    // Tim 1: freeze project + freeze team (investor round → bake ke cap table)
+    // Tim 2: freeze 1 project (delivered), tim tetap aktif
+    // Tim 3: gak ada freeze (pre-seed, masih dinamis)
     private function createFrozenSnapshots(array $teams): void
     {
         DB::transaction(function () use ($teams) {
-            foreach ($teams as $team) {
+            foreach ($this->teamDefs as $def) {
+                $team = $teams[$def['name']];
+
+                // 1. Recalculate + freeze per-project
                 foreach ($team->projects as $project) {
                     if ($project->contributions()->where('status', 'APPROVED')->exists()) {
                         $this->slicingPie->recalculate($team, null, $project);
-                        $this->slicingPie->freeze($team, $project);
+                        // Freeze hanya project yang masuk freezeProjects
+                        if (in_array($project->name, $def['freezeProjects'])) {
+                            $this->slicingPie->freeze($team, $project);
+                        }
                     }
                 }
-                // Agregasi tim (induk)
+
+                // 2. Agregasi tim (induk) — selalu recalculate
                 $this->slicingPie->recalculate($team);
+
+                // 3. Freeze tim hanya jika flag aktif (investor round → bake)
+                if ($def['freezeTeam']) {
+                    $this->slicingPie->freeze($team);
+                }
             }
         });
     }
@@ -649,6 +663,13 @@ class ComprehensiveDemoSeeder extends Seeder
         $this->command?->info('  Leavers:        ' . TeamMember::where('status', 'exited')->count());
         $this->command?->info('');
 
+        $this->command?->info('🧊 Tim Freeze Status:');
+        foreach ($this->teamDefs as $def) {
+            $status = $def['freezeTeam'] ? '🔴 FROZEN (investor baked)' : '🟢 ACTIVE (dynamic)';
+            $this->command?->info("  {$def['name']}: {$status}");
+        }
+
+        $this->command?->info('');
         $this->command?->info('👤 Login credentials: (semua password: password)');
         foreach ($this->userDefs as $def) {
             $leaver = collect($this->leaverDefs)->firstWhere('email', $def['email']);
