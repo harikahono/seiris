@@ -153,7 +153,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
     );
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => animateClose(onClose)}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={loadingCreate || loadingJoin ? undefined : () => animateClose(onClose)}>
       <div ref={trapRef} className={`${animClass} w-full max-w-md rounded-xl border border-gray-700 bg-card p-6 shadow-2xl`} onClick={(e) => e.stopPropagation()}>
         {/* ── Header + Tabs ── */}
         <div className="mb-4 flex items-center justify-between">
@@ -167,7 +167,7 @@ export default function CreateTeamModal({ open, onClose, onCreated, defaultTab =
           </div>
           <button
             type="button"
-            onClick={handleClose}
+            onClick={handleClose} disabled={loadingCreate || loadingJoin}
             className="ml-2 rounded-md p-1 text-gray-500 hover:bg-gray-800 hover:text-white transition-colors active:scale-[0.97]"
             aria-label="Tutup" title="Tutup"
           >
